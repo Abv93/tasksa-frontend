@@ -246,6 +246,20 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
 .empty-state .es-icon{font-size:48px;margin-bottom:16px;}
 .empty-state h3{font-size:18px;font-weight:800;color:var(--t2);margin-bottom:8px;}
 .api-warn{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:var(--r);padding:14px 18px;margin:12px 5%;font-size:13px;color:#f87171;display:none;line-height:1.7;} .api-warn code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size:12px;}
+.shop-listing-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:all .25s;display:flex;flex-direction:column;}
+.shop-listing-card:hover{border-color:var(--bd2);transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.3);}
+.shop-banner{height:140px;display:flex;align-items:center;justify-content:center;font-size:52px;position:relative;}
+.shop-tag{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;}
+.shop-info{padding:16px;flex:1;display:flex;flex-direction:column;}
+.shop-name{font-family:'Sora',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px;}
+.shop-loc{font-size:11px;color:var(--t3);margin-bottom:4px;}
+.shop-cat-tag{display:inline-block;background:rgba(26,143,255,.1);color:var(--blue3);font-size:10px;padding:2px 9px;border-radius:50px;margin-bottom:8px;}
+.shop-desc{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:10px;flex:1;}
+.shop-stats{font-size:11px;color:var(--t3);margin-bottom:12px;}
+.shop-browse-btn{display:block;width:100%;padding:10px;background:linear-gradient(135deg,var(--blue),var(--blue2));border:none;border-radius:50px;color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center;}
+.shop-detail-banner{height:180px;display:flex;align-items:center;justify-content:center;font-size:64px;border-radius:var(--r2);margin-bottom:18px;position:relative;}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:700px){.plans-grid{grid-template-columns:1fr;}}
 .api-warn.show{display:block;}
 .qrs{display:flex;gap:6px;flex-wrap:wrap;padding:7px 18px 0;}
 .qr{background:var(--surf);border:1px solid var(--bd);color:var(--t2);padding:5px 12px;border-radius:50px;font-size:11px;cursor:pointer;}
@@ -565,12 +579,27 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
 <!-- SHOP PAGE -->
 <div class="page" id="shop">
   <div class="cat-header">
-    <div class="breadcrumb"><a onclick="goPage('home')">Home</a> / Shop</div>
-    <h2 style="font-size:24px;font-weight:900;">Local Shop Marketplace</h2>
-    <p style="color:var(--t2);font-size:13px;margin-top:5px;">Products from verified South African stores — including hidden gems you've never heard of</p>
-    <div class="sub-filters" id="shopFilters"><button class="sfb active" onclick="filterShop(this,'')">All Products</button></div>
+    <div class="breadcrumb" id="shopBreadcrumb"><a onclick="goPage('home')">Home</a> / Shop</div>
+    <h2 id="shopPageTitle" style="font-size:24px;font-weight:900;">Local Shop Marketplace</h2>
+    <p id="shopPageSub" style="color:var(--t2);font-size:13px;margin-top:5px;">Discover hidden-gem stores across South Africa — from Khayelitsha to Franschhoek</p>
+    <div class="sub-filters" id="shopFilters"><button class="sfb active" onclick="filterShopCat(this,'')">All Shops</button></div>
   </div>
-  <div class="section"><div class="shop-grid" id="shopGrid"></div></div>
+  <!-- SHOPS DIRECTORY -->
+  <div id="shopsDirectory">
+    <div class="section"><div id="shopsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;"></div></div>
+  </div>
+  <!-- SHOP DETAIL -->
+  <div id="shopDetailView" style="display:none;">
+    <div style="background:var(--bg2);border-bottom:1px solid var(--bd);padding:18px 5%;display:flex;align-items:center;gap:14px;">
+      <button onclick="backToShops()" style="background:var(--surf);border:1px solid var(--bd2);color:var(--t2);padding:8px 16px;border-radius:50px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;">← Back to Shops</button>
+      <div id="shopDetailHeader" style="flex:1;"></div>
+    </div>
+    <div class="section">
+      <div style="margin-bottom:20px;" id="shopDetailInfo"></div>
+      <div class="sub-filters" id="shopDetailFilters" style="margin-bottom:18px;"></div>
+      <div class="shop-grid" id="shopProductsGrid"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ACCOMMODATION PAGE -->
@@ -960,45 +989,119 @@ async function loadMoreSvc(){
   btn.textContent='Load More Providers'; btn.disabled=false;
 }
 
-// ── SHOP ─────────────────────────────────────────────────────
+// ── SHOP ─────────────────────────────────────────────────────────
 async function loadShop(){
-  const grid = document.getElementById('shopGrid');
-  skelProds(grid, 8);
+  document.getElementById('shopsDirectory').style.display='block';
+  document.getElementById('shopDetailView').style.display='none';
+  document.getElementById('shopPageTitle').textContent='Local Shop Marketplace';
+  document.getElementById('shopPageSub').textContent='Discover hidden-gem stores across South Africa';
+  const el=document.getElementById('shopFilters');
+  if(el) el.style.display='flex';
+  const grid = document.getElementById('shopsGrid');
+  if(!grid) return;
+  grid.innerHTML = Array(6).fill('<div class="skel-card"><div class="skeleton" style="height:140px;margin-bottom:14px;border-radius:8px"></div><div class="skeleton" style="height:15px;margin-bottom:7px"></div><div class="skeleton" style="height:12px;width:60%"></div></div>').join('');
   try {
-    const [prods, cats] = await Promise.all([
-      api('/products?limit=40'),
+    const [shops, cats] = await Promise.all([
+      api('/listings?type=SHOP&limit=40'),
       api('/categories?type=SHOP')
     ]);
-    S.allProds = prods.data; S.shopCats = cats.data;
-    buildShopFilters();
-    grid.innerHTML = prods.data.map((p,i)=>renderProductCard(p,i)).join('') || emptyState('🛒','No products yet','Shops are being onboarded!');
-  } catch(e){ grid.innerHTML = emptyState('⚠️','Could not load products',e.message); }
+    S.shopCats = cats.data;
+    buildShopCatFilters();
+    grid.innerHTML = shops.data.map((s,i)=>renderShopCard(s,i)).join('') || emptyState('🛒','No shops yet','Shops are being onboarded!');
+  } catch(e){ grid.innerHTML = emptyState('⚠️','Could not load shops',e.message); }
 }
 
-function buildShopFilters(){
+function buildShopCatFilters(){
   const el = document.getElementById('shopFilters');
-  el.innerHTML = `<button class="sfb active" onclick="filterShop(this,'')">All Products</button>` +
-    S.shopCats.map(c=>`<button class="sfb" onclick="filterShop(this,'${c.id}')">${c.icon||''} ${c.name}</button>`).join('');
+  if(!el) return;
+  el.innerHTML = '<button class="sfb active" onclick="filterShopCat(this,\'\')">All Shops</button>' +
+    S.shopCats.map(c=>'<button class="sfb" onclick="filterShopCat(this,\''+c.id+'\')">'+( c.icon||'')+' '+c.name+'</button>').join('');
 }
 
-async function filterShop(btn, catId){
+async function filterShopCat(btn, catId){
   document.querySelectorAll('#shopFilters .sfb').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const grid = document.getElementById('shopGrid');
-  skelProds(grid, 8);
+  const grid = document.getElementById('shopsGrid');
+  if(!grid) return;
   try {
-    if(catId){
-      const shops = await api(`/listings?type=SHOP&categoryId=${catId}`);
-      if(!shops.data.length){ grid.innerHTML=emptyState('🛒','No products in this category yet'); return; }
-      const all = await Promise.all(shops.data.map(s=>api(`/products?listingId=${s.id}`)));
-      const flat = all.flatMap(r=>r.data);
-      grid.innerHTML = flat.map((p,i)=>renderProductCard(p,i)).join('') || emptyState('🛒','No products yet');
-    } else {
-      const r = await api('/products?limit=40');
-      grid.innerHTML = r.data.map((p,i)=>renderProductCard(p,i)).join('');
-    }
+    const q = catId ? '/listings?type=SHOP&categoryId='+catId : '/listings?type=SHOP&limit=40';
+    const r = await api(q);
+    grid.innerHTML = r.data.map((s,i)=>renderShopCard(s,i)).join('') || emptyState('🛒','No shops in this category');
   } catch(e){ grid.innerHTML = emptyState('⚠️','Filter failed',e.message); }
 }
+
+const SHOP_BGS = ['linear-gradient(135deg,#041a3a,#0a6edb)','linear-gradient(135deg,#1a1a0a,#4a3a0a)','linear-gradient(135deg,#2e0a1e,#8b1a5f)','linear-gradient(135deg,#0a1a0a,#1a3a1a)','linear-gradient(135deg,#2e1a0a,#b45309)','linear-gradient(135deg,#041a3a,#0a3a5f)'];
+const SHOP_EMS = ['🛒','🔩','🌶️','👗','🌱','🎭','🎨','🏪'];
+
+function renderShopCard(s, i){
+  const bg = SHOP_BGS[i%SHOP_BGS.length];
+  const em = s.category?.icon || SHOP_EMS[i%SHOP_EMS.length];
+  const prodCount = s._count?.products || 0;
+  return '<div class="shop-listing-card" onclick="viewShop(\''+s.id+'\')">'+
+    '<div class="shop-banner" style="background:'+bg+'">'+em+'<span class="shop-tag">'+(s.category?.name||'Shop')+'</span></div>'+
+    '<div class="shop-info">'+
+      '<div class="shop-name">'+s.name+'</div>'+
+      '<div class="shop-loc">📍 '+s.location+'</div>'+
+      '<div class="shop-desc">'+(s.description||'').slice(0,100)+'</div>'+
+      '<div class="shop-stats">★★★★'+(s.rating>=4.8?'★':'☆')+' · '+s.reviewCount+' reviews · '+prodCount+' product'+(prodCount!==1?'s':'')+'</div>'+
+      (s.isVerified?'<div style="margin-bottom:10px"><span class="vbadge">✓ Verified</span></div>':'')+
+      '<button class="shop-browse-btn">Browse Shop →</button>'+
+    '</div></div>';
+}
+
+async function viewShop(listingId){
+  document.getElementById('shopsDirectory').style.display='none';
+  document.getElementById('shopDetailView').style.display='block';
+  const el=document.getElementById('shopFilters'); if(el) el.style.display='none';
+  const prodGrid = document.getElementById('shopProductsGrid');
+  if(!prodGrid) return;
+  prodGrid.innerHTML = Array(6).fill('<div class="skel-card"><div class="skeleton" style="height:95px;margin-bottom:12px;border-radius:8px"></div><div class="skeleton" style="height:12px;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:60%"></div></div>').join('');
+  try {
+    const [listing, products] = await Promise.all([
+      api('/listings/'+listingId),
+      api('/products?listingId='+listingId)
+    ]);
+    const s = listing.data;
+    S.currentShop = s;
+    const bg = SHOP_BGS[0];
+    const em = s.category?.icon || '🏪';
+    const pt = document.getElementById('shopPageTitle');
+    const ps = document.getElementById('shopPageSub');
+    const pb = document.getElementById('shopBreadcrumb');
+    const sh = document.getElementById('shopDetailHeader');
+    const si = document.getElementById('shopDetailInfo');
+    if(pt) pt.textContent = s.name;
+    if(ps) ps.textContent = '📍 '+s.location;
+    if(pb) pb.innerHTML = '<a onclick="goPage(\'home\')">Home</a> / <a onclick="backToShops()" style="color:var(--blue3);cursor:pointer">Shop</a> / '+s.name;
+    if(sh) sh.innerHTML = '<div style="font-size:13px;font-weight:800;">'+s.name+'</div><div style="font-size:11px;color:var(--t3)">📍 '+s.location+' · '+(s.category?.name||'')+'</div>';
+    if(si) si.innerHTML = '<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px">'+
+      '<div style="width:80px;height:80px;border-radius:var(--r2);background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0">'+em+'</div>'+
+      '<div style="flex:1">'+
+        '<div style="font-family:\'Sora\',sans-serif;font-size:20px;font-weight:800;margin-bottom:5px">'+s.name+'</div>'+
+        '<div style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:8px">'+(s.description||'')+'</div>'+
+        '<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--t3)">'+
+          '<span>📍 '+s.location+'</span>'+
+          '<span>★★★★'+(s.rating>=4.8?'★':'☆')+' '+(s.reviewCount)+' reviews</span>'+
+          (s.isVerified?'<span class="vbadge">✓ Verified</span>':'')+
+        '</div>'+
+      '</div></div>';
+    prodGrid.innerHTML = products.data.length
+      ? products.data.map((p,i)=>renderProductCard(p,i)).join('')
+      : emptyState('📦','No products yet','This shop hasn\'t added products yet');
+  } catch(e){ prodGrid.innerHTML = emptyState('⚠️','Could not load shop',e.message); }
+}
+
+function backToShops(){
+  S.currentShop = null;
+  document.getElementById('shopsDirectory').style.display='block';
+  document.getElementById('shopDetailView').style.display='none';
+  const el=document.getElementById('shopFilters'); if(el) el.style.display='flex';
+  const pt=document.getElementById('shopPageTitle'); if(pt) pt.textContent='Local Shop Marketplace';
+  const ps=document.getElementById('shopPageSub'); if(ps) ps.textContent='Discover hidden-gem stores across South Africa';
+  const pb=document.getElementById('shopBreadcrumb'); if(pb) pb.innerHTML='<a onclick="goPage(\'home\')">Home</a> / Shop';
+}
+
+async function filterShop(btn, catId){ filterShopCat(btn, catId); }
 
 // ── ACCOMMODATION ─────────────────────────────────────────────
 async function loadAccom(){

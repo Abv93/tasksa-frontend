@@ -523,32 +523,48 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
     <div class="panel" id="panel-settings">
       <div class="grid2">
         <div class="card">
-          <h4>Platform Settings</h4>
-          <p style="font-size:12px;color:var(--t3);margin-bottom:14px">Manage core platform configuration</p>
-          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px;">
-            <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Commission Rate</div>
-            <div style="font-size:22px;font-weight:800;color:var(--blue3)" id="settCommRate">8%</div>
-            <div style="font-size:11px;color:var(--t3);margin-top:4px">Set via Railway Variables: COMMISSION_RATE=0.08</div>
-          </div>
-          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;">
-            <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Demo Accounts</div>
-            <div style="font-size:12px;color:var(--t2);line-height:2">
-              👤 demo@tasksa.co.za / password123<br>
-              🔧 thabo@tasksa.co.za / password123<br>
-              🏪 buildright@tasksa.co.za / password123<br>
-              ⚙️ admin@tasksa.co.za / Admin@123
-            </div>
-          </div>
+          <h4>Change Admin Password</h4>
+          <p style="font-size:12px;color:var(--t3);margin-bottom:16px">Update your admin account password</p>
+          <div class="field"><label>Current Password</label><input type="password" id="currPass" placeholder="Current password"></div>
+          <div class="field"><label>New Password (min 8 chars)</label><input type="password" id="newPass" placeholder="New password"></div>
+          <div class="field"><label>Confirm New Password</label><input type="password" id="confirmPass" placeholder="Confirm new password"></div>
+          <button class="btn btn-p" id="changePassBtn" onclick="changeAdminPassword()" style="margin-top:4px;">Change Password</button>
         </div>
         <div class="card">
           <h4>Quick Actions</h4>
           <div style="display:flex;flex-direction:column;gap:9px;margin-top:4px;">
-            <button class="btn btn-g" style="justify-content:flex-start;gap:10px;" onclick="showPanel('categories',document.querySelector('.slink:nth-child(14)'))">🏷️ Manage Categories</button>
-            <button class="btn btn-g" style="justify-content:flex-start;gap:10px;" onclick="showPanel('banners',document.querySelector('.slink:nth-child(15)'))">📣 Manage Banner Ads</button>
+            <button class="btn btn-g" style="justify-content:flex-start;gap:10px;" onclick="showPanelByName('categories')">🏷️ Manage Categories</button>
+            <button class="btn btn-g" style="justify-content:flex-start;gap:10px;" onclick="showPanelByName('banners')">📣 Manage Banner Ads</button>
             <button class="btn btn-g" style="justify-content:flex-start;gap:10px;" onclick="openModal('notifyModal')">🔔 Send Notification</button>
-            <button class="btn btn-g" style="justify-content:flex-start;gap:10px;" onclick="showPanel('listings',document.querySelector('.slink:nth-child(11)'))">📋 Review Pending Listings</button>
-            <button class="btn btn-g" style="justify-content:flex-start;gap:10px;" onclick="showPanel('users',document.querySelector('.slink:nth-child(10)'))">👥 Manage Users</button>
+            <button class="btn btn-g" style="justify-content:flex-start;gap:10px;" onclick="showPanelByName('listings')">📋 Review Pending Listings</button>
+            <button class="btn btn-g" style="justify-content:flex-start;gap:10px;" onclick="showPanelByName('users')">👥 Manage Users</button>
           </div>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:16px;">
+        <div class="card">
+          <h4>Platform Info</h4>
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px;">
+            <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Commission Rate</div>
+            <div style="font-size:22px;font-weight:800;color:var(--blue3)" id="settCommRate">8%</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:4px">Change via Railway → Variables → COMMISSION_RATE</div>
+          </div>
+        </div>
+        <div class="card">
+          <h4>Category Icon Guide</h4>
+          <p style="font-size:12px;color:var(--t3);margin-bottom:12px">Go to Categories → Edit any category → change the Icon field to any emoji below</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:22px;">
+            <span title="Plumbing" style="cursor:default">🔧</span><span title="Electrical">⚡</span><span title="Cleaning">🧹</span>
+            <span title="Gardening">🌿</span><span title="Painting">🎨</span><span title="Handyman">🔨</span>
+            <span title="Dog Sitting">🐕</span><span title="Moving">🚛</span><span title="Photography">📸</span>
+            <span title="Security">🛡️</span><span title="Tutoring">📚</span><span title="Catering">🍽️</span>
+            <span title="Beach House">🏖️</span><span title="Game Lodge">🦁</span><span title="Self-Catering">🏡</span>
+            <span title="Guesthouse">🛏️</span><span title="Eco-Retreat">🌲</span><span title="Vineyard">🍷</span>
+            <span title="Hardware">🔩</span><span title="Spices">🌶️</span><span title="African Fashion">👗</span>
+            <span title="Garden">🌱</span><span title="Crafts">🎭</span><span title="Electronics">💡</span>
+            <span title="Books">📖</span><span title="Health">💊</span><span title="Beauty">💄</span>
+          </div>
+          <p style="font-size:11px;color:var(--t3);margin-top:10px">Copy any emoji → paste into the Icon field when editing a category</p>
         </div>
       </div>
     </div>
@@ -1008,6 +1024,29 @@ async function loadSettings(){
     const r=await api('/admin/settings');
     document.getElementById('settCommRate').textContent=r.data.commissionPercent+'%';
   } catch(e){}
+}
+
+async function changeAdminPassword(){
+  const curr = document.getElementById('currPass').value;
+  const newp = document.getElementById('newPass').value;
+  const conf = document.getElementById('confirmPass').value;
+  if(!curr||!newp||!conf){ toast('All fields required','error'); return; }
+  if(newp !== conf){ toast('New passwords do not match','error'); return; }
+  if(newp.length < 8){ toast('New password must be at least 8 characters','error'); return; }
+  const btn = document.getElementById('changePassBtn'); btn.disabled=true; btn.textContent='Changing…';
+  try {
+    await api('/users/change-password','PUT',{currentPassword:curr,newPassword:newp});
+    toast('Password changed successfully! Use new password next time you log in.','success');
+    document.getElementById('currPass').value='';
+    document.getElementById('newPass').value='';
+    document.getElementById('confirmPass').value='';
+  } catch(e){ toast(e.message,'error'); }
+  btn.disabled=false; btn.textContent='Change Password';
+}
+
+function showPanelByName(name){
+  const link = document.querySelector('.slink[onclick*="''+name+''"]');
+  showPanel(name, link);
 }
 
 tryAutoLogin();
