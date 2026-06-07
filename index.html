@@ -245,6 +245,12 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
 .empty-state{text-align:center;padding:60px 20px;color:var(--t3);}
 .empty-state .es-icon{font-size:48px;margin-bottom:16px;}
 .empty-state h3{font-size:18px;font-weight:800;color:var(--t2);margin-bottom:8px;}
+.new-cat-card{border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s;position:relative;min-height:320px;display:flex;flex-direction:column;}
+.new-cat-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.4);}
+.new-cat-card .cat-img-layer{position:absolute;inset:0;border-radius:20px;background-size:cover;background-position:center;background-repeat:no-repeat;}
+.new-cat-card .cat-content{position:relative;z-index:1;padding:28px;flex:1;display:flex;flex-direction:column;}
+.new-cat-card .cat-white-btn{background:rgba(255,255,255,.95);border:none;border-radius:50px;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;transition:background .2s;}
+.new-cat-card .cat-white-btn:hover{background:#fff;}
 .api-warn{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:var(--r);padding:14px 18px;margin:12px 5%;font-size:13px;color:#f87171;display:none;line-height:1.7;} .api-warn code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size:12px;}
 .shop-listing-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:all .25s;display:flex;flex-direction:column;}
 .shop-listing-card:hover{border-color:var(--bd2);transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.3);}
@@ -267,36 +273,6 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
 </style>
 </head>
 <body>
-
-<!-- FIRST-TIME SETUP OVERLAY -->
-<div id="setupOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#020b1a;display:flex;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:#041020;border:1px solid rgba(26,143,255,0.32);border-radius:20px;padding:36px;max-width:480px;width:100%;text-align:center;">
-    <div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:900;color:#1a8fff;margin-bottom:4px;">Task<span style="color:#F5A623;">SA</span></div>
-    <div style="font-size:13px;color:#4a7aa0;margin-bottom:28px;">South Africa's Service Marketplace</div>
-    <div style="font-size:22px;font-weight:800;margin-bottom:8px;">One-Time Setup</div>
-    <p style="font-size:13px;color:#93b8d8;line-height:1.7;margin-bottom:24px;">
-      Paste your Railway backend URL below.<br>
-      Find it in Railway → your <strong style="color:#4db0ff;">tasksa-backend</strong> service → the URL shown at the top.
-    </p>
-    <div style="background:#061628;border:1px solid rgba(26,143,255,0.32);border-radius:8px;padding:10px 14px;margin-bottom:8px;text-align:left;">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#4a7aa0;margin-bottom:5px;">Your Railway Backend URL</div>
-      <input id="setupUrl" type="text" placeholder="tasksa-backend-production-xxxx.up.railway.app"
-        style="width:100%;background:transparent;border:none;outline:none;color:#e8f4ff;font-size:13px;font-family:'DM Sans',sans-serif;"
-        onkeydown="if(event.key==='Enter')saveSetup()">
-    </div>
-    <div style="font-size:11px;color:#4a7aa0;margin-bottom:20px;">Just the domain — no https:// needed. We'll handle that.</div>
-    <button onclick="saveSetup()" style="width:100%;padding:14px;background:linear-gradient(135deg,#0a6edb,#1a8fff);border:none;border-radius:50px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">
-      Connect to Backend →
-    </button>
-    <div style="margin-top:16px;font-size:12px;color:#4a7aa0;">
-      <strong style="color:#4db0ff;">Don't have a Railway URL yet?</strong><br>
-      Deploy the <code style="background:rgba(26,143,255,.1);padding:2px 6px;border-radius:4px;">tasksa-backend</code> folder from the ZIP to Railway first.
-    </div>
-  </div>
-</div>
-
-<div id="toast"></div>
-<div id="cartOverlay" onclick="closeCart()"></div>
 
 <!-- LOGIN MODAL -->
 <div class="modal-overlay" id="loginModal">
@@ -509,25 +485,57 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
   <div class="section">
     <div class="sec-title">Browse by Category</div>
     <p class="sec-sub">Everything you need in one platform</p>
-    <div class="cat-grid">
-      <div class="cat-card" onclick="goPage('services')">
-        <div class="cat-icon">🔧</div><h3>Home Services</h3>
-        <p>Book verified professionals for any task — plumbers, cleaners, electricians and more.</p>
-        <div class="cat-pills"><span class="cpill">Plumbing</span><span class="cpill">Electrical</span><span class="cpill">Cleaning</span><span class="cpill">Painting</span></div>
-        <button class="cat-btn" style="background:linear-gradient(135deg,var(--blue),var(--blue2));">Browse Services →</button>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;">
+
+      <!-- HOME SERVICES -->
+      <div class="new-cat-card" onclick="goPage('services')">
+        <div class="cat-img-layer" style="background:linear-gradient(135deg,rgba(10,110,219,0.88),rgba(26,143,255,0.75)),url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600&q=80');"></div>
+        <div class="cat-content">
+          <div style="font-size:40px;margin-bottom:14px;">🔧</div>
+          <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;">Home Services</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;flex:1;margin-bottom:16px;">Book verified professionals — plumbers, electricians, cleaners, painters and more across SA.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px;">
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Plumbing</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Electrical</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Cleaning</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Painting</span>
+          </div>
+          <button class="cat-white-btn" style="color:#0a6edb;">Browse Services →</button>
+        </div>
       </div>
-      <div class="cat-card" onclick="goPage('accommodation')">
-        <div class="cat-icon">🏡</div><h3>Holiday Stays</h3>
-        <p>Find and book holiday accommodation, fun places and parks across South Africa.</p>
-        <div class="cat-pills"><span class="cpill">Beach House</span><span class="cpill">Game Lodge</span><span class="cpill">Winelands</span></div>
-        <button class="cat-btn" style="background:linear-gradient(135deg,#6d28d9,#8b5cf6);">Find a Stay →</button>
+
+      <!-- HOLIDAY STAYS -->
+      <div class="new-cat-card" onclick="goPage('accommodation')">
+        <div class="cat-img-layer" style="background:linear-gradient(135deg,rgba(109,40,217,0.88),rgba(139,92,246,0.75)),url('https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&w=600&q=80');"></div>
+        <div class="cat-content">
+          <div style="font-size:40px;margin-bottom:14px;">🏡</div>
+          <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;">Holiday Stays</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;flex:1;margin-bottom:16px;">Find and book holiday accommodation, game lodges, beach houses and fun places across SA.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px;">
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Beach House</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Game Lodge</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Winelands</span>
+          </div>
+          <button class="cat-white-btn" style="color:#6d28d9;">Find a Stay →</button>
+        </div>
       </div>
-      <div class="cat-card" onclick="goPage('shop')">
-        <div class="cat-icon">🛒</div><h3>Local Shops</h3>
-        <p>Buy from SA's hidden-gem stores — the Khayelitsha boutique, the Bo-Kaap spice market you never heard of.</p>
-        <div class="cat-pills"><span class="cpill">African Fashion</span><span class="cpill">Hardware</span><span class="cpill">Spices</span></div>
-        <button class="cat-btn" style="background:linear-gradient(135deg,#059669,#22C55E);">Browse Shops →</button>
+
+      <!-- LOCAL SHOPS -->
+      <div class="new-cat-card" onclick="goPage('shop')">
+        <div class="cat-img-layer" style="background:linear-gradient(135deg,rgba(5,150,105,0.88),rgba(34,197,94,0.75)),url('https://images.unsplash.com/photo-1534482421-64566f976cfa?auto=format&fit=crop&w=600&q=80');"></div>
+        <div class="cat-content">
+          <div style="font-size:40px;margin-bottom:14px;">🛒</div>
+          <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;">Local Shops</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;flex:1;margin-bottom:16px;">Discover hidden-gem stores — from handmade African dresses in Khayelitsha to authentic spices in Bo-Kaap.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px;">
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">African Fashion</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Hardware</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Spices</span>
+          </div>
+          <button class="cat-white-btn" style="color:#059669;">Browse Shops →</button>
+        </div>
       </div>
+
     </div>
   </div>
   <div class="section" style="background:var(--bg2);">
@@ -556,7 +564,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
       <div class="fc"><h5>Platform</h5><a onclick="goPage('shop')">Shop</a><a onclick="goPage('accommodation')">Holiday Stays</a><a onclick="goPage('dashboard')">Dashboard</a><a onclick="openModal('registerModal')">Register Business</a></div>
       <div class="fc"><h5>Company</h5><a>About Us</a><a>Careers</a><a>Privacy Policy</a><a>Terms of Service</a></div>
     </div>
-    <div class="footer-bottom"><p>© 2025 TaskSA (Pty) Ltd · hello@tasksa.co.za · +27 21 000 0000</p><span onclick="localStorage.removeItem('tasksa_api_url');window.location.reload()" style="font-size:11px;color:var(--t3);cursor:pointer;padding:4px 10px;border:1px solid var(--bd);border-radius:50px;">⚙️ Change API URL</span></div>
+    <div class="footer-bottom"><p>© 2025 TaskSA (Pty) Ltd · hello@tasksa.co.za · +27 21 000 0000</p></div>
   </footer>
 </div>
 
@@ -566,6 +574,21 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <div class="breadcrumb"><a onclick="goPage('home')">Home</a> / Services</div>
     <h2 style="font-size:24px;font-weight:900;">Home &amp; Local Services</h2>
     <p style="color:var(--t2);font-size:13px;margin-top:5px;">Book trusted verified professionals anywhere in South Africa</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+      <input style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;min-width:160px;" placeholder="🔍 Search by name or city…" id="svcSearch" oninput="searchSvc()">
+      <select id="svcProvFilter" onchange="searchSvc()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;cursor:pointer;">
+        <option value="">All Provinces</option>
+        <option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option>
+        <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
+        <option>North West</option><option>Free State</option><option>Northern Cape</option>
+      </select>
+      <select id="svcSortFilter" onchange="searchSvc()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;cursor:pointer;">
+        <option value="">Sort: Top Rated</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="newest">Newest First</option>
+      </select>
+    </div>
     <div class="sub-filters" id="svcFilters"><button class="sfb active" onclick="filterSvc(this,'')">All Services</button></div>
   </div>
   <div class="section">
@@ -612,6 +635,12 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
       <input style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;min-width:160px;" placeholder="🔍 Search destination…" id="acSearch" oninput="filterAccom()">
       <select id="acProv" onchange="filterAccom()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;cursor:pointer;">
         <option value="">All Provinces</option><option>Western Cape</option><option>KwaZulu-Natal</option><option>Gauteng</option><option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
+      </select>
+      <select id="acSort" onchange="filterAccom()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;cursor:pointer;">
+        <option value="">Sort: Top Rated</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="newest">Newest First</option>
       </select>
     </div>
     <div class="sub-filters" id="accomFilters"><button class="sfb active" onclick="filterAccomCat(this,'')">All Stays</button></div>
@@ -743,7 +772,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
 // ╔══════════════════════════════════════════════════════════╗
 // ║  UPDATE THIS URL TO YOUR RAILWAY BACKEND                ║
 // ╚══════════════════════════════════════════════════════════╝
-const API = localStorage.getItem('tasksa_api_url') || '';
+const API = 'https://tasksa-backend-production.up.railway.app/api';
 
 // ── STATE ────────────────────────────────────────────────────
 const S = {
@@ -884,160 +913,24 @@ function renderAccomCard(l, i){
 }
 
 function renderProductCard(p, i){
-  const em = ['🔨','🎨','🧽','🌶️','👗','🔩','🌱','🐾','📦','🎭','💡','🧴'][i%12];
-  return `<div class="product-card">
-    <div class="prod-img">${em}</div>
-    <div class="prod-info">
-      <div class="prod-name">${p.name}</div>
-      <div class="prod-store">${p.listing?.name||''}</div>
-      <div class="stars" style="font-size:11px">★★★★★</div>
-      <div class="prod-price">${R(p.price)}</div>
-      <button class="add-btn" onclick="addToCart('${p.id}','${p.name.replace(/'/g,"\\'")}','${p.listing?.name?.replace(/'/g,"\\'")||""}',${p.price},'${em}')">Add to Cart</button>
-    </div>
-  </div>`;
+  var ems = ['🔨','🎨','🧽','🌶️','👗','🔩','🌱','🐾','📦','🎭','💡','🧴'];
+  var em = ems[i%ems.length];
+  var store = (p.listing && p.listing.name) ? p.listing.name : '';
+  return '<div class="product-card">'
+    + '<div class="prod-img">'+em+'</div>'
+    + '<div class="prod-info">'
+      + '<div class="prod-name">'+p.name+'</div>'
+      + '<div class="prod-store">'+store+'</div>'
+      + '<div class="stars" style="font-size:11px">★★★★★</div>'
+      + '<div class="prod-price">'+R(p.price)+'</div>'
+      + '<button class="add-btn" data-pid="'+p.id+'" data-pname="'+encodeURIComponent(p.name)+'" data-pstore="'+encodeURIComponent(store)+'" data-pprice="'+p.price+'" data-pem="'+em+'">Add to Cart</button>'
+    + '</div></div>';
 }
-
-// ── BANNERS ──────────────────────────────────────────────────
-function renderBanners(){
-  const el = document.getElementById('bannerScroll');
-  if(!el) return;
-  const banners = [
-    {title:'Thabo Mokoena Plumbing',sub:'Emergency plumbing 24/7 · Johannesburg',cta:'Book Now',bg:'linear-gradient(135deg,#041a3a,#0a6edb)',fn:"goPage('services')"},
-    {title:'Thandi\'s African Dresses',sub:'Handmade in Khayelitsha — truly unique',cta:'Shop Now',bg:'linear-gradient(135deg,#2e0a1e,#8b1a5f)',fn:"goPage('shop')"},
-    {title:'Cape Spice Market',sub:'Authentic Cape Malay spices from Bo-Kaap',cta:'Order Now',bg:'linear-gradient(135deg,#2e1a0a,#b45309)',fn:"goPage('shop')"},
-    {title:'Cape Hideaway Clifton',sub:'Luxury beachfront villa · From R3,500/night',cta:'View Stay',bg:'linear-gradient(135deg,#041a3a,#1a5f8a)',fn:"goPage('accommodation')"},
-    {title:'Kruger Bush Lodge',sub:'Big 5 game drives · Limpopo',cta:'Book Now',bg:'linear-gradient(135deg,#1a1a0a,#4a3a0a)',fn:"goPage('accommodation')"},
-  ];
-  el.innerHTML = banners.map(b=>`<div class="banner-ad" style="background:${b.bg}" onclick="${b.fn}">
-    <div class="ba-title">${b.title}</div>
-    <div class="ba-sub">${b.sub}</div>
-    <button class="ba-cta" onclick="event.stopPropagation();${b.fn}">${b.cta}</button>
-  </div>`).join('') + `<div class="banner-empty" onclick="openModal('registerModal')">
-    <div style="font-size:24px">+</div>
-    <p>Advertise here from R499/month</p>
-    <button class="dpill dp-b" style="border:none;padding:5px 14px;font-size:11px">Get Started</button>
-  </div>`;
-}
-
-// ── HOME ─────────────────────────────────────────────────────
-async function loadHome(){
-  renderBanners();
-  const provEl = document.getElementById('homeProvs');
-  const acEl = document.getElementById('homeAccom');
-  skelProvs(provEl, 4); skelAccom(acEl, 4);
-  try {
-    const [svcs, accoms] = await Promise.all([
-      api('/listings?type=SERVICE&limit=4'),
-      api('/listings?type=ACCOMMODATION&limit=4')
-    ]);
-    provEl.innerHTML = svcs.data.map((l,i)=>renderProvCard(l,i)).join('') || '<div style="color:var(--t3);font-size:13px;padding:20px">No providers yet</div>';
-    acEl.innerHTML = accoms.data.map((l,i)=>renderAccomCard(l,i)).join('') || '<div style="color:var(--t3);font-size:13px;padding:20px">No stays yet</div>';
-    document.getElementById('apiWarn').classList.remove('show');
-  } catch(e){
-    document.getElementById('apiWarn').classList.add('show');
-    provEl.innerHTML = '<div style="color:var(--t3);font-size:13px;padding:20px;text-align:center">Update API_BASE in the HTML to your Railway URL</div>';
-    acEl.innerHTML='';
-  }
-}
-
-// ── SERVICES ─────────────────────────────────────────────────
-async function loadServices(){
-  const grid = document.getElementById('svcGrid');
-  skelProvs(grid, 8);
-  try {
-    const [listings, cats] = await Promise.all([
-      api('/listings?type=SERVICE&limit=24'),
-      api('/categories?type=SERVICE')
-    ]);
-    S.allSvc = listings.data; S.svcCats = cats.data;
-    buildSvcFilters();
-    grid.innerHTML = listings.data.map((l,i)=>renderProvCard(l,i)).join('') || emptyState('🔧','No Services Yet','Be the first to register as a provider!');
-    document.getElementById('loadMoreWrap').style.display = listings.total > 24 ? 'block':'none';
-  } catch(e){
-    grid.innerHTML = emptyState('⚠️','Could not load services',e.message);
-  }
-}
-
-function buildSvcFilters(){
-  const el = document.getElementById('svcFilters');
-  el.innerHTML = `<button class="sfb active" onclick="filterSvc(this,'')">All Services</button>` +
-    S.svcCats.map(c=>`<button class="sfb" onclick="filterSvc(this,'${c.id}')">${c.icon||''} ${c.name}</button>`).join('');
-}
-
-async function filterSvc(btn, catId){
-  document.querySelectorAll('#svcFilters .sfb').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const grid = document.getElementById('svcGrid');
-  skelProvs(grid, 8);
-  try {
-    const q = catId ? `/listings?type=SERVICE&categoryId=${catId}&limit=24` : '/listings?type=SERVICE&limit=24';
-    const r = await api(q);
-    grid.innerHTML = r.data.map((l,i)=>renderProvCard(l,i)).join('') || emptyState('🔧','No providers in this category yet');
-  } catch(e){ grid.innerHTML = emptyState('⚠️','Filter failed',e.message); }
-}
-
-async function loadMoreSvc(){
-  S.svcPage++;
-  const btn = document.getElementById('loadMoreBtn');
-  btn.textContent='Loading…'; btn.disabled=true;
-  try {
-    const r = await api(`/listings?type=SERVICE&page=${S.svcPage}&limit=24`);
-    const grid = document.getElementById('svcGrid');
-    grid.innerHTML += r.data.map((l,i)=>renderProvCard(l, (S.svcPage-1)*24+i)).join('');
-    if(S.svcPage * 24 >= r.total) document.getElementById('loadMoreWrap').style.display='none';
-  } catch(e){ toast('Failed to load more','error'); }
-  btn.textContent='Load More Providers'; btn.disabled=false;
-}
-
-// ── SHOP ─────────────────────────────────────────────────────────
-async function loadShop(){
-  document.getElementById('shopsDirectory').style.display='block';
-  document.getElementById('shopDetailView').style.display='none';
-  document.getElementById('shopPageTitle').textContent='Local Shop Marketplace';
-  document.getElementById('shopPageSub').textContent='Discover hidden-gem stores across South Africa';
-  const el=document.getElementById('shopFilters');
-  if(el) el.style.display='flex';
-  const grid = document.getElementById('shopsGrid');
-  if(!grid) return;
-  grid.innerHTML = Array(6).fill('<div class="skel-card"><div class="skeleton" style="height:140px;margin-bottom:14px;border-radius:8px"></div><div class="skeleton" style="height:15px;margin-bottom:7px"></div><div class="skeleton" style="height:12px;width:60%"></div></div>').join('');
-  try {
-    const [shops, cats] = await Promise.all([
-      api('/listings?type=SHOP&limit=40'),
-      api('/categories?type=SHOP')
-    ]);
-    S.shopCats = cats.data;
-    buildShopCatFilters();
-    grid.innerHTML = shops.data.map((s,i)=>renderShopCard(s,i)).join('') || emptyState('🛒','No shops yet','Shops are being onboarded!');
-  } catch(e){ grid.innerHTML = emptyState('⚠️','Could not load shops',e.message); }
-}
-
-function buildShopCatFilters(){
-  const el = document.getElementById('shopFilters');
-  if(!el) return;
-  el.innerHTML = '<button class="sfb active" onclick="filterShopCat(this,\'\')">All Shops</button>' +
-    S.shopCats.map(c=>'<button class="sfb" onclick="filterShopCat(this,\''+c.id+'\')">'+( c.icon||'')+' '+c.name+'</button>').join('');
-}
-
-async function filterShopCat(btn, catId){
-  document.querySelectorAll('#shopFilters .sfb').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const grid = document.getElementById('shopsGrid');
-  if(!grid) return;
-  try {
-    const q = catId ? '/listings?type=SHOP&categoryId='+catId : '/listings?type=SHOP&limit=40';
-    const r = await api(q);
-    grid.innerHTML = r.data.map((s,i)=>renderShopCard(s,i)).join('') || emptyState('🛒','No shops in this category');
-  } catch(e){ grid.innerHTML = emptyState('⚠️','Filter failed',e.message); }
-}
-
-const SHOP_BGS = ['linear-gradient(135deg,#041a3a,#0a6edb)','linear-gradient(135deg,#1a1a0a,#4a3a0a)','linear-gradient(135deg,#2e0a1e,#8b1a5f)','linear-gradient(135deg,#0a1a0a,#1a3a1a)','linear-gradient(135deg,#2e1a0a,#b45309)','linear-gradient(135deg,#041a3a,#0a3a5f)'];
-const SHOP_EMS = ['🛒','🔩','🌶️','👗','🌱','🎭','🎨','🏪'];
-
 function renderShopCard(s, i){
   const bg = SHOP_BGS[i%SHOP_BGS.length];
   const em = s.category?.icon || SHOP_EMS[i%SHOP_EMS.length];
   const prodCount = s._count?.products || 0;
-  return '<div class="shop-listing-card" onclick="viewShop(\''+s.id+'\')">'+
+  return '<div class="shop-listing-card" data-shopid="'+s.id+'">'+
     '<div class="shop-banner" style="background:'+bg+'">'+em+'<span class="shop-tag">'+(s.category?.name||'Shop')+'</span></div>'+
     '<div class="shop-info">'+
       '<div class="shop-name">'+s.name+'</div>'+
@@ -1052,54 +945,65 @@ function renderShopCard(s, i){
 async function viewShop(listingId){
   document.getElementById('shopsDirectory').style.display='none';
   document.getElementById('shopDetailView').style.display='block';
-  const el=document.getElementById('shopFilters'); if(el) el.style.display='none';
-  const prodGrid = document.getElementById('shopProductsGrid');
+  var el=document.getElementById('shopFilters'); if(el) el.style.display='none';
+  var prodGrid = document.getElementById('shopProductsGrid');
   if(!prodGrid) return;
   prodGrid.innerHTML = Array(6).fill('<div class="skel-card"><div class="skeleton" style="height:95px;margin-bottom:12px;border-radius:8px"></div><div class="skeleton" style="height:12px;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:60%"></div></div>').join('');
   try {
-    const [listing, products] = await Promise.all([
+    var results = await Promise.all([
       api('/listings/'+listingId),
       api('/products?listingId='+listingId)
     ]);
-    const s = listing.data;
+    var s = results[0].data;
+    var products = results[1];
     S.currentShop = s;
-    const bg = SHOP_BGS[0];
-    const em = s.category?.icon || '🏪';
-    const pt = document.getElementById('shopPageTitle');
-    const ps = document.getElementById('shopPageSub');
-    const pb = document.getElementById('shopBreadcrumb');
-    const sh = document.getElementById('shopDetailHeader');
-    const si = document.getElementById('shopDetailInfo');
+    var bg = SHOP_BGS[0];
+    var em = (s.category && s.category.icon) ? s.category.icon : '🏪';
+    var catName = (s.category && s.category.name) ? s.category.name : '';
+    var pt = document.getElementById('shopPageTitle');
+    var ps = document.getElementById('shopPageSub');
+    var pb = document.getElementById('shopBreadcrumb');
+    var sh = document.getElementById('shopDetailHeader');
+    var si = document.getElementById('shopDetailInfo');
     if(pt) pt.textContent = s.name;
     if(ps) ps.textContent = '📍 '+s.location;
-    if(pb) pb.innerHTML = '<a onclick="goPage(\'home\')">Home</a> / <a onclick="backToShops()" style="color:var(--blue3);cursor:pointer">Shop</a> / '+s.name;
-    if(sh) sh.innerHTML = '<div style="font-size:13px;font-weight:800;">'+s.name+'</div><div style="font-size:11px;color:var(--t3)">📍 '+s.location+' · '+(s.category?.name||'')+'</div>';
-    if(si) si.innerHTML = '<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px">'+
-      '<div style="width:80px;height:80px;border-radius:var(--r2);background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0">'+em+'</div>'+
-      '<div style="flex:1">'+
-        '<div style="font-family:\'Sora\',sans-serif;font-size:20px;font-weight:800;margin-bottom:5px">'+s.name+'</div>'+
-        '<div style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:8px">'+(s.description||'')+'</div>'+
-        '<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--t3)">'+
-          '<span>📍 '+s.location+'</span>'+
-          '<span>★★★★'+(s.rating>=4.8?'★':'☆')+' '+(s.reviewCount)+' reviews</span>'+
-          (s.isVerified?'<span class="vbadge">✓ Verified</span>':'')+
-        '</div>'+
-      '</div></div>';
+    if(pb){
+      var homeA = '<a onclick="goPage(' + String.fromCharCode(39) + 'home' + String.fromCharCode(39) + ')">Home</a>';
+      var shopA = '<a onclick="backToShops()" style="color:var(--blue3);cursor:pointer">Shop</a>';
+      pb.innerHTML = homeA + ' / ' + shopA + ' / ' + s.name;
+    }
+    if(sh) sh.innerHTML = '<div style="font-size:13px;font-weight:800">'+s.name+'</div><div style="font-size:11px;color:var(--t3)">📍 '+s.location+' · '+catName+'</div>';
+    if(si){
+      si.innerHTML = '<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px">'
+        + '<div style="width:80px;height:80px;border-radius:var(--r2);background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0">'+em+'</div>'
+        + '<div style="flex:1">'
+          + '<div style="font-family:Sora,sans-serif;font-size:20px;font-weight:800;margin-bottom:5px">'+s.name+'</div>'
+          + '<div style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:8px">'+(s.description||'')+'</div>'
+          + '<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--t3)">'
+            + '<span>📍 '+s.location+'</span>'
+            + '<span>'+s.reviewCount+' reviews</span>'
+            + (s.isVerified ? '<span class="vbadge">✓ Verified</span>' : '')
+          + '</div>'
+        + '</div></div>';
+    }
     prodGrid.innerHTML = products.data.length
-      ? products.data.map((p,i)=>renderProductCard(p,i)).join('')
-      : emptyState('📦','No products yet','This shop hasn\'t added products yet');
+      ? products.data.map(function(p,i){ return renderProductCard(p,i); }).join('')
+      : emptyState('📦','No products yet','This shop has not added products yet');
   } catch(e){ prodGrid.innerHTML = emptyState('⚠️','Could not load shop',e.message); }
 }
+
 
 function backToShops(){
   S.currentShop = null;
   document.getElementById('shopsDirectory').style.display='block';
   document.getElementById('shopDetailView').style.display='none';
-  const el=document.getElementById('shopFilters'); if(el) el.style.display='flex';
-  const pt=document.getElementById('shopPageTitle'); if(pt) pt.textContent='Local Shop Marketplace';
-  const ps=document.getElementById('shopPageSub'); if(ps) ps.textContent='Discover hidden-gem stores across South Africa';
-  const pb=document.getElementById('shopBreadcrumb'); if(pb) pb.innerHTML='<a onclick="goPage(\'home\')">Home</a> / Shop';
+  var el=document.getElementById('shopFilters'); if(el) el.style.display='flex';
+  var pt=document.getElementById('shopPageTitle'); if(pt) pt.textContent='Local Shop Marketplace';
+  var ps=document.getElementById('shopPageSub'); if(ps) ps.textContent='Discover hidden-gem stores across South Africa';
+  var pb=document.getElementById('shopBreadcrumb');
+  if(pb) pb.innerHTML='<a onclick="goPage(' + String.fromCharCode(39) + 'home' + String.fromCharCode(39) + ')">Home</a> / Shop';
 }
+
 
 async function filterShop(btn, catId){ filterShopCat(btn, catId); }
 
@@ -1137,14 +1041,17 @@ async function filterAccomCat(btn, catId){
 }
 
 function filterAccom(){
-  const search = document.getElementById('acSearch').value.toLowerCase();
-  const prov = document.getElementById('acProv').value;
+  const search = (document.getElementById('acSearch')?.value||'').toLowerCase();
+  const prov = document.getElementById('acProv')?.value||'';
+  const sort = document.getElementById('acSort')?.value||'';
   const grid = document.getElementById('accomGrid');
-  const filtered = S.allAccom.filter(l=>{
-    const ms = !search || l.name.toLowerCase().includes(search) || l.location.toLowerCase().includes(search);
+  let filtered = S.allAccom.filter(l=>{
+    const ms = !search || l.name.toLowerCase().includes(search) || l.location.toLowerCase().includes(search) || (l.province||'').toLowerCase().includes(search);
     const mp = !prov || l.province === prov;
     return ms && mp;
   });
+  if(sort==='price_asc') filtered.sort((a,b)=>(a.priceFrom||0)-(b.priceFrom||0));
+  else if(sort==='price_desc') filtered.sort((a,b)=>(b.priceFrom||0)-(a.priceFrom||0));
   grid.innerHTML = filtered.map((l,i)=>renderAccomCard(l,i)).join('') || emptyState('🏡','No stays match your search');
 }
 
@@ -1601,44 +1508,37 @@ function emptyState(icon, title, msg=''){
 }
 
 // ── INIT ──────────────────────────────────────────────────────
-function showSetup(){ document.getElementById('setupOverlay').style.display='flex'; }
-function hideSetup(){ document.getElementById('setupOverlay').style.display='none'; }
-
-function saveSetup(){
-  let url = (document.getElementById('setupUrl').value||'').trim();
-  if(!url){ alert('Please enter your Railway URL'); return; }
-  // Strip https:// and trailing slash if user pasted full URL
-  url = url.replace(/^https?:\/\//, '').replace(/\/api\/?$/, '').replace(/\/$/, '');
-  const apiUrl = 'https://'+url+'/api';
-  localStorage.setItem('tasksa_api_url', apiUrl);
-  hideSetup();
-  window.location.reload();
-}
-
 async function checkApiConnection(){
-  const saved = localStorage.getItem('tasksa_api_url');
-  if(!saved){
-    showSetup();
-    return false;
-  }
   try {
-    const r = await fetch(API+'/health', {signal: AbortSignal.timeout(8000)});
+    const r = await fetch(API+'/health');
     if(!r.ok) throw new Error('HTTP '+r.status);
     const d = await r.json();
     console.log('✅ API connected:', d.service);
-    hideSetup();
     return true;
   } catch(e){
     console.error('❌ API unreachable:', e.message);
-    // Show a non-blocking warning, not a full setup screen
     const w = document.getElementById('apiWarn');
     if(w){
       w.style.cssText='background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:12px 18px;margin:12px 5%;font-size:13px;color:#f87171;display:block;line-height:1.7;';
-      w.innerHTML='⚠️ <strong>Backend unreachable.</strong> Check that your Railway backend is Online. <a onclick="localStorage.removeItem(\'tasksa_api_url\');window.location.reload()" style="color:#4db0ff;cursor:pointer;text-decoration:underline;">Change URL</a>';
+      w.innerHTML='⚠️ <strong>Cannot connect to backend.</strong> Please check your internet connection and try again.';
     }
     return false;
   }
 }
+
+// Event delegation for all dynamic card clicks
+document.addEventListener('click', function(e){
+  var shopCard = e.target.closest('[data-shopid]');
+  if(shopCard){ viewShop(shopCard.dataset.shopid); return; }
+});
+
+// Event delegation for cart buttons - avoids inline onclick quote issues
+document.addEventListener('click', function(e){
+  if(e.target.classList.contains('add-btn') && e.target.dataset.pid){
+    const d = e.target.dataset;
+    addToCart(d.pid, decodeURIComponent(d.pname), decodeURIComponent(d.pstore), parseFloat(d.pprice), d.pem);
+  }
+});
 
 async function init(){
   renderCartUI();
@@ -1661,4 +1561,29 @@ async function init(){
 init();
 </script>
 </body>
-</html>
+</htmlfunction buildShopCatFilters(){
+  var el = document.getElementById('shopFilters');
+  if(!el) return;
+  var btns = '<button class="sfb active" data-catid="">All Shops</button>';
+  S.shopCats.forEach(function(c){
+    btns += '<button class="sfb" data-catid="'+c.id+'">'+(c.icon||'')+' '+c.name+'</button>';
+  });
+  el.innerHTML = btns;
+  el.querySelectorAll('.sfb').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      el.querySelectorAll('.sfb').forEach(function(b){ b.classList.remove('active'); });
+      this.classList.add('active');
+      filterShopCatById(this.dataset.catid);
+    });
+  });
+}
+
+async function filterShopCatById(catId){
+  var grid = document.getElementById('shopsGrid');
+  if(!grid) return;
+  try {
+    var q = catId ? '/listings?type=SHOP&categoryId='+catId : '/listings?type=SHOP&limit=40';
+    var r = await api(q);
+    grid.innerHTML = r.data.map(function(s,i){ return renderShopCard(s,i); }).join('') || emptyState('🛒','No shops in this category');
+  } catch(e){ grid.innerHTML = emptyState('⚠️','Filter failed',e.message); }
+}>
