@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020b1a">
+<title>TaskSA — South Africa's Service Marketplace</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#020b1a;--bg2:#041020;--bg3:#061628;--surf:#082035;--surf2:#0a2840;--blue:#0a6edb;--blue2:#1a8fff;--blue3:#4db0ff;--gold:#F5A623;--green:#22C55E;--green2:#4ade80;--red:#ef4444;--amber2:#fbbf24;--bd:rgba(26,143,255,0.15);--bd2:rgba(26,143,255,0.32);--t:#e8f4ff;--t2:#93b8d8;--t3:#4a7aa0;--r:12px;--r2:20px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;overflow-x:hidden;}
+h1,h2,h3,h4,h5{font-family:'Sora',sans-serif;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--blue);border-radius:3px;}
+.page{display:none;min-height:100vh;}.page.active{display:block;}
+nav{position:sticky;top:0;z-index:200;background:rgba(2,11,26,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px;}
+.logo{font-family:'Sora',sans-serif;font-size:22px;font-weight:900;color:var(--blue2);cursor:pointer;white-space:nowrap;}
+.logo span{color:var(--gold);}
+.nav-links{display:flex;align-items:center;gap:4px;}
+.nav-links a{color:var(--t2);font-size:13px;padding:7px 12px;border-radius:8px;transition:all .2s;cursor:pointer;white-space:nowrap;}
+.nav-links a:hover{color:var(--t);background:var(--surf);}
+.nav-links a.active{color:var(--blue3);background:rgba(26,143,255,.1);}
+.nav-cta{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff!important;border-radius:50px!important;font-weight:700;padding:7px 16px!important;}
+.nav-cart{background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:6px 12px;font-size:13px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px;}
+.cart-cnt{background:var(--blue2);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.hamburger{display:none;background:var(--surf);border:1px solid var(--bd2);color:var(--t2);width:38px;height:38px;border-radius:8px;cursor:pointer;font-size:20px;align-items:center;justify-content:center;}
+@media(max-width:900px){.nav-links a:not(.nav-cta):not(#navSignIn){display:none;}.hamburger{display:flex;}}
+#mobileMenu{display:none;position:fixed;top:64px;left:0;right:0;z-index:199;background:var(--bg2);border-bottom:1px solid var(--bd);padding:10px;}
+#mobileMenu a{display:block;padding:12px 16px;color:var(--t2);border-radius:8px;font-size:15px;cursor:pointer;}
+#mobileMenu a:hover{background:var(--surf);}
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--surf2);border:1px solid var(--bd2);color:var(--blue3);padding:12px 20px;border-radius:var(--r);font-size:13px;font-weight:600;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:320px;}
+#toast.show{opacity:1;transform:translateY(0);}
+#toast.success{border-color:rgba(34,197,94,.35);color:var(--green2);}
+#toast.error{border-color:rgba(239,68,68,.35);color:#f87171;}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r2);padding:28px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;position:relative;}
+.modal h2{font-size:20px;font-weight:800;margin-bottom:6px;}
+.modal-sub{color:var(--t2);font-size:13px;margin-bottom:20px;}
+.modal-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;background:var(--surf);border:1px solid var(--bd);color:var(--t2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 13px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue2);}
+.field select option{background:var(--bg2);}
+.field textarea{resize:vertical;min-height:80px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-p{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;}
+.btn-p:hover:not(:disabled){opacity:.9;transform:translateY(-1px);}
+.btn-g{background:var(--surf);border:1px solid var(--bd2);color:var(--t2);}
+.btn-g:hover{color:var(--t);}
+.btn-s{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:var(--green2);}
+.btn-d{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;}
+.mfooter{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+.demo-pills{background:rgba(26,143,255,.07);border:1px solid var(--bd2);border-radius:10px;padding:12px;margin-bottom:16px;}
+.demo-pills p{font-size:10px;font-weight:700;color:var(--blue3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.dpills{display:flex;flex-wrap:wrap;gap:6px;}
+.dpill{padding:4px 12px;border-radius:50px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid transparent;font-family:'DM Sans',sans-serif;}
+.dp-g{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.25);color:var(--green2);}
+.dp-b{background:rgba(26,143,255,.1);border-color:rgba(26,143,255,.25);color:var(--blue3);}
+.dp-a{background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.25);color:var(--amber2);}
+.dp-p{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.25);color:#c4b5fd;}
+.section{padding:52px 5%;}
+.sec-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px;}
+.sec-title{font-size:22px;font-weight:800;}
+.sec-sub{font-size:13px;color:var(--t3);margin-bottom:24px;}
+.see-all{font-size:13px;color:var(--blue3);cursor:pointer;}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton{background:linear-gradient(90deg,var(--surf) 25%,var(--surf2) 50%,var(--surf) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;}
+.skel-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;}
+.hero{padding:72px 5% 56px;text-align:center;position:relative;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0,rgba(26,143,255,.12) 0,transparent 70%);pointer-events:none;}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:var(--surf);border:1px solid var(--bd2);padding:6px 16px;border-radius:50px;font-size:12px;color:var(--blue3);margin-bottom:20px;}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:clamp(32px,5vw,58px);font-weight:900;line-height:1.1;margin-bottom:14px;}
+.hero h1 em{font-style:normal;color:var(--blue2);}
+.hero p{font-size:16px;color:var(--t2);max-width:520px;margin:0 auto 32px;line-height:1.7;}
+.search-bar{display:flex;max-width:580px;margin:0 auto 16px;background:var(--surf2);border:2px solid var(--bd2);border-radius:60px;overflow:hidden;}
+.search-bar input{flex:1;background:transparent;border:none;outline:none;padding:15px 20px;color:var(--t);font-size:14px;font-family:'DM Sans',sans-serif;}
+.search-bar input::placeholder{color:var(--t3);}
+.search-bar button{background:linear-gradient(135deg,var(--blue),var(--blue2));border:none;color:#fff;font-weight:700;font-size:14px;padding:0 28px;cursor:pointer;border-radius:60px;margin:5px;font-family:'DM Sans',sans-serif;}
+.tags{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;}
+.tag{background:var(--surf);border:1px solid var(--bd);padding:6px 14px;border-radius:50px;font-size:12px;color:var(--t2);cursor:pointer;transition:all .2s;}
+.tag:hover{border-color:var(--blue2);color:var(--blue3);}
+.stats{display:flex;justify-content:space-around;padding:28px 5%;background:var(--bg2);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);flex-wrap:wrap;gap:8px;}
+.stat-n{font-family:'Sora',sans-serif;font-size:26px;font-weight:800;color:var(--blue3);}
+.stat-l{font-size:11px;color:var(--t3);margin-top:2px;}
+.banner-scroll{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;}
+.banner-scroll::-webkit-scrollbar{display:none;}
+.banner-ad{flex:0 0 300px;height:155px;border-radius:var(--r2);display:flex;flex-direction:column;justify-content:flex-end;padding:16px;position:relative;overflow:hidden;cursor:pointer;}
+.ba-title{font-family:'Sora',sans-serif;font-size:15px;font-weight:800;color:#fff;position:relative;z-index:1;}
+.ba-sub{font-size:11px;color:rgba(255,255,255,.8);margin-top:3px;position:relative;z-index:1;}
+.ba-cta{margin-top:9px;background:#fff;color:#111;font-size:11px;font-weight:700;padding:5px 14px;border-radius:50px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;position:relative;z-index:1;display:inline-block;}
+.banner-empty{flex:0 0 260px;height:155px;border-radius:var(--r2);border:2px dashed var(--bd2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;cursor:pointer;color:var(--t3);font-size:12px;}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+.cat-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:22px 18px;cursor:pointer;transition:all .25s;}
+.cat-card:hover{border-color:var(--bd2);transform:translateY(-3px);}
+.cat-icon{font-size:32px;margin-bottom:12px;}
+.cat-card h3{font-size:16px;font-weight:800;margin-bottom:5px;}
+.cat-card p{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:12px;}
+.cat-pills{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;}
+.cpill{background:rgba(26,143,255,.1);border:1px solid var(--bd);color:var(--blue3);font-size:10px;padding:2px 9px;border-radius:50px;}
+.cat-btn{display:block;width:100%;padding:9px;border-radius:50px;border:none;font-weight:700;font-size:12px;cursor:pointer;text-align:center;color:#fff;font-family:'DM Sans',sans-serif;}
+.prov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;}
+.prov-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px 14px;text-align:center;cursor:pointer;transition:all .25s;}
+.prov-card:hover{border-color:var(--bd2);transform:translateY(-2px);}
+.pav{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;margin:0 auto 10px;}
+.pname{font-size:13px;font-weight:700;margin-bottom:2px;}
+.prole{font-size:11px;color:var(--t3);margin-bottom:6px;}
+.stars{color:var(--gold);font-size:12px;}
+.pprice{font-size:12px;color:var(--blue3);font-weight:700;margin-top:5px;}
+.vbadge{display:inline-block;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green2);font-size:10px;padding:2px 8px;border-radius:50px;margin-top:5px;}
+.accom-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+.accom-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:all .25s;}
+.accom-card:hover{border-color:var(--bd2);transform:translateY(-3px);}
+.accom-img{height:160px;display:flex;align-items:center;justify-content:center;font-size:54px;position:relative;}
+.accom-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;}
+.accom-info{padding:14px;}
+.accom-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+.accom-loc{font-size:11px;color:var(--t3);margin-bottom:6px;}
+.accom-row{display:flex;justify-content:space-between;align-items:center;}
+.accom-price{font-size:16px;font-weight:800;color:var(--blue3);}
+.accom-price span{font-size:11px;color:var(--t3);font-weight:400;}
+.amenity{font-size:10px;background:rgba(26,143,255,.1);color:var(--blue3);padding:2px 8px;border-radius:50px;}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;}
+.product-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:all .25s;}
+.product-card:hover{border-color:var(--bd2);transform:translateY(-2px);}
+.prod-img{height:100px;display:flex;align-items:center;justify-content:center;font-size:38px;background:var(--surf2);}
+.prod-info{padding:12px;}
+.prod-name{font-size:12px;font-weight:700;margin-bottom:2px;}
+.prod-store{font-size:10px;color:var(--t3);margin-bottom:6px;}
+.prod-price{font-size:15px;font-weight:800;color:var(--blue3);}
+.add-btn{display:block;width:100%;margin-top:9px;padding:8px;border:none;border-radius:50px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+#cartSidebar{position:fixed;top:0;right:-100%;width:360px;height:100vh;background:var(--bg2);border-left:2px solid var(--bd2);z-index:400;transition:right .35s;display:flex;flex-direction:column;}
+#cartSidebar.open{right:0;}
+@media(max-width:400px){#cartSidebar{width:100%;}}
+#cartOverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:399;display:none;}
+#cartOverlay.open{display:block;}
+.cart-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd);}
+.cart-hdr h3{font-size:16px;font-weight:800;}
+.cart-close{background:var(--surf);border:1px solid var(--bd);color:var(--t2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.cart-body{flex:1;overflow-y:auto;padding:12px 20px;}
+.cart-item{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--bd);}
+.ci-icon{width:46px;height:46px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:var(--surf2);}
+.ci-name{font-size:12px;font-weight:700;margin-bottom:2px;}
+.ci-store{font-size:10px;color:var(--t3);}
+.ci-price{font-size:13px;font-weight:800;color:var(--blue3);margin-top:3px;}
+.qty-row{display:flex;align-items:center;gap:7px;margin-top:5px;}
+.qty-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--bd2);background:var(--surf);color:var(--t);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.qty-n{font-size:12px;font-weight:700;}
+.rm-btn{background:none;border:none;color:var(--red);font-size:11px;cursor:pointer;margin-left:4px;font-family:'DM Sans',sans-serif;}
+.cart-foot{padding:16px 20px;border-top:1px solid var(--bd);}
+.cart-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;}
+.cart-grand{display:flex;justify-content:space-between;font-size:17px;font-weight:800;margin-top:10px;padding-top:10px;border-top:1px solid var(--bd);}
+.empty-cart{text-align:center;padding:48px 20px;color:var(--t3);}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:700px){.plans-grid{grid-template-columns:1fr;}}
+.plan{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:24px;position:relative;}
+.plan.featured{border-color:var(--blue2);}
+.plan-badge{position:absolute;top:14px;right:14px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:50px;}
+.plan-name{font-size:16px;font-weight:800;margin-bottom:5px;}
+.plan-price{font-size:36px;font-weight:900;line-height:1;}
+.plan-price span{font-size:14px;color:var(--t3);font-weight:400;}
+.feat{font-size:12px;color:var(--t2);padding:5px 0;border-bottom:1px solid var(--bd);display:flex;gap:7px;}
+.feat:last-child{border:none;}
+.fck{color:var(--green2);}
+.plan-btn{width:100%;margin-top:14px;padding:11px;border-radius:50px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:var(--surf2);color:var(--t);font-family:'DM Sans',sans-serif;}
+.plan.featured .plan-btn{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;}
+.cat-header{background:var(--bg2);border-bottom:1px solid var(--bd);padding:28px 5%;}
+.breadcrumb{font-size:12px;color:var(--t3);margin-bottom:12px;}
+.breadcrumb a{color:var(--blue3);cursor:pointer;}
+.sub-filters{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;}
+.sfb{background:var(--surf);border:1px solid var(--bd);color:var(--t2);padding:7px 15px;border-radius:50px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.sfb.active,.sfb:hover{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border-color:transparent;}
+.dash-layout{display:flex;min-height:calc(100vh - 64px);}
+.dash-side{width:210px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bd);padding:14px 8px;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;}
+@media(max-width:700px){.dash-side{display:none;}}
+.dash-main{flex:1;padding:24px;overflow-x:hidden;}
+.si{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;color:var(--t2);font-size:13px;margin-bottom:2px;transition:all .2s;position:relative;}
+.si:hover{background:var(--surf);color:var(--t);}
+.si.active{background:rgba(26,143,255,.14);color:var(--blue3);}
+.si.active::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--blue2);border-radius:0 2px 2px 0;}
+.si-ic{font-size:14px;width:18px;text-align:center;}
+.sib{margin-left:auto;font-size:9px;font-weight:700;padding:2px 6px;border-radius:50px;color:#fff;background:var(--red);}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+@media(max-width:900px){.metrics{grid-template-columns:1fr 1fr;}}
+.metric{background:var(--surf);border:1px solid var(--bd);border-radius:14px;padding:16px;}
+.ml{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;font-weight:700;}
+.mv{font-size:24px;font-weight:800;}
+.mc{font-size:11px;color:var(--green2);margin-top:4px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:800px){.grid2{grid-template-columns:1fr;}}
+.dash-card{background:var(--surf);border:1px solid var(--bd);border-radius:14px;padding:18px;}
+.dash-card h4{font-size:14px;font-weight:800;margin-bottom:14px;}
+.bk-item{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--bd);}
+.bk-item:last-child{border:none;}
+.bkav{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.bkname{font-size:13px;font-weight:700;}
+.bkdesc{font-size:11px;color:var(--t3);}
+.bkst{font-size:10px;padding:3px 9px;border-radius:50px;font-weight:700;}
+.s-ok{background:rgba(34,197,94,.1);color:var(--green2);}
+.s-pend{background:rgba(245,158,11,.1);color:var(--amber2);}
+.s-done{background:rgba(26,143,255,.1);color:var(--blue3);}
+.s-cancel{background:rgba(239,68,68,.1);color:#f87171;}
+.pay-method{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:13px 16px;margin-bottom:9px;cursor:pointer;transition:all .2s;}
+.pay-method:hover,.pay-method.selected{border-color:var(--blue2);background:rgba(26,143,255,.05);}
+.pay-icon{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.order-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--bd);}
+.order-row:last-child{border:none;}
+.order-total{display:flex;justify-content:space-between;font-size:17px;font-weight:800;margin-top:10px;padding-top:10px;border-top:1px solid var(--bd);}
+.msg-layout{display:flex;height:calc(100vh - 64px);}
+.conv-list{width:270px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bd);overflow-y:auto;}
+@media(max-width:680px){.conv-list{display:none;}}
+.conv-hdr{padding:14px 16px;border-bottom:1px solid var(--bd);font-size:15px;font-weight:800;}
+.conv-item{display:flex;gap:10px;padding:13px 14px;border-bottom:1px solid var(--bd);cursor:pointer;transition:all .2s;}
+.conv-item:hover,.conv-item.active-conv{background:rgba(26,143,255,.07);}
+.cav{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;}
+.cname{font-size:13px;font-weight:700;}
+.cprev{font-size:11px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
+.udot{width:8px;height:8px;background:var(--blue2);border-radius:50%;margin-top:5px;flex-shrink:0;}
+.chat-area{flex:1;display:flex;flex-direction:column;}
+.chat-hdr{padding:12px 18px;border-bottom:1px solid var(--bd);background:var(--bg2);display:flex;align-items:center;gap:12px;}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:9px;}
+.bubble{max-width:65%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.55;}
+.bubble.sent{align-self:flex-end;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border-bottom-right-radius:4px;}
+.bubble.recv{align-self:flex-start;background:var(--surf);color:var(--t);border-bottom-left-radius:4px;}
+.chat-inp-area{padding:12px 18px;border-top:1px solid var(--bd);background:var(--bg2);display:flex;gap:8px;align-items:flex-end;}
+.chat-inp{flex:1;background:var(--surf);border:1px solid var(--bd2);border-radius:20px;padding:10px 15px;color:var(--t);font-size:13px;outline:none;resize:none;max-height:100px;font-family:'DM Sans',sans-serif;}
+.chat-inp:focus{border-color:var(--blue2);}
+.send-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));border:none;color:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:32px;}
+@media(max-width:700px){.footer-grid{grid-template-columns:1fr 1fr;}}
+.footer-logo{font-family:'Sora',sans-serif;font-size:22px;font-weight:900;color:var(--blue2);margin-bottom:9px;}
+.footer-logo span{color:var(--gold);}
+.footer-about{font-size:13px;color:var(--t3);line-height:1.7;max-width:240px;}
+.fc h5{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:13px;}
+.fc a{display:block;font-size:13px;color:var(--t3);margin-bottom:8px;cursor:pointer;}
+.fc a:hover{color:var(--blue3);}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:18px;border-top:1px solid var(--bd);flex-wrap:wrap;gap:12px;}
+.footer-bottom p{font-size:12px;color:var(--t3);}
+.empty-state{text-align:center;padding:60px 20px;color:var(--t3);}
+.empty-state .es-icon{font-size:48px;margin-bottom:16px;}
+.empty-state h3{font-size:18px;font-weight:800;color:var(--t2);margin-bottom:8px;}
+.new-cat-card{border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s;position:relative;min-height:320px;display:flex;flex-direction:column;}
+.new-cat-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.4);}
+.new-cat-card .cat-img-layer{position:absolute;inset:0;border-radius:20px;background-size:cover;background-position:center;background-repeat:no-repeat;}
+.new-cat-card .cat-content{position:relative;z-index:1;padding:28px;flex:1;display:flex;flex-direction:column;}
+.new-cat-card .cat-white-btn{background:rgba(255,255,255,.95);border:none;border-radius:50px;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;transition:background .2s;}
+.new-cat-card .cat-white-btn:hover{background:#fff;}
+.api-warn{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:var(--r);padding:14px 18px;margin:12px 5%;font-size:13px;color:#f87171;display:none;line-height:1.7;} .api-warn code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size:12px;}
+.shop-listing-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:all .25s;display:flex;flex-direction:column;}
+.shop-listing-card:hover{border-color:var(--bd2);transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.3);}
+.shop-banner{height:140px;display:flex;align-items:center;justify-content:center;font-size:52px;position:relative;}
+.shop-tag{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;}
+.shop-info{padding:16px;flex:1;display:flex;flex-direction:column;}
+.shop-name{font-family:'Sora',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px;}
+.shop-loc{font-size:11px;color:var(--t3);margin-bottom:4px;}
+.shop-cat-tag{display:inline-block;background:rgba(26,143,255,.1);color:var(--blue3);font-size:10px;padding:2px 9px;border-radius:50px;margin-bottom:8px;}
+.shop-desc{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:10px;flex:1;}
+.shop-stats{font-size:11px;color:var(--t3);margin-bottom:12px;}
+.shop-browse-btn{display:block;width:100%;padding:10px;background:linear-gradient(135deg,var(--blue),var(--blue2));border:none;border-radius:50px;color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center;}
+.shop-detail-banner{height:180px;display:flex;align-items:center;justify-content:center;font-size:64px;border-radius:var(--r2);margin-bottom:18px;position:relative;}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:700px){.plans-grid{grid-template-columns:1fr;}}
+.api-warn.show{display:block;}
+.qrs{display:flex;gap:6px;flex-wrap:wrap;padding:7px 18px 0;}
+.qr{background:var(--surf);border:1px solid var(--bd);color:var(--t2);padding:5px 12px;border-radius:50px;font-size:11px;cursor:pointer;}
+.qr:hover{border-color:var(--blue2);color:var(--blue3);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
+    <h2>Welcome back</h2>
+    <div class="modal-sub">Sign in to your TaskSA account</div>
+    <div class="demo-pills">
+      <p>Demo accounts — tap to fill</p>
+      <div class="dpills">
+        <button class="dpill dp-g" onclick="fillLogin('demo@tasksa.co.za','password123')">👤 Customer</button>
+        <button class="dpill dp-b" onclick="fillLogin('thabo@tasksa.co.za','password123')">🔧 Provider</button>
+        <button class="dpill dp-p" onclick="fillLogin('buildright@tasksa.co.za','password123')">🏪 Shop</button>
+        <button class="dpill dp-a" onclick="fillLogin('admin@tasksa.co.za','Admin@123')">⚙️ Admin</button>
+      </div>
+    </div>
+    <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.co.za"></div>
+    <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-p" id="loginBtn" style="width:100%;padding:13px;" onclick="doLogin()">Sign In</button>
+    <p style="text-align:center;font-size:13px;color:var(--t2);margin-top:14px;">No account? <a style="color:var(--blue3);" onclick="closeModal('loginModal');openModal('registerModal')">Register free</a></p>
+  </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('registerModal')">✕</button>
+    <h2>Join TaskSA</h2>
+    <div class="modal-sub">Create your account — it's free</div>
+    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;" id="roleTabs">
+      <button class="dpill dp-b" data-role="CLIENT" onclick="setRole('CLIENT')">👤 Customer</button>
+      <button class="dpill" data-role="PROVIDER" onclick="setRole('PROVIDER')" style="background:var(--surf);border-color:var(--bd);color:var(--t2);">🔧 Service Provider</button>
+      <button class="dpill" data-role="SHOP_OWNER" onclick="setRole('SHOP_OWNER')" style="background:var(--surf);border-color:var(--bd);color:var(--t2);">🏪 Shop Owner</button>
+      <button class="dpill" data-role="HOST" onclick="setRole('HOST')" style="background:var(--surf);border-color:var(--bd);color:var(--t2);">🏡 Accommodation Host</button>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Full Name *</label><input id="regName" placeholder="Your full name"></div>
+      <div class="field"><label>Phone</label><input id="regPhone" placeholder="+27 82 000 0000"></div>
+    </div>
+    <div class="field"><label>Email *</label><input type="email" id="regEmail" placeholder="you@example.co.za"></div>
+    <div class="g2">
+      <div class="field"><label>Province</label>
+        <select id="regProv"><option value="">Select...</option><option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option><option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option><option>North West</option><option>Free State</option><option>Northern Cape</option></select>
+      </div>
+      <div class="field"><label>City</label><input id="regCity" placeholder="e.g. Cape Town"></div>
+    </div>
+    <div class="field"><label>Password * (min 8 chars)</label><input type="password" id="regPass" placeholder="••••••••"></div>
+    <button class="btn btn-p" id="regBtn" style="width:100%;padding:13px;" onclick="doRegister()">Create Account</button>
+  </div>
+</div>
+
+<!-- BOOKING MODAL (Services) -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('bookingModal')">✕</button>
+    <h2>Book This Service</h2>
+    <div class="modal-sub">Confirm your booking details below</div>
+    <div id="bkCard" style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:16px;"></div>
+    <div class="g2">
+      <div class="field"><label>Date *</label><input type="date" id="bkDate"></div>
+      <div class="field"><label>Time</label><input type="time" id="bkTime" value="09:00"></div>
+    </div>
+    <div class="field"><label>Payment Method</label>
+      <select id="bkPayment"><option value="CARD">💳 Credit / Debit Card</option><option value="EFT">🏦 EFT / Bank Transfer</option><option value="CASH">💵 Cash on Arrival</option></select>
+    </div>
+    <div class="field"><label>Notes (optional)</label><textarea id="bkNotes" placeholder="Any special requirements?"></textarea></div>
+    <div class="mfooter">
+      <button class="btn btn-g" onclick="closeModal('bookingModal')">Cancel</button>
+      <button class="btn btn-p" id="bkBtn" onclick="submitBooking()">Confirm Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- ACCOM BOOKING MODAL -->
+<div class="modal-overlay" id="accomModal">
+  <div class="modal" style="max-width:540px;">
+    <button class="modal-close" onclick="closeModal('accomModal')">✕</button>
+    <h2 id="accomTitle">Book Accommodation</h2>
+    <div class="modal-sub">Select your dates and confirm</div>
+    <div id="accomCard" style="margin-bottom:16px;"></div>
+    <div class="g2">
+      <div class="field"><label>Check-in *</label><input type="date" id="checkin" onchange="calcAccomPrice()"></div>
+      <div class="field"><label>Check-out *</label><input type="date" id="checkout" onchange="calcAccomPrice()"></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Adults</label><input type="number" id="accomAdults" value="2" min="1"></div>
+      <div class="field"><label>Children</label><input type="number" id="accomChildren" value="0" min="0"></div>
+    </div>
+    <div class="field"><label>Payment Method</label>
+      <select id="accomPayment"><option value="CARD">💳 Credit / Debit Card</option><option value="EFT">🏦 EFT / Bank Transfer</option></select>
+    </div>
+    <div class="field"><label>Special Requests</label><textarea id="accomNotes" placeholder="Early check-in, dietary needs etc."></textarea></div>
+    <div id="accomPrice" style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:6px;font-size:13px;color:var(--t2);">Select dates to see pricing</div>
+    <div class="mfooter">
+      <button class="btn btn-g" onclick="closeModal('accomModal')">Cancel</button>
+      <button class="btn btn-p" id="accomBtn" onclick="submitAccomBooking()">Confirm Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD LISTING MODAL -->
+<div class="modal-overlay" id="addListingModal">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('addListingModal')">✕</button>
+    <h2>Add New Listing</h2>
+    <div class="modal-sub">Your listing goes live immediately after publishing</div>
+    <div class="field"><label>Category *</label><select id="newCat"><option value="">Loading...</option></select></div>
+    <div class="field"><label>Title *</label><input id="newTitle" placeholder="e.g. Emergency Plumbing Repair"></div>
+    <div class="field"><label>Description *</label><textarea id="newDesc" placeholder="Describe your service or property..."></textarea></div>
+    <div class="g2">
+      <div class="field"><label>Province *</label>
+        <select id="newProv"><option value="">Select...</option><option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option><option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option><option>North West</option><option>Free State</option><option>Northern Cape</option></select>
+      </div>
+      <div class="field"><label>City *</label><input id="newCity" placeholder="e.g. Cape Town"></div>
+    </div>
+    <div class="field"><label>Full Address / Area</label><input id="newLoc" placeholder="e.g. Sandton, Johannesburg"></div>
+    <div class="g2">
+      <div class="field"><label>Price From (R)</label><input type="number" id="newPrice" placeholder="0"></div>
+      <div class="field"><label>Price Type</label>
+        <select id="newPriceType"><option value="HOURLY">Per Hour</option><option value="PER_JOB">Per Job</option><option value="DAILY">Per Day</option><option value="FIXED">Fixed Price</option></select>
+      </div>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-g" onclick="closeModal('addListingModal')">Cancel</button>
+      <button class="btn btn-p" id="addListBtn" onclick="submitListing()">Publish Listing</button>
+    </div>
+  </div>
+</div>
+
+<!-- CART SIDEBAR -->
+<div id="cartSidebar">
+  <div class="cart-hdr"><h3>🛒 Your Cart</h3><button class="cart-close" onclick="closeCart()">✕</button></div>
+  <div class="cart-body" id="cartBody"></div>
+  <div id="cartFoot" style="display:none;" class="cart-foot">
+    <div class="cart-row"><span style="color:var(--t2);">Subtotal</span><span id="cartSub">R0</span></div>
+    <div class="cart-row"><span style="color:var(--t2);">Platform fee (3%)</span><span id="cartFee">R0</span></div>
+    <div class="cart-grand"><span>Total</span><span id="cartTotal" style="color:var(--blue3);">R0</span></div>
+    <button class="btn btn-p" style="width:100%;margin-top:14px;padding:13px;" onclick="closeCart();goPage('checkout')">Proceed to Checkout →</button>
+    <button onclick="closeCart()" style="width:100%;padding:9px;background:none;border:1px solid var(--bd);border-radius:50px;color:var(--t2);cursor:pointer;margin-top:8px;font-family:'DM Sans',sans-serif;font-size:13px;">Continue Shopping</button>
+  </div>
+</div>
+
+<!-- MOBILE MENU -->
+<div id="mobileMenu">
+  <a onclick="goPage('home')">🏠 Home</a>
+  <a onclick="goPage('services')">🔧 Services</a>
+  <a onclick="goPage('shop')">🛒 Shop</a>
+  <a onclick="goPage('accommodation')">🏡 Stays</a>
+  <a onclick="goPage('messages')">💬 Messages</a>
+  <a onclick="goPage('dashboard')">📊 Dashboard</a>
+  <div style="border-top:1px solid var(--bd);margin:8px 0;"></div>
+  <a id="mobileSignIn" onclick="openModal('loginModal');closeMobile()">Sign In</a>
+  <a id="mobileRegister" onclick="openModal('registerModal');closeMobile()" style="background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border-radius:50px;text-align:center;font-weight:700;">Get Started Free</a>
+  <a id="mobileSignOut" style="display:none;" onclick="doLogout()">Sign Out</a>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="goPage('home')">Task<span>SA</span></div>
+  <div class="nav-links" id="navLinks">
+    <a data-page="services" onclick="goPage('services')">Services</a>
+    <a data-page="shop" onclick="goPage('shop')">Shop</a>
+    <a data-page="accommodation" onclick="goPage('accommodation')">🏡 Stays</a>
+    <a data-page="messages" onclick="goPage('messages')">Messages</a>
+    <a data-page="dashboard" onclick="goPage('dashboard')">Dashboard</a>
+    <span id="navUser" style="display:none;font-size:13px;color:var(--blue3);font-weight:700;padding:0 6px;"></span>
+    <a id="navSignIn" onclick="openModal('loginModal')">Sign In</a>
+    <a id="navReg" class="nav-cta" onclick="openModal('registerModal')">Get Started</a>
+    <a id="navOut" style="display:none;font-size:13px;color:var(--t3);" onclick="doLogout()">Sign Out</a>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="nav-cart" onclick="openCartSidebar()">🛒<span class="cart-cnt" id="cartCnt">0</span></div>
+    <button class="hamburger" onclick="toggleMobile()">☰</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div class="page active" id="home">
+  <div class="api-warn" id="apiWarn"></div>
+  <section class="hero">
+    <div class="hero-badge"><span class="live-dot"></span>Live across all 9 provinces</div>
+    <h1>South Africa's<br><em>Trusted Service</em><br>Marketplace</h1>
+    <p>Book skilled professionals, shop from hidden-gem local stores, and find the perfect holiday stay — all in one place.</p>
+    <div class="search-bar">
+      <input id="heroSearch" placeholder="Search services, shops or stays…" onkeydown="if(event.key==='Enter')doHeroSearch()">
+      <button onclick="doHeroSearch()">Search</button>
+    </div>
+    <div class="tags">
+      <span class="tag" onclick="goPage('services')">🔧 Plumbing</span>
+      <span class="tag" onclick="goPage('services')">🧹 Cleaning</span>
+      <span class="tag" onclick="goPage('services')">⚡ Electrical</span>
+      <span class="tag" onclick="goPage('services')">🌿 Gardening</span>
+      <span class="tag" onclick="goPage('shop')">👗 African Fashion</span>
+      <span class="tag" onclick="goPage('shop')">🔩 Hardware</span>
+      <span class="tag" onclick="goPage('accommodation')">🏡 Holiday Stays</span>
+    </div>
+  </section>
+  <div class="stats">
+    <div class="stat"><div class="stat-n">12,400+</div><div class="stat-l">Verified Providers</div></div>
+    <div class="stat"><div class="stat-n">340K+</div><div class="stat-l">Tasks Completed</div></div>
+    <div class="stat"><div class="stat-n">4.8★</div><div class="stat-l">Avg Rating</div></div>
+    <div class="stat"><div class="stat-n">9</div><div class="stat-l">Provinces</div></div>
+    <div class="stat"><div class="stat-n">2,800+</div><div class="stat-l">Stays Listed</div></div>
+  </div>
+  <div class="section" style="padding-bottom:0;">
+    <div class="sec-hdr"><div class="sec-title">Featured Partners</div><a class="see-all" onclick="openModal('registerModal')">Advertise with us →</a></div>
+    <p class="sec-sub">Promoted listings from verified TaskSA businesses</p>
+    <div class="banner-scroll" id="bannerScroll"></div>
+  </div>
+  <div class="section">
+    <div class="sec-title">Browse by Category</div>
+    <p class="sec-sub">Everything you need in one platform</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;">
+
+      <!-- HOME SERVICES -->
+      <div class="new-cat-card" onclick="goPage('services')">
+        <div class="cat-img-layer" style="background:linear-gradient(135deg,rgba(10,110,219,0.88),rgba(26,143,255,0.75)),url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600&q=80');"></div>
+        <div class="cat-content">
+          <div style="font-size:40px;margin-bottom:14px;">🔧</div>
+          <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;">Home Services</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;flex:1;margin-bottom:16px;">Book verified professionals — plumbers, electricians, cleaners, painters and more across SA.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px;">
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Plumbing</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Electrical</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Cleaning</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Painting</span>
+          </div>
+          <button class="cat-white-btn" style="color:#0a6edb;">Browse Services →</button>
+        </div>
+      </div>
+
+      <!-- HOLIDAY STAYS -->
+      <div class="new-cat-card" onclick="goPage('accommodation')">
+        <div class="cat-img-layer" style="background:linear-gradient(135deg,rgba(109,40,217,0.88),rgba(139,92,246,0.75)),url('https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&w=600&q=80');"></div>
+        <div class="cat-content">
+          <div style="font-size:40px;margin-bottom:14px;">🏡</div>
+          <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;">Holiday Stays</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;flex:1;margin-bottom:16px;">Find and book holiday accommodation, game lodges, beach houses and fun places across SA.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px;">
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Beach House</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Game Lodge</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Winelands</span>
+          </div>
+          <button class="cat-white-btn" style="color:#6d28d9;">Find a Stay →</button>
+        </div>
+      </div>
+
+      <!-- LOCAL SHOPS -->
+      <div class="new-cat-card" onclick="goPage('shop')">
+        <div class="cat-img-layer" style="background:linear-gradient(135deg,rgba(5,150,105,0.88),rgba(34,197,94,0.75)),url('https://images.unsplash.com/photo-1534482421-64566f976cfa?auto=format&fit=crop&w=600&q=80');"></div>
+        <div class="cat-content">
+          <div style="font-size:40px;margin-bottom:14px;">🛒</div>
+          <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;">Local Shops</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;flex:1;margin-bottom:16px;">Discover hidden-gem stores — from handmade African dresses in Khayelitsha to authentic spices in Bo-Kaap.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px;">
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">African Fashion</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Hardware</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;padding:3px 10px;border-radius:50px;">Spices</span>
+          </div>
+          <button class="cat-white-btn" style="color:#059669;">Browse Shops →</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="section" style="background:var(--bg2);">
+    <div class="sec-hdr"><div class="sec-title">Top-Rated Providers</div><a class="see-all" onclick="goPage('services')">View all →</a></div>
+    <p class="sec-sub">Verified and community-reviewed professionals</p>
+    <div class="prov-grid" id="homeProvs"></div>
+  </div>
+  <div class="section">
+    <div class="sec-hdr"><div class="sec-title">Featured Holiday Stays</div><a class="see-all" onclick="goPage('accommodation')">View all →</a></div>
+    <p class="sec-sub">Hand-picked accommodation across South Africa</p>
+    <div class="accom-grid" id="homeAccom"></div>
+  </div>
+  <div class="section" style="background:var(--bg2);">
+    <div class="sec-title">Subscription Plans for Businesses</div>
+    <p class="sec-sub">Monthly fee + platform commission. Cancel anytime. 14-day free trial.</p>
+    <div class="plans-grid">
+      <div class="plan"><div class="plan-name">Starter</div><div class="plan-price">R199<span>/month</span></div><div style="font-size:12px;color:var(--t2);margin:6px 0 14px">For individuals starting out</div><div class="feat"><span class="fck">✓</span>10 listings · 12% commission</div><div class="feat"><span class="fck">✓</span>Basic profile + messaging</div><div class="feat"><span class="fck">✓</span>14-day free trial</div><button class="plan-btn" onclick="openModal('registerModal')">Get Started</button></div>
+      <div class="plan featured"><div class="plan-badge">Most Popular</div><div class="plan-name">Professional</div><div class="plan-price">R499<span>/month</span></div><div style="font-size:12px;color:var(--t2);margin:6px 0 14px">For growing businesses</div><div class="feat"><span class="fck">✓</span>Unlimited listings · 8% commission</div><div class="feat"><span class="fck">✓</span>Featured placement + analytics</div><div class="feat"><span class="fck">✓</span>1 banner ad per month</div><button class="plan-btn" onclick="openModal('registerModal')">Get Started</button></div>
+      <div class="plan"><div class="plan-name">Business</div><div class="plan-price">R999<span>/month</span></div><div style="font-size:12px;color:var(--t2);margin:6px 0 14px">For shops and agencies</div><div class="feat"><span class="fck">✓</span>Shop setup · 5% commission</div><div class="feat"><span class="fck">✓</span>5 team accounts + API access</div><div class="feat"><span class="fck">✓</span>3 banner ads per month</div><button class="plan-btn" onclick="openModal('registerModal')">Get Started</button></div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-grid">
+      <div><div class="footer-logo">Task<span>SA</span></div><p class="footer-about">South Africa's trusted marketplace for home services, local shops and holiday accommodation. Connecting hidden-gem businesses with customers across all 9 provinces.</p></div>
+      <div class="fc"><h5>Services</h5><a onclick="goPage('services')">Browse Services</a><a onclick="goPage('services')">Plumbing</a><a onclick="goPage('services')">Cleaning</a><a onclick="goPage('services')">Electrical</a></div>
+      <div class="fc"><h5>Platform</h5><a onclick="goPage('shop')">Shop</a><a onclick="goPage('accommodation')">Holiday Stays</a><a onclick="goPage('dashboard')">Dashboard</a><a onclick="openModal('registerModal')">Register Business</a></div>
+      <div class="fc"><h5>Company</h5><a>About Us</a><a>Careers</a><a>Privacy Policy</a><a>Terms of Service</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2025 TaskSA (Pty) Ltd · hello@tasksa.co.za · +27 21 000 0000</p></div>
+  </footer>
+</div>
+
+<!-- SERVICES PAGE -->
+<div class="page" id="services">
+  <div class="cat-header">
+    <div class="breadcrumb"><a onclick="goPage('home')">Home</a> / Services</div>
+    <h2 style="font-size:24px;font-weight:900;">Home &amp; Local Services</h2>
+    <p style="color:var(--t2);font-size:13px;margin-top:5px;">Book trusted verified professionals anywhere in South Africa</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+      <input style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;min-width:160px;" placeholder="🔍 Search by name or city…" id="svcSearch" oninput="searchSvc()">
+      <select id="svcProvFilter" onchange="searchSvc()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;cursor:pointer;">
+        <option value="" selected>All Provinces</option>
+        <option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option>
+        <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
+        <option>North West</option><option>Free State</option><option>Northern Cape</option>
+      </select>
+      <select id="svcSortFilter" onchange="searchSvc()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;cursor:pointer;">
+        <option value="">Sort: Top Rated</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="newest">Newest First</option>
+      </select>
+    </div>
+    <div class="sub-filters" id="svcFilters"><button class="sfb active" onclick="filterSvc(this,'')">All Services</button></div>
+  </div>
+  <div class="section">
+    <div class="prov-grid" id="svcGrid"></div>
+    <div style="text-align:center;margin-top:24px;" id="loadMoreWrap" style="display:none;">
+      <button class="btn btn-g" id="loadMoreBtn" onclick="loadMoreSvc()">Load More Providers</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHOP PAGE -->
+<div class="page" id="shop">
+  <div class="cat-header">
+    <div class="breadcrumb" id="shopBreadcrumb"><a onclick="goPage('home')">Home</a> / Shop</div>
+    <h2 id="shopPageTitle" style="font-size:24px;font-weight:900;">Local Shop Marketplace</h2>
+    <p id="shopPageSub" style="color:var(--t2);font-size:13px;margin-top:5px;">Discover hidden-gem stores across South Africa — from Khayelitsha to Franschhoek</p>
+    <div class="sub-filters" id="shopFilters"><button class="sfb active" onclick="filterShopCat(this,'')">All Shops</button></div>
+  </div>
+  <!-- SHOPS DIRECTORY -->
+  <div id="shopsDirectory">
+    <div class="section"><div id="shopsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;"></div></div>
+  </div>
+  <!-- SHOP DETAIL -->
+  <div id="shopDetailView" style="display:none;">
+    <div style="background:var(--bg2);border-bottom:1px solid var(--bd);padding:18px 5%;display:flex;align-items:center;gap:14px;">
+      <button onclick="backToShops()" style="background:var(--surf);border:1px solid var(--bd2);color:var(--t2);padding:8px 16px;border-radius:50px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;">← Back to Shops</button>
+      <div id="shopDetailHeader" style="flex:1;"></div>
+    </div>
+    <div class="section">
+      <div style="margin-bottom:20px;" id="shopDetailInfo"></div>
+      <div class="sub-filters" id="shopDetailFilters" style="margin-bottom:18px;"></div>
+      <div class="shop-grid" id="shopProductsGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ACCOMMODATION PAGE -->
+<div class="page" id="accommodation">
+  <div class="cat-header">
+    <div class="breadcrumb"><a onclick="goPage('home')">Home</a> / Holiday Stays</div>
+    <h2 style="font-size:24px;font-weight:900;">Holiday Accommodation &amp; Fun Places</h2>
+    <p style="color:var(--t2);font-size:13px;margin-top:5px;">Book stays, fun places and parks across all 9 provinces</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+      <input style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;min-width:160px;" placeholder="🔍 Search destination…" id="acSearch" oninput="filterAccom()">
+      <select id="acProv" onchange="filterAccom()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;cursor:pointer;">
+        <option value="">All Provinces</option><option>Western Cape</option><option>KwaZulu-Natal</option><option>Gauteng</option><option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
+      </select>
+      <select id="acSort" onchange="filterAccom()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;color:var(--t);font-size:13px;outline:none;cursor:pointer;">
+        <option value="">Sort: Top Rated</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="newest">Newest First</option>
+      </select>
+    </div>
+    <div class="sub-filters" id="accomFilters"><button class="sfb active" onclick="filterAccomCat(this,'')">All Stays</button></div>
+  </div>
+  <div class="section"><div class="accom-grid" id="accomGrid"></div></div>
+</div>
+
+<!-- MESSAGES PAGE -->
+<div class="page" id="messages">
+  <div class="msg-layout">
+    <div class="conv-list">
+      <div class="conv-hdr">Messages</div>
+      <div id="convList"></div>
+    </div>
+    <div class="chat-area">
+      <div class="chat-hdr">
+        <div id="chatAv" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;background:rgba(26,143,255,.15);color:var(--blue3);">TM</div>
+        <div><div id="chatName" style="font-size:14px;font-weight:700;">Thabo Mokoena</div><div id="chatSub" style="font-size:11px;color:var(--t3);">Plumber · Online</div></div>
+      </div>
+      <div class="chat-msgs" id="chatMsgs"></div>
+      <div class="qrs" id="qrs"></div>
+      <div class="chat-inp-area">
+        <textarea class="chat-inp" id="chatInp" placeholder="Type a message…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+        <button class="send-btn" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div class="page" id="dashboard">
+  <div id="dashLock" style="display:none;text-align:center;padding:80px 20px;">
+    <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+    <h2 style="margin-bottom:8px;">Sign In Required</h2>
+    <p style="color:var(--t2);margin-bottom:24px;">Please sign in to view your dashboard</p>
+    <button class="btn btn-p" onclick="openModal('loginModal')">Sign In</button>
+  </div>
+  <div id="dashContent" style="display:none;">
+    <div class="dash-layout">
+      <div class="dash-side">
+        <div style="padding:12px;margin-bottom:8px;border-bottom:1px solid var(--bd);">
+          <div id="dashAv" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;margin-bottom:8px;"></div>
+          <div id="dashName" style="font-size:13px;font-weight:700;"></div>
+          <div id="dashRole" style="font-size:11px;color:var(--blue3);"></div>
+        </div>
+        <div class="si active" onclick="setSI(this,'dashOverview')"><span class="si-ic">📊</span>Overview</div>
+        <div class="si" onclick="setSI(this,'dashBookingsPanel')"><span class="si-ic">📋</span>My Bookings<span class="sib" id="pendBadge" style="display:none;">0</span></div>
+        <div class="si" onclick="setSI(this,'dashOrdersPanel')"><span class="si-ic">🛒</span>My Orders</div>
+        <div class="si" onclick="setSI(this,null);openModal('addListingModal')"><span class="si-ic">📝</span>Add Listing</div>
+        <div class="si" onclick="goPage('messages')"><span class="si-ic">💬</span>Messages</div>
+        <div class="si" style="margin-top:16px;border-top:1px solid var(--bd);padding-top:14px;" onclick="goPage('home')"><span class="si-ic">←</span>Back to site</div>
+      </div>
+      <div class="dash-main">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2 id="dashGreet" style="font-size:21px;font-weight:900;">Welcome 👋</h2>
+            <p id="dashSub" style="color:var(--t2);font-size:13px;margin-top:3px;"></p>
+          </div>
+          <button class="btn btn-p" onclick="openModal('addListingModal')">+ Add Listing</button>
+        </div>
+        <div class="metrics" id="dashMetrics"></div>
+        <div id="dashOverview">
+          <div class="grid2">
+            <div class="dash-card"><h4>Recent Bookings</h4><div id="dashBkList"><div style="text-align:center;padding:20px;color:var(--t3);font-size:13px;">Loading…</div></div></div>
+            <div class="dash-card"><h4>Recent Orders</h4><div id="dashOrdList"><div style="text-align:center;padding:20px;color:var(--t3);font-size:13px;">Loading…</div></div></div>
+          </div>
+        </div>
+        <div id="dashBookingsPanel" style="display:none;">
+          <div class="dash-card"><h4>All My Bookings</h4><div id="allBookingsList"></div></div>
+        </div>
+        <div id="dashOrdersPanel" style="display:none;">
+          <div class="dash-card"><h4>All My Orders</h4><div id="allOrdersList"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHECKOUT PAGE -->
+<div class="page" id="checkout">
+  <div class="cat-header">
+    <div class="breadcrumb"><a onclick="goPage('shop')">Shop</a> / Checkout</div>
+    <h2 style="font-size:24px;font-weight:900;">Secure Checkout</h2>
+    <p style="color:var(--t2);font-size:13px;margin-top:4px;">Customer collects — your order will be ready at the store</p>
+  </div>
+  <div class="section">
+    <div class="grid2" style="align-items:start;">
+      <div>
+        <div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:22px;margin-bottom:14px;">
+          <h3 style="font-size:15px;font-weight:800;margin-bottom:16px;">Your Details</h3>
+          <div class="g2">
+            <div class="field"><label>First Name</label><input id="coFirst" placeholder="First name"></div>
+            <div class="field"><label>Last Name</label><input id="coLast" placeholder="Last name"></div>
+          </div>
+          <div class="field"><label>Phone</label><input id="coPhone" placeholder="+27 82 000 0000"></div>
+          <div class="g2">
+            <div class="field"><label>City</label><input id="coCity" placeholder="City"></div>
+            <div class="field"><label>Province</label>
+              <select id="coProv"><option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option><option>Eastern Cape</option><option>Limpopo</option></select>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:22px;">
+          <h3 style="font-size:15px;font-weight:800;margin-bottom:14px;">Payment Method</h3>
+          <div style="background:rgba(26,143,255,.06);border:1px solid var(--bd2);border-radius:9px;padding:11px;margin-bottom:14px;font-size:12px;color:var(--blue3);">🔒 Secured by PayFast · PCI DSS Level 1 · 256-bit SSL</div>
+          <div class="pay-method selected" onclick="selPay(this,'CARD')"><div class="pay-icon" style="background:rgba(26,143,255,.12);">💳</div><div><div style="font-size:13px;font-weight:700;">Credit / Debit Card</div><div style="font-size:11px;color:var(--t3);">Visa, Mastercard, Amex</div></div></div>
+          <div class="pay-method" onclick="selPay(this,'EFT')"><div class="pay-icon" style="background:rgba(34,197,94,.1);">🏦</div><div><div style="font-size:13px;font-weight:700;">EFT / Bank Transfer</div><div style="font-size:11px;color:var(--t3);">All major SA banks</div></div></div>
+          <div class="pay-method" onclick="selPay(this,'CASH')"><div class="pay-icon" style="background:rgba(245,166,35,.1);">💵</div><div><div style="font-size:13px;font-weight:700;">Cash on Collection</div><div style="font-size:11px;color:var(--t3);">Pay at the store when you collect</div></div></div>
+        </div>
+        <button onclick="processCheckout()" class="btn btn-p" id="checkoutBtn" style="width:100%;margin-top:14px;padding:15px;font-size:15px;border-radius:50px;">🔒 Place Order</button>
+      </div>
+      <div>
+        <div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:20px;position:sticky;top:80px;">
+          <h3 style="font-size:15px;font-weight:800;margin-bottom:14px;">Order Summary</h3>
+          <div id="coItems"></div>
+          <div class="order-row" style="margin-top:10px;"><span style="color:var(--t2);">Subtotal</span><span id="coSub">R0</span></div>
+          <div class="order-row"><span style="color:var(--t2);">Platform fee (3%)</span><span id="coFee">R0</span></div>
+          <div class="order-total"><span>Total</span><span id="coTotal" style="color:var(--blue3);">R0</span></div>
+          <div style="background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:11px;margin-top:14px;font-size:12px;color:var(--t2);line-height:1.8;">
+            ✓ Funds held in escrow until collection<br>✓ 100% money-back guarantee<br>✓ TaskSA Buyer Protection
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════╗
+// ║  UPDATE THIS URL TO YOUR RAILWAY BACKEND                ║
+// ╚══════════════════════════════════════════════════════════╝
+const API = 'https://tasksa-backend-production.up.railway.app/api';
+
+// ── STATE ────────────────────────────────────────────────────
+const S = {
+  user: null, token: localStorage.getItem('tasksa_token') || null,
+  cart: JSON.parse(localStorage.getItem('tasksa_cart') || '[]'),
+  checkoutPay: 'CARD', regRole: 'CLIENT',
+  bookingListing: null, accomListing: null,
+  allSvc: [], allAccom: [], allProds: [], svcCats: [], shopCats: [], accomCats: [],
+  svcPage: 1, activeConv: 0,
+  convs: [
+    {ini:'TM',name:'Thabo Mokoena',role:'Plumber',bg:'rgba(26,143,255,.15)',col:'var(--blue3)',unread:true,msgs:[
+      {f:'them',t:"Hi! I saw your service request. What's the problem?"},
+      {f:'me',t:'Hi Thabo! I have a leaking geyser — it\'s been dripping for 2 days.'},
+      {f:'them',t:'I can fix that. Geyser replacement starts at R2,500. When are you available?'},
+      {f:'me',t:'This week is good. Can you do Wednesday?'},
+      {f:'them',t:'Wednesday works. I\'ll send you a formal quote via TaskSA escrow.'}
+    ]},
+    {ini:'SN',name:'Sarah Ndlovu',role:'Cleaner',bg:'rgba(34,197,94,.12)',col:'#4ade80',unread:true,msgs:[
+      {f:'them',t:'Hi! I\'m available for a full house clean. R850 for 3 bed / 2 bath.'},
+      {f:'me',t:'That sounds good. Can you do Saturday morning?'},
+      {f:'them',t:'Yes, Saturday at 8am works perfectly for me!'}
+    ]},
+    {ini:'KD',name:'Kobus du Plessis',role:'Electrician',bg:'rgba(245,166,35,.12)',col:'#fbbf24',unread:false,msgs:[
+      {f:'them',t:'Certificate of Compliance is ready. I\'ll email it today.'}
+    ]},
+    {ini:'TS',name:'TaskSA Support',role:'Support',bg:'rgba(167,139,250,.12)',col:'#c4b5fd',unread:false,msgs:[
+      {f:'them',t:'Your payout of R4,200 has been processed. Arrives in 1-2 business days.'}
+    ]}
+  ]
+};
+
+// ── COLOURS ──────────────────────────────────────────────────
+const PALS = [
+  ['rgba(26,143,255,.15)','var(--blue3)'],['rgba(34,197,94,.12)','#4ade80'],
+  ['rgba(245,166,35,.12)','#fbbf24'],['rgba(212,83,126,.12)','#f472b6'],
+  ['rgba(167,139,250,.12)','#c4b5fd'],['rgba(239,68,68,.12)','#f87171']
+];
+const ACBG = [
+  'linear-gradient(135deg,#041a3a,#1a5f8a)','linear-gradient(135deg,#1a1a0a,#4a3a0a)',
+  'linear-gradient(135deg,#1a0a0a,#6b2a2a)','linear-gradient(135deg,#0a1a0a,#1a3a1a)',
+  'linear-gradient(135deg,#041020,#0a6edb)','linear-gradient(135deg,#041a3a,#0a5f3a)',
+  'linear-gradient(135deg,#041a3a,#0a3a5f)'
+];
+const SHOP_BGS = [
+  'linear-gradient(135deg,#041a3a,#0a6edb)',
+  'linear-gradient(135deg,#1a1a0a,#4a3a0a)',
+  'linear-gradient(135deg,#2e0a1e,#8b1a5f)',
+  'linear-gradient(135deg,#0a1a0a,#1a3a1a)',
+  'linear-gradient(135deg,#2e1a0a,#b45309)',
+  'linear-gradient(135deg,#041a3a,#0a3a5f)'
+];
+const SHOP_EMS = ['🛒','🔩','🌶️','👗','🌱','🎭','🎨','🏪'];
+const EMIC = ['🏖️','🦁','🍷','🏔️','🏙️','🏄','🐋','🦏','🌿','🏕️'];
+const PMIC = ['🔧','⚡','🧹','🌿','🎨','🔨','🐕','🚛','🔩','🛠️'];
+
+function ini(name){ return (name||'??').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function R(n){ return 'R'+Math.round(n).toLocaleString('en-ZA'); }
+
+// ── API ───────────────────────────────────────────────────────
+async function api(path, method='GET', body=null){
+  const h = {'Content-Type':'application/json'};
+  if(S.token) h['Authorization'] = 'Bearer '+S.token;
+  const cfg = {method, headers:h};
+  if(body) cfg.body = JSON.stringify(body);
+  const r = await fetch(API+path, cfg);
+  const d = await r.json();
+  if(!r.ok) throw new Error(d.error||'Request failed');
+  return d;
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+function toast(msg, type){
+  const t=document.getElementById('toast');
+  t.textContent=(type==='success'?'✓ ':type==='error'?'✕ ':'')+msg;
+  t.className='show '+(type||'');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>{t.className='';},3200);
+}
+
+// ── ROUTING ──────────────────────────────────────────────────
+async function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById(id);
+  if(pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-links a[data-page]').forEach(a=>{
+    a.classList.toggle('active', a.dataset.page===id);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+  closeMobile();
+  if(id==='home') loadHome();
+  if(id==='services') loadServices();
+  if(id==='shop') loadShop();
+  if(id==='accommodation') loadAccom();
+  if(id==='messages') renderConvs();
+  if(id==='dashboard') loadDash();
+  if(id==='checkout') renderCheckout();
+}
+
+function openModal(id){ document.getElementById(id)?.classList.add('open'); }
+function closeModal(id){ document.getElementById(id)?.classList.remove('open'); }
+document.addEventListener('click', e=>{ if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open'); });
+
+let mobOpen=false;
+function toggleMobile(){ mobOpen=!mobOpen; document.getElementById('mobileMenu').style.display=mobOpen?'block':'none'; }
+function closeMobile(){ mobOpen=false; document.getElementById('mobileMenu').style.display='none'; }
+
+// ── SKELETON ─────────────────────────────────────────────────
+function skelProvs(el,n=4){ el.innerHTML=Array(n).fill('<div class="skel-card"><div class="skeleton" style="width:52px;height:52px;border-radius:50%;margin:0 auto 12px"></div><div class="skeleton" style="height:13px;margin-bottom:7px"></div><div class="skeleton" style="height:11px;width:70%;margin:0 auto 5px"></div><div class="skeleton" style="height:11px;width:50%;margin:0 auto"></div></div>').join(''); }
+function skelAccom(el,n=4){ el.innerHTML=Array(n).fill('<div class="skel-card"><div class="skeleton" style="height:155px;margin-bottom:14px;border-radius:8px"></div><div class="skeleton" style="height:14px;margin-bottom:7px"></div><div class="skeleton" style="height:11px;width:60%"></div></div>').join(''); }
+function skelProds(el,n=8){ el.innerHTML=Array(n).fill('<div class="skel-card"><div class="skeleton" style="height:95px;margin-bottom:12px;border-radius:8px"></div><div class="skeleton" style="height:12px;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:60%"></div></div>').join(''); }
+
+// ── RENDER HELPERS ───────────────────────────────────────────
+function renderProvCard(l, i){
+  var pal = PALS[i % PALS.length];
+  var bg = pal[0]; var col = pal[1];
+  var icon = (l.category && l.category.icon) ? l.category.icon : PMIC[i % PMIC.length];
+  var catName = (l.category && l.category.name) ? l.category.name : '';
+  var city = l.city || '';
+  var priceLabels = {HOURLY:'hr',DAILY:'day',PER_JOB:'job',FIXED:'fixed'};
+  var priceLabel = priceLabels[l.priceType] || '';
+  var rating = l.rating || 4.8;
+  var stars = rating >= 4.8 ? '★★★★★' : rating >= 4 ? '★★★★☆' : '★★★☆☆';
+  var priceStr = l.priceFrom ? 'From ' + R(l.priceFrom) + '/' + priceLabel : 'Get Quote';
+  return '<div class="prov-card" data-provid="'+l.id+'">'
+    + '<div class="pav" style="background:'+bg+';color:'+col+'">'+icon+'</div>'
+    + '<div class="pname">'+l.name+'</div>'
+    + '<div class="prole">'+catName+(city ? ' · '+city : '')+'</div>'
+    + '<div class="stars">'+stars+' <span style="font-size:10px;color:var(--t3)">'+l.reviewCount+' reviews</span></div>'
+    + '<div class="pprice">'+priceStr+'</div>'
+    + (l.isVerified ? '<div><span class="vbadge">✓ Verified</span></div>' : '')
+    + '</div>';
+}
+
+
+function renderAccomCard(l, i){
+  var bg = ACBG[i % ACBG.length];
+  var em = (l.category && l.category.icon) ? l.category.icon : EMIC[i % EMIC.length];
+  var catName = (l.category && l.category.name) ? l.category.name : '';
+  var city = l.city || ''; var province = l.province || '';
+  var location = city && province ? city + ', ' + province : city || province;
+  var rating = l.rating || 4.9;
+  var stars = rating >= 4.8 ? '★★★★★' : '★★★★☆';
+  return '<div class="accom-card" data-accomid="'+l.id+'">'
+    + '<div class="ac-img" style="background:'+bg+'">'+em+'</div>'
+    + '<div class="ac-info">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">'
+        + '<div class="ac-name">'+l.name+'</div>'
+        + (l.isFeatured ? '<span style="background:rgba(245,166,35,.15);color:#F5A623;font-size:9px;padding:2px 7px;border-radius:50px;font-weight:700">Featured</span>' : '')
+      + '</div>'
+      + '<div class="ac-loc">📍 '+location+'</div>'
+      + '<div style="font-size:11px;color:var(--gold);margin:4px 0">'+stars+' <span style="color:var(--t3)">'+l.reviewCount+' reviews</span></div>'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">'
+        + '<div class="ac-price">'+(l.priceFrom ? R(l.priceFrom)+'<span style="font-size:10px;color:var(--t3)">/night</span>' : 'Get Quote')+'</div>'
+        + (l.isVerified ? '<span class="vbadge">✓ Verified</span>' : '')
+      + '</div>'
+      + '<span class="ac-type">'+catName+'</span>'
+    + '</div></div>';
+}
+
+
+function renderProductCard(p, i){
+  var ems = ['🔨','🎨','🧽','🌶️','👗','🔩','🌱','🐾','📦','🎭','💡','🧴'];
+  var em = ems[i % ems.length];
+  var store = (p.listing && p.listing.name) ? p.listing.name : '';
+  return '<div class="product-card">'
+    + '<div class="prod-img">'+em+'</div>'
+    + '<div class="prod-info">'
+      + '<div class="prod-name">'+p.name+'</div>'
+      + '<div class="prod-store">'+store+'</div>'
+      + '<div class="stars" style="font-size:11px">★★★★★</div>'
+      + '<div class="prod-price">'+R(p.price)+'</div>'
+      + '<button class="add-btn" data-pid="'+p.id+'" data-pname="'+encodeURIComponent(p.name)+'" data-pstore="'+encodeURIComponent(store)+'" data-pprice="'+p.price+'" data-pem="'+em+'">Add to Cart</button>'
+    + '</div></div>';
+}
+
+function renderShopCard(s, i){
+  const bg = SHOP_BGS[i%SHOP_BGS.length];
+  const em = s.category?.icon || SHOP_EMS[i%SHOP_EMS.length];
+  const prodCount = s._count?.products || 0;
+  return '<div class="shop-listing-card" data-shopid="'+s.id+'">'+
+    '<div class="shop-banner" style="background:'+bg+'">'+em+'<span class="shop-tag">'+(s.category?.name||'Shop')+'</span></div>'+
+    '<div class="shop-info">'+
+      '<div class="shop-name">'+s.name+'</div>'+
+      '<div class="shop-loc">📍 '+s.location+'</div>'+
+      '<div class="shop-desc">'+(s.description||'').slice(0,100)+'</div>'+
+      '<div class="shop-stats">★★★★'+(s.rating>=4.8?'★':'☆')+' · '+s.reviewCount+' reviews · '+prodCount+' product'+(prodCount!==1?'s':'')+'</div>'+
+      (s.isVerified?'<div style="margin-bottom:10px"><span class="vbadge">✓ Verified</span></div>':'')+
+      '<button class="shop-browse-btn">Browse Shop →</button>'+
+    '</div></div>';
+}
+
+async function viewShop(listingId){
+  document.getElementById('shopsDirectory').style.display='none';
+  document.getElementById('shopDetailView').style.display='block';
+  var el=document.getElementById('shopFilters'); if(el) el.style.display='none';
+  var prodGrid = document.getElementById('shopProductsGrid');
+  if(!prodGrid) return;
+  prodGrid.innerHTML = Array(6).fill('<div class="skel-card"><div class="skeleton" style="height:95px;margin-bottom:12px;border-radius:8px"></div><div class="skeleton" style="height:12px;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:60%"></div></div>').join('');
+  try {
+    var results = await Promise.all([
+      api('/listings/'+listingId),
+      api('/products?listingId='+listingId)
+    ]);
+    var s = results[0].data;
+    var products = results[1];
+    S.currentShop = s;
+    var bg = SHOP_BGS[0];
+    var em = (s.category && s.category.icon) ? s.category.icon : '🏪';
+    var catName = (s.category && s.category.name) ? s.category.name : '';
+    var pt = document.getElementById('shopPageTitle');
+    var ps = document.getElementById('shopPageSub');
+    var pb = document.getElementById('shopBreadcrumb');
+    var sh = document.getElementById('shopDetailHeader');
+    var si = document.getElementById('shopDetailInfo');
+    if(pt) pt.textContent = s.name;
+    if(ps) ps.textContent = '📍 '+s.location;
+    if(pb){
+      var homeA = '<a onclick="goPage(' + String.fromCharCode(39) + 'home' + String.fromCharCode(39) + ')">Home</a>';
+      var shopA = '<a onclick="backToShops()" style="color:var(--blue3);cursor:pointer">Shop</a>';
+      pb.innerHTML = homeA + ' / ' + shopA + ' / ' + s.name;
+    }
+    if(sh) sh.innerHTML = '<div style="font-size:13px;font-weight:800">'+s.name+'</div><div style="font-size:11px;color:var(--t3)">📍 '+s.location+' · '+catName+'</div>';
+    if(si){
+      si.innerHTML = '<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px">'
+        + '<div style="width:80px;height:80px;border-radius:var(--r2);background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0">'+em+'</div>'
+        + '<div style="flex:1">'
+          + '<div style="font-family:Sora,sans-serif;font-size:20px;font-weight:800;margin-bottom:5px">'+s.name+'</div>'
+          + '<div style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:8px">'+(s.description||'')+'</div>'
+          + '<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--t3)">'
+            + '<span>📍 '+s.location+'</span>'
+            + '<span>'+s.reviewCount+' reviews</span>'
+            + (s.isVerified ? '<span class="vbadge">✓ Verified</span>' : '')
+          + '</div>'
+        + '</div></div>';
+    }
+    prodGrid.innerHTML = products.data.length
+      ? products.data.map(function(p,i){ return renderProductCard(p,i); }).join('')
+      : emptyState('📦','No products yet','This shop has not added products yet');
+  } catch(e){ prodGrid.innerHTML = emptyState('⚠️','Could not load shop',e.message); }
+}
+
+
+function backToShops(){
+  S.currentShop = null;
+  document.getElementById('shopsDirectory').style.display='block';
+  document.getElementById('shopDetailView').style.display='none';
+  var el=document.getElementById('shopFilters'); if(el) el.style.display='flex';
+  var pt=document.getElementById('shopPageTitle'); if(pt) pt.textContent='Local Shop Marketplace';
+  var ps=document.getElementById('shopPageSub'); if(ps) ps.textContent='Discover hidden-gem stores across South Africa';
+  var pb=document.getElementById('shopBreadcrumb');
+  if(pb) pb.innerHTML='<a onclick="goPage(' + String.fromCharCode(39) + 'home' + String.fromCharCode(39) + ')">Home</a> / Shop';
+}
+
+
+async function filterShop(btn, catId){ filterShopCat(btn, catId); }
+
+// ── ACCOMMODATION ─────────────────────────────────────────────
+async function loadAccom(){
+  const grid = document.getElementById('accomGrid');
+  skelAccom(grid, 6);
+  try {
+    const [listings, cats] = await Promise.all([
+      api('/listings?type=ACCOMMODATION&limit=24'),
+      api('/categories?type=ACCOMMODATION')
+    ]);
+    S.allAccom = listings.data; S.accomCats = cats.data;
+    buildAccomFilters();
+    grid.innerHTML = listings.data.map((l,i)=>renderAccomCard(l,i)).join('') || emptyState('🏡','No stays yet','Be the first host to register!');
+  } catch(e){ grid.innerHTML = emptyState('⚠️','Could not load stays',e.message); }
+}
+
+function buildAccomFilters(){
+  const el = document.getElementById('accomFilters');
+  el.innerHTML = `<button class="sfb active" onclick="filterAccomCat(this,'')">All Stays</button>` +
+    S.accomCats.map(c=>`<button class="sfb" onclick="filterAccomCat(this,'${c.id}')">${c.icon||''} ${c.name}</button>`).join('');
+}
+
+async function filterAccomCat(btn, catId){
+  document.querySelectorAll('#accomFilters .sfb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const grid = document.getElementById('accomGrid');
+  skelAccom(grid, 6);
+  try {
+    const q = catId ? `/listings?type=ACCOMMODATION&categoryId=${catId}` : '/listings?type=ACCOMMODATION&limit=24';
+    const r = await api(q);
+    grid.innerHTML = r.data.map((l,i)=>renderAccomCard(l,i)).join('') || emptyState('🏡','No stays in this category');
+  } catch(e){ grid.innerHTML = emptyState('⚠️','Filter failed',e.message); }
+}
+
+function filterAccom(){
+  const search = (document.getElementById('acSearch')?.value||'').toLowerCase();
+  const prov = document.getElementById('acProv')?.value||'';
+  const sort = document.getElementById('acSort')?.value||'';
+  const grid = document.getElementById('accomGrid');
+  let filtered = S.allAccom.filter(l=>{
+    const ms = !search || l.name.toLowerCase().includes(search) || l.location.toLowerCase().includes(search) || (l.province||'').toLowerCase().includes(search);
+    const mp = !prov || l.province === prov;
+    return ms && mp;
+  });
+  if(sort==='price_asc') filtered.sort((a,b)=>(a.priceFrom||0)-(b.priceFrom||0));
+  else if(sort==='price_desc') filtered.sort((a,b)=>(b.priceFrom||0)-(a.priceFrom||0));
+  grid.innerHTML = filtered.map((l,i)=>renderAccomCard(l,i)).join('') || emptyState('🏡','No stays match your search');
+}
+
+// ── BOOKING (SERVICES) ────────────────────────────────────────
+async function openBookModal(listingId){
+  if(!S.user){ openModal('loginModal'); toast('Please sign in to make a booking','error'); return; }
+  try {
+    const r = await api('/listings/'+listingId);
+    S.bookingListing = r.data;
+    const l = r.data;
+    const priceLabel = {HOURLY:'per hour',DAILY:'per day',PER_JOB:'per job',FIXED:'fixed'}[l.priceType]||'';
+    document.getElementById('bkCard').innerHTML = `
+      <div style="font-size:15px;font-weight:800;margin-bottom:4px">${l.name}</div>
+      <div style="font-size:12px;color:var(--t2)">${l.category?.name} · ${l.city}, ${l.province}</div>
+      ${l.priceFrom?`<div style="font-size:18px;font-weight:800;color:var(--blue3);margin-top:6px">${R(l.priceFrom)} <span style="font-size:12px;color:var(--t3)">${priceLabel}</span></div>`:''}`;
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+    document.getElementById('bkDate').min = new Date().toISOString().split('T')[0];
+    document.getElementById('bkDate').value = tomorrow.toISOString().split('T')[0];
+    openModal('bookingModal');
+  } catch(e){ toast('Could not load listing: '+e.message,'error'); }
+}
+
+async function submitBooking(){
+  if(!S.user){ openModal('loginModal'); return; }
+  const date = document.getElementById('bkDate').value;
+  const time = document.getElementById('bkTime').value || '09:00';
+  const payMethod = document.getElementById('bkPayment').value;
+  const notes = document.getElementById('bkNotes').value;
+  if(!date){ toast('Please select a date','error'); return; }
+  if(!S.bookingListing){ toast('No listing selected','error'); return; }
+  const btn = document.getElementById('bkBtn');
+  btn.textContent='Booking…'; btn.disabled=true;
+  try {
+    const scheduledAt = new Date(date+'T'+time+':00').toISOString();
+    await api('/bookings','POST',{
+      listingId: S.bookingListing.id, scheduledAt, paymentMethod: payMethod,
+      notes, totalAmount: S.bookingListing.priceFrom || 0
+    });
+    closeModal('bookingModal');
+    toast(`Booking confirmed! ${S.bookingListing.name} on ${new Date(scheduledAt).toLocaleDateString('en-ZA')}`, 'success');
+    document.getElementById('bkNotes').value='';
+  } catch(e){ toast('Booking failed: '+e.message,'error'); }
+  btn.textContent='Confirm Booking'; btn.disabled=false;
+}
+
+// ── BOOKING (ACCOMMODATION) ───────────────────────────────────
+async function openAccomModal(listingId){
+  if(!S.user){ openModal('loginModal'); toast('Please sign in to book accommodation','error'); return; }
+  try {
+    const r = await api('/listings/'+listingId);
+    S.accomListing = r.data;
+    const l = r.data;
+    document.getElementById('accomTitle').textContent = l.name;
+    document.getElementById('accomCard').innerHTML = `
+      <div style="font-size:13px;color:var(--t2);margin-bottom:8px">📍 ${l.location} · ${l.category?.name||'Accommodation'}</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:4px">${l.description?.slice(0,120)}...</div>
+      ${l.priceFrom?`<div style="font-size:16px;font-weight:800;color:var(--blue3);margin-top:8px">${R(l.priceFrom)} <span style="font-size:12px;color:var(--t3)">per night</span></div>`:''}`;
+    const today = new Date().toISOString().split('T')[0];
+    const nextWeek = new Date(Date.now()+7*86400000).toISOString().split('T')[0];
+    document.getElementById('checkin').min = today; document.getElementById('checkin').value = today;
+    document.getElementById('checkout').value = nextWeek;
+    calcAccomPrice();
+    openModal('accomModal');
+  } catch(e){ toast('Could not load accommodation: '+e.message,'error'); }
+}
+
+function calcAccomPrice(){
+  const l = S.accomListing; if(!l) return;
+  const cin = document.getElementById('checkin').value;
+  const cout = document.getElementById('checkout').value;
+  const el = document.getElementById('accomPrice');
+  if(!cin||!cout){ el.textContent='Select dates to see pricing'; return; }
+  const nights = Math.max(1, Math.round((new Date(cout)-new Date(cin))/86400000));
+  const sub = (l.priceFrom||0)*nights;
+  const fee = Math.round(sub*0.05);
+  el.innerHTML = `<div style="display:flex;flex-direction:column;gap:5px">
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">${R(l.priceFrom||0)} × ${nights} night${nights!==1?'s':''}</span><span>${R(sub)}</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Service fee (5%)</span><span>${R(fee)}</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;padding-top:7px;border-top:1px solid var(--bd)"><span>Total</span><span style="color:var(--blue3)">${R(sub+fee)}</span></div>
+  </div>`;
+}
+
+async function submitAccomBooking(){
+  if(!S.user||!S.accomListing){ return; }
+  const cin = document.getElementById('checkin').value;
+  const cout = document.getElementById('checkout').value;
+  const payMethod = document.getElementById('accomPayment').value;
+  const notes = document.getElementById('accomNotes').value;
+  if(!cin||!cout){ toast('Select check-in and check-out dates','error'); return; }
+  if(new Date(cout)<=new Date(cin)){ toast('Check-out must be after check-in','error'); return; }
+  const btn = document.getElementById('accomBtn');
+  btn.textContent='Booking…'; btn.disabled=true;
+  const nights = Math.max(1, Math.round((new Date(cout)-new Date(cin))/86400000));
+  const total = (S.accomListing.priceFrom||0)*nights*1.05;
+  try {
+    await api('/bookings','POST',{
+      listingId: S.accomListing.id,
+      scheduledAt: new Date(cin+'T14:00:00').toISOString(),
+      checkoutAt: new Date(cout+'T11:00:00').toISOString(),
+      paymentMethod: payMethod, notes, totalAmount: Math.round(total)
+    });
+    closeModal('accomModal');
+    toast(`🏡 ${S.accomListing.name} booked! Confirmation will be sent to your email.`, 'success');
+    document.getElementById('accomNotes').value='';
+  } catch(e){ toast('Booking failed: '+e.message,'error'); }
+  btn.textContent='Confirm Booking'; btn.disabled=false;
+}
+
+// ── CART ─────────────────────────────────────────────────────
+function addToCart(id, name, store, price, icon){
+  const ex = S.cart.find(x=>x.id===id);
+  if(ex) ex.qty++;
+  else S.cart.push({id,name,store,price,icon,qty:1});
+  saveCart(); renderCartUI(); openCartSidebar();
+  toast(name+' added to cart!','success');
+}
+function changeQty(id, d){
+  const item = S.cart.find(x=>x.id===id); if(!item) return;
+  item.qty+=d; if(item.qty<=0) S.cart=S.cart.filter(x=>x.id!==id);
+  saveCart(); renderCartUI();
+}
+function saveCart(){ localStorage.setItem('tasksa_cart', JSON.stringify(S.cart)); }
+function openCartSidebar(){ document.getElementById('cartSidebar').classList.add('open'); document.getElementById('cartOverlay').classList.add('open'); }
+function closeCart(){ document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('open'); }
+
+function renderCartUI(){
+  const sub = S.cart.reduce((s,x)=>s+x.price*x.qty,0);
+  const cnt = S.cart.reduce((s,x)=>s+x.qty,0);
+  document.getElementById('cartCnt').textContent=cnt;
+  const body = document.getElementById('cartBody');
+  const foot = document.getElementById('cartFoot');
+  if(!S.cart.length){
+    body.innerHTML='<div class="empty-cart"><div style="font-size:42px;margin-bottom:12px">🛒</div><p style="font-size:14px">Your cart is empty</p><p style="font-size:12px;color:var(--t3);margin-top:4px">Add items from the Shop</p></div>';
+    foot.style.display='none'; return;
+  }
+  body.innerHTML=S.cart.map(x=>`<div class="cart-item">
+    <div class="ci-icon">${x.icon}</div>
+    <div style="flex:1;min-width:0">
+      <div class="ci-name">${x.name}</div>
+      <div class="ci-store">${x.store}</div>
+      <div class="ci-price">${R(x.price*x.qty)}</div>
+      <div class="qty-row">
+        <button class="qty-btn" onclick="changeQty('${x.id}',-1)">−</button>
+        <span class="qty-n">${x.qty}</span>
+        <button class="qty-btn" onclick="changeQty('${x.id}',1)">+</button>
+        <button class="rm-btn" onclick="changeQty('${x.id}',-999)">Remove</button>
+      </div>
+    </div>
+  </div>`).join('');
+  const fee = Math.round(sub*0.03);
+  document.getElementById('cartSub').textContent=R(sub);
+  document.getElementById('cartFee').textContent=R(fee);
+  document.getElementById('cartTotal').textContent=R(sub+fee);
+  foot.style.display='block';
+}
+
+function renderCheckout(){
+  const sub = S.cart.reduce((s,x)=>s+x.price*x.qty,0);
+  const fee = Math.round(sub*0.03);
+  document.getElementById('coItems').innerHTML = !S.cart.length
+    ? '<p style="font-size:13px;color:var(--t3)">No items in cart</p>'
+    : S.cart.map(x=>`<div class="order-row">${x.icon} ${x.name} ×${x.qty}<span>${R(x.price*x.qty)}</span></div>`).join('');
+  document.getElementById('coSub').textContent=R(sub);
+  document.getElementById('coFee').textContent=R(fee);
+  document.getElementById('coTotal').textContent=R(sub+fee);
+  if(S.user){
+    document.getElementById('coFirst').value=S.user.name?.split(' ')[0]||'';
+    document.getElementById('coLast').value=S.user.name?.split(' ').slice(1).join(' ')||'';
+    document.getElementById('coPhone').value=S.user.phone||'';
+    document.getElementById('coCity').value=S.user.city||'';
+  }
+}
+
+function selPay(el, method){
+  document.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('selected'));
+  el.classList.add('selected'); S.checkoutPay=method;
+}
+
+async function processCheckout(){
+  if(!S.user){ openModal('loginModal'); toast('Please sign in to checkout','error'); return; }
+  if(!S.cart.length){ toast('Your cart is empty','error'); return; }
+  const btn = document.getElementById('checkoutBtn');
+  btn.textContent='Processing…'; btn.disabled=true;
+  try {
+    const items = S.cart.map(x=>({productId:x.id, quantity:x.qty}));
+    const r = await api('/orders','POST',{ items, paymentMethod: S.checkoutPay });
+    S.cart=[]; saveCart(); renderCartUI();
+    closeCart(); goPage('home');
+    toast(`Order placed! Collection code: ${r.data.collectionCode}`, 'success');
+  } catch(e){ toast('Order failed: '+e.message,'error'); }
+  btn.textContent='🔒 Place Order'; btn.disabled=false;
+}
+
+// ── AUTH ──────────────────────────────────────────────────────
+function fillLogin(e,p){ document.getElementById('loginEmail').value=e; document.getElementById('loginPass').value=p; }
+
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  if(!email||!pass){ toast('Email and password required','error'); return; }
+  const btn=document.getElementById('loginBtn');
+  btn.textContent='Signing in…'; btn.disabled=true;
+  try {
+    const r = await api('/auth/login','POST',{email,password:pass});
+    S.token=r.token; S.user=r.data;
+    localStorage.setItem('tasksa_token',r.token);
+    closeModal('loginModal'); updateNav();
+    toast('Welcome back, '+r.data.name.split(' ')[0]+'! 👋','success');
+    if(['PROVIDER','SHOP_OWNER','HOST','ADMIN'].includes(r.data.role)) goPage('dashboard');
+  } catch(e){ toast(e.message,'error'); }
+  btn.textContent='Sign In'; btn.disabled=false;
+}
+
+function setRole(role){
+  S.regRole=role;
+  document.querySelectorAll('#roleTabs .dpill').forEach(b=>{
+    const isActive = b.dataset.role===role;
+    b.className = isActive ? 'dpill dp-b' : 'dpill';
+    if(!isActive){ b.style.background='var(--surf)'; b.style.borderColor='var(--bd)'; b.style.color='var(--t2)'; }
+    else{ b.style.background=''; b.style.borderColor=''; b.style.color=''; }
+  });
+}
+
+async function doRegister(){
+  const name=document.getElementById('regName').value.trim();
+  const phone=document.getElementById('regPhone').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const province=document.getElementById('regProv').value;
+  const city=document.getElementById('regCity').value.trim();
+  const pass=document.getElementById('regPass').value;
+  if(!name||!email||!pass){ toast('Name, email and password required','error'); return; }
+  if(pass.length<8){ toast('Password must be at least 8 characters','error'); return; }
+  const btn=document.getElementById('regBtn');
+  btn.textContent='Creating account…'; btn.disabled=true;
+  try {
+    const r = await api('/auth/register','POST',{name,phone,email,password:pass,role:S.regRole,province,city});
+    S.token=r.token; S.user=r.data;
+    localStorage.setItem('tasksa_token',r.token);
+    closeModal('registerModal'); updateNav();
+    toast('Welcome to TaskSA, '+r.data.name.split(' ')[0]+'! 🎉','success');
+    if(['PROVIDER','SHOP_OWNER','HOST'].includes(r.data.role)) goPage('dashboard');
+  } catch(e){ toast(e.message,'error'); }
+  btn.textContent='Create Account'; btn.disabled=false;
+}
+
+function doLogout(){
+  S.token=null; S.user=null;
+  localStorage.removeItem('tasksa_token');
+  updateNav(); goPage('home');
+  toast('Signed out successfully','success');
+}
+
+function updateNav(){
+  const si=document.getElementById('navSignIn');
+  const sr=document.getElementById('navReg');
+  const so=document.getElementById('navOut');
+  const nu=document.getElementById('navUser');
+  const ms=document.getElementById('mobileSignIn');
+  const mr=document.getElementById('mobileRegister');
+  const mo=document.getElementById('mobileSignOut');
+  if(S.user){
+    si.style.display='none'; sr.style.display='none'; so.style.display='inline'; nu.style.display='inline';
+    nu.textContent='👤 '+S.user.name.split(' ')[0];
+    if(ms) ms.style.display='none'; if(mr) mr.style.display='none'; if(mo) mo.style.display='block';
+  } else {
+    si.style.display='inline'; sr.style.display='inline'; so.style.display='none'; nu.style.display='none';
+    if(ms) ms.style.display='block'; if(mr) mr.style.display='block'; if(mo) mo.style.display='none';
+  }
+}
+
+// ── LISTING MODAL ─────────────────────────────────────────────
+async function loadCatsForModal(){
+  try {
+    const r = await api('/categories');
+    const sel = document.getElementById('newCat');
+    if(r.data && r.data.length){
+      sel.innerHTML = r.data.map(c=>`<option value="${c.id}">${c.type==='SERVICE'?'🔧':c.type==='ACCOMMODATION'?'🏡':'🛒'} ${c.name}</option>`).join('');
+    } else {
+      sel.innerHTML = '<option value="">No categories found — check API connection</option>';
+    }
+  } catch(e){
+    console.error('loadCatsForModal failed:', e.message);
+    const sel = document.getElementById('newCat');
+    sel.innerHTML = '<option value="">Cannot reach API — check API_BASE URL</option>';
+    // Show the api warning banner if visible
+    const warn = document.getElementById('apiWarn');
+    if(warn) warn.classList.add('show');
+  }
+}
+
+async function submitListing(){
+  if(!S.user){ openModal('loginModal'); return; }
+  const catId=document.getElementById('newCat').value;
+  const title=document.getElementById('newTitle').value.trim();
+  const desc=document.getElementById('newDesc').value.trim();
+  const prov=document.getElementById('newProv').value;
+  const city=document.getElementById('newCity').value.trim();
+  const loc=document.getElementById('newLoc').value.trim()||city+', '+prov;
+  const price=document.getElementById('newPrice').value;
+  const priceType=document.getElementById('newPriceType').value;
+  if(!catId||!title||!desc||!prov||!city){ toast('Please fill in all required fields','error'); return; }
+  const btn=document.getElementById('addListBtn');
+  btn.textContent='Publishing…'; btn.disabled=true;
+  try {
+    await api('/listings','POST',{categoryId:catId,name:title,description:desc,location:loc,province:prov,city,priceFrom:price?parseFloat(price):null,priceType});
+    closeModal('addListingModal');
+    toast(`Listing "${title}" published successfully!`,'success');
+    document.getElementById('newTitle').value=''; document.getElementById('newDesc').value='';
+    document.getElementById('newPrice').value=''; document.getElementById('newLoc').value='';
+  } catch(e){ toast('Failed to create listing: '+e.message,'error'); }
+  btn.textContent='Publish Listing'; btn.disabled=false;
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────
+async function loadDash(){
+  if(!S.user){ document.getElementById('dashLock').style.display='block'; document.getElementById('dashContent').style.display='none'; return; }
+  document.getElementById('dashLock').style.display='none'; document.getElementById('dashContent').style.display='block';
+  const first = S.user.name.split(' ')[0];
+  document.getElementById('dashAv').textContent=ini(S.user.name);
+  document.getElementById('dashName').textContent=S.user.name;
+  document.getElementById('dashRole').textContent=S.user.role.replace('_',' ');
+  document.getElementById('dashGreet').textContent='Good day, '+first+' 👋';
+  document.getElementById('dashSub').textContent=S.user.role==='CLIENT'?'Manage your bookings and orders':'Manage your listings, bookings and earnings';
+
+  try {
+    const stats = await api('/users/dashboard-stats');
+    const d = stats.data;
+    if(['PROVIDER','SHOP_OWNER','HOST'].includes(S.user.role)){
+      document.getElementById('dashMetrics').innerHTML=`
+        <div class="metric"><div class="ml">Total Listings</div><div class="mv">${d.totalListings||0}</div></div>
+        <div class="metric"><div class="ml">Total Bookings</div><div class="mv">${d.totalBookings||0}</div></div>
+        <div class="metric"><div class="ml">Pending</div><div class="mv">${d.pendingBookings||0}</div></div>
+        <div class="metric"><div class="ml">Earnings</div><div class="mv">${R(d.totalEarnings||0)}</div><div class="mc">After 8% commission</div></div>`;
+      if(d.pendingBookings>0){ const b=document.getElementById('pendBadge'); b.textContent=d.pendingBookings; b.style.display='inline'; }
+    } else {
+      document.getElementById('dashMetrics').innerHTML=`
+        <div class="metric"><div class="ml">My Bookings</div><div class="mv">${d.totalBookings||0}</div></div>
+        <div class="metric"><div class="ml">My Orders</div><div class="mv">${d.totalOrders||0}</div></div>`;
+    }
+  } catch(e){ document.getElementById('dashMetrics').innerHTML=''; }
+
+  loadDashBookings(); loadDashOrders();
+}
+
+async function loadDashBookings(){
+  const el = document.getElementById('dashBkList');
+  const el2 = document.getElementById('allBookingsList');
+  try {
+    const r = await api('/bookings/mine');
+    const bks = r.data.slice(0,4);
+    const full = r.data;
+    const html = full.map(b=>{
+      const name = S.user.role==='CLIENT' ? b.listing?.name : b.client?.name;
+      const desc = S.user.role==='CLIENT' ? (b.listing?.category?.name||'')+' · '+new Date(b.scheduledAt).toLocaleDateString('en-ZA') : new Date(b.scheduledAt).toLocaleDateString('en-ZA');
+      const stMap={'PENDING':'s-pend','CONFIRMED':'s-ok','COMPLETED':'s-done','CANCELLED':'s-cancel','IN_PROGRESS':'s-ok'};
+      return `<div class="bk-item"><div class="bkav" style="background:rgba(26,143,255,.15);color:var(--blue3)">${ini(name||'?')}</div>
+        <div style="flex:1"><div class="bkname">${name||'—'}</div><div class="bkdesc">${desc}</div></div>
+        <span class="bkst ${stMap[b.status]||'s-pend'}">${b.status}</span></div>`;
+    }).join('');
+    el.innerHTML = bks.map(b=>{
+      const name = S.user.role==='CLIENT' ? b.listing?.name : b.client?.name;
+      const desc = new Date(b.scheduledAt).toLocaleDateString('en-ZA');
+      const stMap={'PENDING':'s-pend','CONFIRMED':'s-ok','COMPLETED':'s-done','CANCELLED':'s-cancel','IN_PROGRESS':'s-ok'};
+      return `<div class="bk-item"><div class="bkav" style="background:rgba(26,143,255,.15);color:var(--blue3)">${ini(name||'?')}</div>
+        <div style="flex:1"><div class="bkname">${name||'—'}</div><div class="bkdesc">${desc}</div></div>
+        <span class="bkst ${stMap[b.status]||'s-pend'}">${b.status}</span></div>`;
+    }).join('') || '<div style="color:var(--t3);font-size:13px;padding:10px">No bookings yet</div>';
+    if(el2) el2.innerHTML = html || '<div style="color:var(--t3);font-size:13px;padding:10px">No bookings yet</div>';
+  } catch(e){ el.innerHTML='<div style="color:var(--t3);font-size:13px;padding:10px">Could not load bookings</div>'; }
+}
+
+async function loadDashOrders(){
+  const el = document.getElementById('dashOrdList');
+  const el2 = document.getElementById('allOrdersList');
+  try {
+    const r = await api('/orders/mine');
+    const html = r.data.map(o=>{
+      const stMap={'PENDING':'s-pend','CONFIRMED':'s-ok','READY_FOR_COLLECTION':'s-ok','COLLECTED':'s-done','CANCELLED':'s-cancel'};
+      const itemCount = o.items?.length||0;
+      return `<div class="bk-item"><div class="bkav" style="background:rgba(34,197,94,.12);color:#4ade80">📦</div>
+        <div style="flex:1"><div class="bkname">Order ${o.collectionCode||o.id.slice(-6)}</div><div class="bkdesc">${itemCount} item${itemCount!==1?'s':''} · ${R(o.totalAmount)}</div></div>
+        <span class="bkst ${stMap[o.status]||'s-pend'}">${o.status.replace('_',' ')}</span></div>`;
+    }).join('') || '<div style="color:var(--t3);font-size:13px;padding:10px">No orders yet</div>';
+    el.innerHTML = html;
+    if(el2) el2.innerHTML = html;
+  } catch(e){ el.innerHTML='<div style="color:var(--t3);font-size:13px;padding:10px">Could not load orders</div>'; }
+}
+
+function setSI(el, panelId){
+  document.querySelectorAll('.si').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  ['dashOverview','dashBookingsPanel','dashOrdersPanel'].forEach(id=>{
+    const p=document.getElementById(id); if(p) p.style.display='none';
+  });
+  if(panelId){ const p=document.getElementById(panelId); if(p) p.style.display='block'; }
+}
+
+// ── MESSAGES ─────────────────────────────────────────────────
+function renderConvs(){
+  const el = document.getElementById('convList');
+  el.innerHTML = S.convs.map((c,i)=>`<div class="conv-item${i===S.activeConv?' active-conv':''}" onclick="switchConv(${i})">
+    <div class="cav" style="background:${c.bg};color:${c.col}">${c.ini}</div>
+    <div style="flex:1;min-width:0"><div class="cname">${c.name}</div><div class="cprev">${c.msgs[c.msgs.length-1]?.t||''}</div></div>
+    ${c.unread?'<div class="udot"></div>':''}
+  </div>`).join('');
+  renderMsgs();
+}
+
+function switchConv(i){
+  S.activeConv=i; S.convs[i].unread=false; renderConvs();
+  const c=S.convs[i];
+  document.getElementById('chatAv').textContent=c.ini;
+  document.getElementById('chatAv').style.background=c.bg;
+  document.getElementById('chatAv').style.color=c.col;
+  document.getElementById('chatName').textContent=c.name;
+  document.getElementById('chatSub').textContent=c.role+' · Online';
+}
+
+function renderMsgs(){
+  const area=document.getElementById('chatMsgs');
+  const msgs=S.convs[S.activeConv]?.msgs||[];
+  area.innerHTML=msgs.map(m=>`<div class="bubble ${m.f==='me'?'sent':'recv'}">${m.t}</div>`).join('');
+  area.scrollTop=area.scrollHeight;
+  document.getElementById('qrs').innerHTML=['Sounds good!','When are you available?','Can you send a quote?','I will confirm shortly.']
+    .map(q=>`<div class="qr" onclick="fillQR('${q}')">${q}</div>`).join('');
+}
+
+function sendMsg(){
+  const inp=document.getElementById('chatInp');
+  const text=(inp.value||'').trim(); if(!text) return;
+  S.convs[S.activeConv].msgs.push({f:'me',t:text});
+  S.convs[S.activeConv].unread=false;
+  inp.value=''; renderConvs();
+  setTimeout(()=>{
+    const replies=['Got it, I\'ll check my schedule.','Sounds good!','Thanks for the message.','Let me get back to you shortly.'];
+    S.convs[S.activeConv].msgs.push({f:'them',t:replies[Math.floor(Math.random()*replies.length)]});
+    renderConvs();
+  },1200);
+}
+
+function fillQR(text){ document.getElementById('chatInp').value=text; sendMsg(); }
+
+// ── HERO SEARCH ───────────────────────────────────────────────
+function doHeroSearch(){
+  const q=(document.getElementById('heroSearch').value||'').toLowerCase();
+  if(q.includes('stay')||q.includes('holiday')||q.includes('accom')||q.includes('lodge')||q.includes('house')) goPage('accommodation');
+  else if(q.includes('shop')||q.includes('buy')||q.includes('product')||q.includes('spice')||q.includes('dress')) goPage('shop');
+  else goPage('services');
+}
+
+// ── EMPTY STATE ───────────────────────────────────────────────
+function emptyState(icon, title, msg=''){
+  return `<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">${icon}</div><h3>${title}</h3>${msg?`<p>${msg}</p>`:''}</div>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+async function checkApiConnection(){
+  try {
+    const r = await fetch(API+'/health');
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    console.log('✅ API connected:', d.service);
+    return true;
+  } catch(e){
+    console.error('❌ API unreachable:', e.message);
+    const w = document.getElementById('apiWarn');
+    if(w){
+      w.style.cssText='background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:12px 18px;margin:12px 5%;font-size:13px;color:#f87171;display:block;line-height:1.7;';
+      w.innerHTML='⚠️ <strong>Cannot connect to backend.</strong> Please check your internet connection and try again.';
+    }
+    return false;
+  }
+}
+
+// Event delegation for all dynamic card clicks
+document.addEventListener('click', function(e){
+  var shopCard = e.target.closest('[data-shopid]');
+  if(shopCard){ viewShop(shopCard.dataset.shopid); return; }
+  var provCard = e.target.closest('[data-provid]');
+  if(provCard){ openBookModal(provCard.dataset.provid); return; }
+  var accomCard = e.target.closest('[data-accomid]');
+  if(accomCard){ openBookModal(accomCard.dataset.accomid); return; }
+});
+
+// Event delegation for cart buttons - avoids inline onclick quote issues
+document.addEventListener('click', function(e){
+  if(e.target.classList.contains('add-btn') && e.target.dataset.pid){
+    const d = e.target.dataset;
+    addToCart(d.pid, decodeURIComponent(d.pname), decodeURIComponent(d.pstore), parseFloat(d.pprice), d.pem);
+  }
+});
+
+async function init(){
+  renderCartUI();
+  // Check API connection first
+  const connected = await checkApiConnection();
+  // Restore session if token exists
+  if(S.token){
+    try {
+      const r = await api('/auth/me');
+      S.user = r.data; updateNav();
+    } catch(e){
+      S.token=null;
+      localStorage.removeItem('tasksa_token');
+    }
+  }
+  await loadHome();
+  if(connected) await loadCatsForModal();
+}
+
+init();
+
+function buildShopCatFilters(){
+  var el = document.getElementById('shopFilters');
+  if(!el) return;
+  var btns = '<button class="sfb active" data-catid="">All Shops</button>';
+  S.shopCats.forEach(function(c){
+    btns += '<button class="sfb" data-catid="'+c.id+'">'+(c.icon||'')+' '+c.name+'</button>';
+  });
+  el.innerHTML = btns;
+  el.querySelectorAll('.sfb').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      el.querySelectorAll('.sfb').forEach(function(b){ b.classList.remove('active'); });
+      this.classList.add('active');
+      filterShopCatById(this.dataset.catid);
+    });
+  });
+}
+
+async function filterShopCatById(catId){
+  var grid = document.getElementById('shopsGrid');
+  if(!grid) return;
+  try {
+    var q = catId ? '/listings?type=SHOP&categoryId='+catId : '/listings?type=SHOP&limit=40';
+    var r = await api(q);
+    grid.innerHTML = r.data.map(function(s,i){ return renderShopCard(s,i); }).join('') || emptyState('🛒','No shops in this category');
+  } catch(e){ grid.innerHTML = emptyState('⚠️','Filter failed',e.message); }
+}
+
+async function loadShop(){
+  document.getElementById('shopsDirectory').style.display='block';
+  document.getElementById('shopDetailView').style.display='none';
+  var pt=document.getElementById('shopPageTitle'); if(pt) pt.textContent='Local Shop Marketplace';
+  var ps=document.getElementById('shopPageSub'); if(ps) ps.textContent='Discover hidden-gem stores across South Africa — from Khayelitsha to Franschhoek';
+  var fl=document.getElementById('shopFilters'); if(fl) fl.style.display='flex';
+  var grid = document.getElementById('shopsGrid');
+  if(!grid) return;
+  grid.innerHTML = Array(6).fill('<div class="skel-card"><div class="skeleton" style="height:140px;margin-bottom:14px;border-radius:8px"></div><div class="skeleton" style="height:15px;margin-bottom:7px"></div><div class="skeleton" style="height:12px;width:60%"></div></div>').join('');
+  try {
+    var results = await Promise.all([
+      api('/listings?type=SHOP&limit=40'),
+      api('/categories?type=SHOP')
+    ]);
+    var shops = results[0];
+    var cats = results[1];
+    S.shopCats = cats.data;
+    buildShopCatFilters();
+    grid.innerHTML = shops.data.map(function(s,i){ return renderShopCard(s,i); }).join('') || emptyState('🛒','No shops yet','Shops are being onboarded!');
+  } catch(e){ grid.innerHTML = emptyState('⚠️','Could not load shops',e.message); }
+}
+
+
+// ── HOME ─────────────────────────────────────────────────────────────
+async function loadHome(){
+  try {
+    var r = await api('/listings?limit=4&type=SERVICE&sort=rating');
+    var provGrid = document.getElementById('provGrid');
+    if(provGrid){
+      provGrid.innerHTML = r.data.map(function(l,i){ return renderProvCard(l,i); }).join('') 
+        || '<p style="color:var(--t3);font-size:13px">No providers yet</p>';
+      attachProvCardListeners();
+    }
+  } catch(e){ console.error('loadHome providers:', e.message); }
+  try {
+    var r2 = await api('/listings?limit=4&type=ACCOMMODATION&sort=rating');
+    var stayGrid = document.getElementById('stayGrid');
+    if(stayGrid){
+      stayGrid.innerHTML = r2.data.map(function(l,i){ return renderAccomCard(l,i); }).join('')
+        || '<p style="color:var(--t3);font-size:13px">No stays yet</p>';
+      attachAccomCardListeners();
+    }
+  } catch(e){ console.error('loadHome stays:', e.message); }
+}
+
+// ── SERVICES ──────────────────────────────────────────────────────────
+async function loadServices(){
+  var grid = document.getElementById('svcGrid');
+  if(!grid) return;
+  grid.innerHTML = Array(8).fill('<div class="skel-card"><div class="skeleton" style="height:80px;margin-bottom:12px;border-radius:50%"></div><div class="skeleton" style="height:14px;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:70%"></div></div>').join('');
+  try {
+    var results = await Promise.all([
+      api('/listings?type=SERVICE&limit=24'),
+      api('/categories?type=SERVICE')
+    ]);
+    S.allSvcs = results[0].data;
+    S.svcCats = results[1].data;
+    buildSvcFilters();
+    renderSvcGrid(S.allSvcs);
+  } catch(e){ grid.innerHTML = emptyState('⚠️','Could not load services',e.message); }
+}
+
+function buildSvcFilters(){
+  var el = document.getElementById('svcFilters');
+  if(!el) return;
+  var btns = '<button class="sfb active" data-catid="">All Services</button>';
+  S.svcCats.forEach(function(c){
+    btns += '<button class="sfb" data-catid="'+c.id+'">'+(c.icon||'')+' '+c.name+'</button>';
+  });
+  el.innerHTML = btns;
+  el.querySelectorAll('.sfb').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      el.querySelectorAll('.sfb').forEach(function(b){ b.classList.remove('active'); });
+      this.classList.add('active');
+      filterSvcByCat(this.dataset.catid);
+    });
+  });
+}
+
+async function filterSvcByCat(catId){
+  var grid = document.getElementById('svcGrid');
+  if(!grid) return;
+  try {
+    var q = catId ? '/listings?type=SERVICE&categoryId='+catId : '/listings?type=SERVICE&limit=24';
+    var r = await api(q);
+    renderSvcGrid(r.data);
+  } catch(e){ grid.innerHTML = emptyState('⚠️','Filter failed',e.message); }
+}
+
+async function searchSvc(){
+  var search = (document.getElementById('svcSearch') ? document.getElementById('svcSearch').value : '') || '';
+  var prov = (document.getElementById('svcProvFilter') ? document.getElementById('svcProvFilter').value : '') || '';
+  var sort = (document.getElementById('svcSortFilter') ? document.getElementById('svcSortFilter').value : '') || '';
+  var grid = document.getElementById('svcGrid');
+  if(!grid) return;
+  try {
+    var q = '/listings?type=SERVICE&limit=24';
+    if(search) q += '&search=' + encodeURIComponent(search);
+    if(prov) q += '&province=' + encodeURIComponent(prov);
+    var r = await api(q);
+    var data = r.data.slice();
+    if(sort === 'price_asc') data.sort(function(a,b){ return (a.priceFrom||0)-(b.priceFrom||0); });
+    else if(sort === 'price_desc') data.sort(function(a,b){ return (b.priceFrom||0)-(a.priceFrom||0); });
+    else if(sort === 'newest') data.sort(function(a,b){ return new Date(b.createdAt)-new Date(a.createdAt); });
+    renderSvcGrid(data);
+  } catch(e){ grid.innerHTML = emptyState('⚠️','Search failed',e.message); }
+}
+
+function renderSvcGrid(data){
+  var grid = document.getElementById('svcGrid');
+  if(!grid) return;
+  grid.innerHTML = data.map(function(l,i){ return renderProvCard(l,i); }).join('')
+    || emptyState('🔧','No services found','Try a different filter');
+  attachProvCardListeners();
+}
+
+function attachProvCardListeners(){
+  document.querySelectorAll('[data-provid]').forEach(function(card){
+    card.addEventListener('click', function(){
+      openBookingModal(this.dataset.provid);
+    });
+  });
+}
+
+function attachAccomCardListeners(){
+  document.querySelectorAll('[data-accomid]').forEach(function(card){
+    card.addEventListener('click', function(){
+      openBookingModal(this.dataset.accomid);
+    });
+  });
+}
+
+</script>
+</body>
+</html>
