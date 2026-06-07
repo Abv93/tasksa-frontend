@@ -1559,9 +1559,8 @@ async function init(){
 }
 
 init();
-</script>
-</body>
-</htmlfunction buildShopCatFilters(){
+
+function buildShopCatFilters(){
   var el = document.getElementById('shopFilters');
   if(!el) return;
   var btns = '<button class="sfb active" data-catid="">All Shops</button>';
@@ -1586,4 +1585,30 @@ async function filterShopCatById(catId){
     var r = await api(q);
     grid.innerHTML = r.data.map(function(s,i){ return renderShopCard(s,i); }).join('') || emptyState('🛒','No shops in this category');
   } catch(e){ grid.innerHTML = emptyState('⚠️','Filter failed',e.message); }
-}>
+}
+
+async function loadShop(){
+  document.getElementById('shopsDirectory').style.display='block';
+  document.getElementById('shopDetailView').style.display='none';
+  var pt=document.getElementById('shopPageTitle'); if(pt) pt.textContent='Local Shop Marketplace';
+  var ps=document.getElementById('shopPageSub'); if(ps) ps.textContent='Discover hidden-gem stores across South Africa — from Khayelitsha to Franschhoek';
+  var fl=document.getElementById('shopFilters'); if(fl) fl.style.display='flex';
+  var grid = document.getElementById('shopsGrid');
+  if(!grid) return;
+  grid.innerHTML = Array(6).fill('<div class="skel-card"><div class="skeleton" style="height:140px;margin-bottom:14px;border-radius:8px"></div><div class="skeleton" style="height:15px;margin-bottom:7px"></div><div class="skeleton" style="height:12px;width:60%"></div></div>').join('');
+  try {
+    var results = await Promise.all([
+      api('/listings?type=SHOP&limit=40'),
+      api('/categories?type=SHOP')
+    ]);
+    var shops = results[0];
+    var cats = results[1];
+    S.shopCats = cats.data;
+    buildShopCatFilters();
+    grid.innerHTML = shops.data.map(function(s,i){ return renderShopCard(s,i); }).join('') || emptyState('🛒','No shops yet','Shops are being onboarded!');
+  } catch(e){ grid.innerHTML = emptyState('⚠️','Could not load shops',e.message); }
+}
+
+</script>
+</body>
+</html>
