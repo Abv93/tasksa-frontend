@@ -1,0 +1,26 @@
+{
+  "name": "TaskSA — South Africa's Service Marketplace",
+  "short_name": "TaskSA",
+  "description": "Book services, shop local and find holiday stays across South Africa",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020b1a",
+  "theme_color": "#020b1a",
+  "lang": "en-ZA",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/0a6edb/ffffff?text=TSA",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/0a6edb/ffffff?text=TSA",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "lifestyle", "shopping"]
+}
