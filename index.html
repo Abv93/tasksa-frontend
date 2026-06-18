@@ -422,7 +422,409 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:48px 5% 0;}
   </div>
 
   <!-- FOOTER -->
-  <footer>
+  
+
+
+
+<!-- ── Become a Provider Section ─────────────────────────── -->
+<section id="become-provider" style="padding:60px 16px;max-width:900px;margin:0 auto;">
+  <div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0f2d4a 100%);
+              border-radius:20px;padding:48px 32px;position:relative;overflow:hidden;">
+
+    <!-- Background decoration -->
+    <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;
+                border-radius:50%;background:rgba(26,143,255,.12);pointer-events:none;"></div>
+    <div style="position:absolute;bottom:-30px;left:10%;width:140px;height:140px;
+                border-radius:50%;background:rgba(37,211,102,.08);pointer-events:none;"></div>
+
+    <div style="position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(37,211,102,.15);
+                    border:1px solid rgba(37,211,102,.3);border-radius:50px;
+                    padding:5px 14px;margin-bottom:20px;">
+          <span style="width:8px;height:8px;border-radius:50%;background:#25d366;
+                        box-shadow:0 0 8px rgba(37,211,102,.6);flex-shrink:0;"></span>
+          <span style="font-size:12px;font-weight:600;color:#4ade80;letter-spacing:.06em;">NOW ACCEPTING PROVIDERS</span>
+        </div>
+
+        <h2 style="font-size:26px;font-weight:800;color:#fff;margin:0 0 12px;line-height:1.3;">
+          Earn Money With Your Skills
+        </h2>
+        <p style="font-size:14px;color:rgba(255,255,255,.7);line-height:1.7;margin:0 0 24px;max-width:480px;">
+          Join thousands of South African service providers on TaskSA. Set your own rates,
+          choose your own hours, and grow your business — completely free to join.
+        </p>
+
+        <!-- Benefits -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#4ade80;font-size:14px;">✓</span>
+            <span style="font-size:13px;color:rgba(255,255,255,.8);">Free to join</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#4ade80;font-size:14px;">✓</span>
+            <span style="font-size:13px;color:rgba(255,255,255,.8);">Flexible hours</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#4ade80;font-size:14px;">✓</span>
+            <span style="font-size:13px;color:rgba(255,255,255,.8);">Set your own rates</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#4ade80;font-size:14px;">✓</span>
+            <span style="font-size:13px;color:rgba(255,255,255,.8);">All 9 provinces</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#4ade80;font-size:14px;">✓</span>
+            <span style="font-size:13px;color:rgba(255,255,255,.8);">Instant bookings</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#4ade80;font-size:14px;">✓</span>
+            <span style="font-size:13px;color:rgba(255,255,255,.8);">Get rated &amp; grow</span>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button onclick="openRegisterAsProvider()"
+            style="background:linear-gradient(135deg,var(--blue),var(--blue2));
+                   color:#fff;border:none;padding:13px 28px;border-radius:50px;
+                   font-size:14px;font-weight:700;cursor:pointer;
+                   box-shadow:0 4px 16px rgba(26,143,255,.4);">
+            Register as Provider
+          </button>
+          <button onclick="showPage('about')"
+            style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25);
+                   padding:13px 28px;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;">
+            Learn More
+          </button>
+        </div>
+      </div>
+
+      <!-- Icon/Stats side -->
+      <div style="display:flex;flex-direction:column;gap:16px;min-width:160px;" class="provider-stats-col">
+        <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+                    border-radius:14px;padding:18px;text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:#fff;">80+</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;">Service Categories</div>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+                    border-radius:14px;padding:18px;text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:#4ade80;">9</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;">Provinces</div>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+                    border-radius:14px;padding:18px;text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:#fbbf24;">Free</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;">To Join</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+@media(max-width:600px){
+  .provider-stats-col { display:none !important; }
+}
+</style>
+
+<script>
+function openRegisterAsProvider(){
+  // If user is logged in take them to dashboard, else open register modal
+  if(window.S && S.user){
+    showPage('dashboard');
+    toast('Go to Dashboard → Provider Settings to list your services','info');
+  } else {
+    openModal('registerModal');
+  }
+}
+</script>
+
+<!-- ── Live Activity Strip ────────────────────────────────── -->
+<section style="padding:40px 0;overflow:hidden;background:var(--bg);">
+  <p style="text-align:center;font-size:13px;font-weight:600;color:var(--t3);
+             letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px;">
+    🟢 Recently booked across South Africa
+  </p>
+  <div style="position:relative;overflow:hidden;">
+    <!-- Fade edges -->
+    <div style="position:absolute;left:0;top:0;bottom:0;width:60px;
+                background:linear-gradient(to right,var(--bg),transparent);z-index:2;pointer-events:none;"></div>
+    <div style="position:absolute;right:0;top:0;bottom:0;width:60px;
+                background:linear-gradient(to left,var(--bg),transparent);z-index:2;pointer-events:none;"></div>
+    <!-- Scrolling track -->
+    <div id="activityTrack" style="display:flex;gap:12px;animation:scrollLeft 30s linear infinite;width:max-content;">
+    </div>
+  </div>
+</section>
+
+<style>
+@keyframes scrollLeft {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+#activityTrack:hover { animation-play-state: paused; }
+.activity-card {
+  flex-shrink:0;
+  background:var(--surf);
+  border:1px solid var(--bd);
+  border-radius:14px;
+  padding:14px 18px;
+  min-width:220px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.activity-card .ac-top { display:flex; align-items:center; gap:10px; }
+.activity-card .ac-emoji { font-size:22px; }
+.activity-card .ac-name { font-size:13px; font-weight:700; color:var(--t1); }
+.activity-card .ac-cat  { font-size:11px; color:var(--t3); }
+.activity-card .ac-bottom { display:flex; justify-content:space-between; align-items:center; margin-top:6px; }
+.activity-card .ac-loc  { font-size:11px; color:var(--t3); }
+.activity-card .ac-price{ font-size:13px; font-weight:700; color:var(--blue3); }
+.activity-card .ac-stars{ font-size:11px; color:#f59e0b; }
+</style>
+
+<script>
+(function(){
+  var bookings = [
+    { emoji:'🔧', name:'Sipho M.', cat:'Plumbing',       loc:'Cape Town',    price:'R450', stars:'★★★★★' },
+    { emoji:'⚡', name:'Lerato K.', cat:'Electrical',    loc:'Johannesburg', price:'R380', stars:'★★★★★' },
+    { emoji:'🧹', name:'Nandi Z.', cat:'House Cleaning', loc:'Durban',       price:'R320', stars:'★★★★☆' },
+    { emoji:'🏡', name:'Thabo M.', cat:'Airbnb Cleaning',loc:'Cape Town',    price:'R550', stars:'★★★★★' },
+    { emoji:'🌿', name:'Ayanda B.', cat:'Garden Service', loc:'Pretoria',    price:'R280', stars:'★★★★★' },
+    { emoji:'🎨', name:'Ruan V.',  cat:'Painting',       loc:'Stellenbosch', price:'R650', stars:'★★★★☆' },
+    { emoji:'🚚', name:'Kabelo D.', cat:'Moving Help',   loc:'Sandton',      price:'R800', stars:'★★★★★' },
+    { emoji:'🛠️', name:'Faizel A.', cat:'Handyman',     loc:'Somerset West', price:'R420', stars:'★★★★★' },
+    { emoji:'🏠', name:'Priya N.', cat:'Stays — Beach',  loc:'Blouberg',     price:'R1200', stars:'★★★★★' },
+    { emoji:'🔌', name:'Carlos F.', cat:'Solar Install', loc:'George',       price:'R2400', stars:'★★★★★' },
+    { emoji:'🧺', name:'Zinhle P.', cat:'Laundry',      loc:'Roodepoort',   price:'R190', stars:'★★★★☆' },
+    { emoji:'🐾', name:'Mikael H.', cat:'Pet Grooming',  loc:'Knysna',       price:'R350', stars:'★★★★★' },
+  ];
+
+  var track = document.getElementById('activityTrack');
+  if(!track) return;
+
+  // Double the array for seamless loop
+  var all = bookings.concat(bookings);
+  all.forEach(function(b){
+    var card = document.createElement('div');
+    card.className = 'activity-card';
+    card.innerHTML =
+      '<div class="ac-top">'
+        +'<span class="ac-emoji">'+b.emoji+'</span>'
+        +'<div><div class="ac-name">'+b.name+'</div>'
+        +'<div class="ac-cat">'+b.cat+'</div></div>'
+      +'</div>'
+      +'<div class="ac-bottom">'
+        +'<span class="ac-loc">📍 '+b.loc+'</span>'
+        +'<span class="ac-price">'+b.price+'</span>'
+      +'</div>'
+      +'<div class="ac-stars">'+b.stars+'</div>';
+    track.appendChild(card);
+  });
+})();
+</script>
+
+
+<!-- ── Trust Breakdown Section ───────────────────────────── -->
+<section id="trust-section" style="padding:60px 16px;background:var(--surf);max-width:900px;margin:0 auto;">
+  <h2 style="text-align:center;font-size:26px;font-weight:800;color:var(--t1);margin-bottom:8px;">
+    Why You Can Trust TaskSA
+  </h2>
+  <p style="text-align:center;color:var(--t3);font-size:14px;margin-bottom:44px;">
+    Every provider on TaskSA goes through our verification process
+  </p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:20px;">
+
+    <!-- Card 1 -->
+    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:24px 20px;text-align:center;">
+      <div style="font-size:32px;margin-bottom:14px;">🪪</div>
+      <h3 style="font-size:15px;font-weight:700;color:var(--t1);margin-bottom:8px;">Identity Verified</h3>
+      <p style="font-size:12px;color:var(--t3);line-height:1.6;margin:0;">
+        We confirm the real identity and contact details of every provider before they can list on TaskSA.
+      </p>
+    </div>
+
+    <!-- Card 2 -->
+    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:24px 20px;text-align:center;">
+      <div style="font-size:32px;margin-bottom:14px;">⭐</div>
+      <h3 style="font-size:15px;font-weight:700;color:var(--t1);margin-bottom:8px;">Ratings &amp; Reviews</h3>
+      <p style="font-size:12px;color:var(--t3);line-height:1.6;margin:0;">
+        Real ratings from real customers after every completed booking. No fake reviews.
+      </p>
+    </div>
+
+    <!-- Card 3 -->
+    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:24px 20px;text-align:center;">
+      <div style="font-size:32px;margin-bottom:14px;">🛡️</div>
+      <h3 style="font-size:15px;font-weight:700;color:var(--t1);margin-bottom:8px;">Experience Checked</h3>
+      <p style="font-size:12px;color:var(--t3);line-height:1.6;margin:0;">
+        We assess skills, work history and service quality before approving any provider listing.
+      </p>
+    </div>
+
+    <!-- Card 4 -->
+    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:24px 20px;text-align:center;">
+      <div style="font-size:32px;margin-bottom:14px;">💬</div>
+      <h3 style="font-size:15px;font-weight:700;color:var(--t1);margin-bottom:8px;">Support &amp; Disputes</h3>
+      <p style="font-size:12px;color:var(--t3);line-height:1.6;margin:0;">
+        Something goes wrong? Our team helps resolve disputes and monitors service quality on your behalf.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── FAQ Section ────────────────────────────────────────── -->
+<section id="faq-section" style="padding:60px 16px;background:var(--surf2,var(--bg));max-width:800px;margin:0 auto;">
+  <h2 style="text-align:center;font-size:26px;font-weight:800;color:var(--t1);margin-bottom:8px;">
+    Frequently Asked Questions
+  </h2>
+  <p style="text-align:center;color:var(--t3);font-size:14px;margin-bottom:40px;">
+    Everything you need to know about TaskSA
+  </p>
+
+  <div id="faqList" style="display:flex;flex-direction:column;gap:12px;">
+  </div>
+</section>
+
+<script>
+(function(){
+  var faqs = [
+    {
+      q: "Is TaskSA free to use?",
+      a: "Yes! Browsing, searching and booking on TaskSA is completely free for customers. You only pay the provider's service fee when you book."
+    },
+    {
+      q: "How do I book a service?",
+      a: "Browse the Services section, find a provider you like, click Book Now, choose your date and time, and confirm. It takes less than a minute."
+    },
+    {
+      q: "Are providers on TaskSA verified?",
+      a: "Yes. All providers go through a verification process before listing on TaskSA. We check their details, experience and service quality to make sure you get a trusted professional."
+    },
+    {
+      q: "What areas does TaskSA cover?",
+      a: "TaskSA is live across all 9 provinces in South Africa, with providers in major cities and surrounding areas including Cape Town, Johannesburg, Pretoria, Durban and more."
+    },
+    {
+      q: "Can I cancel or reschedule a booking?",
+      a: "Yes. You can manage your bookings from your dashboard. Cancellation and rescheduling policies vary by provider — check their listing for details."
+    },
+    {
+      q: "How do I become a provider on TaskSA?",
+      a: "Register as a provider, complete your profile, add your services and pricing, and start receiving bookings. It's free to join — we only take a small commission when you earn."
+    },
+    {
+      q: "What if I'm not happy with the service?",
+      a: "Your satisfaction matters. Contact us via WhatsApp or the Messages section and we'll help resolve any issues with your booking."
+    }
+  ];
+
+  var list = document.getElementById('faqList');
+  if(!list) return;
+
+  faqs.forEach(function(item, i){
+    var div = document.createElement('div');
+    div.style.cssText = 'background:var(--surf);border:1px solid var(--bd);border-radius:14px;overflow:hidden;';
+    div.innerHTML = '<button onclick="toggleFaq('+i+')" style="width:100%;text-align:left;padding:18px 20px;background:none;border:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;">'
+      +'<span style="font-size:14px;font-weight:700;color:var(--t1);">'+item.q+'</span>'
+      +'<span id="faq-icon-'+i+'" style="font-size:18px;color:var(--blue);flex-shrink:0;transition:transform .25s;">＋</span>'
+      +'</button>'
+      +'<div id="faq-ans-'+i+'" style="max-height:0;overflow:hidden;transition:max-height .3s ease;">'
+      +'<p style="padding:0 20px 18px;font-size:13px;color:var(--t3);line-height:1.7;margin:0;">'+item.a+'</p>'
+      +'</div>';
+    list.appendChild(div);
+  });
+})();
+
+function toggleFaq(i){
+  var ans = document.getElementById('faq-ans-'+i);
+  var icon = document.getElementById('faq-icon-'+i);
+  if(!ans) return;
+  var isOpen = ans.style.maxHeight && ans.style.maxHeight !== '0px';
+  // Close all
+  document.querySelectorAll('[id^="faq-ans-"]').forEach(function(el){ el.style.maxHeight='0px'; });
+  document.querySelectorAll('[id^="faq-icon-"]').forEach(function(el){ el.textContent='＋'; el.style.transform=''; });
+  // Open clicked if it was closed
+  if(!isOpen){
+    ans.style.maxHeight = ans.scrollHeight + 'px';
+    icon.textContent = '－';
+    icon.style.transform = 'rotate(180deg)';
+  }
+}
+</script>
+
+<!-- ── How It Works Section ───────────────────────────────── -->
+<section id="how-it-works" style="padding:60px 16px;background:var(--bg);max-width:900px;margin:0 auto;">
+  <h2 style="text-align:center;font-size:26px;font-weight:800;color:var(--t1);margin-bottom:8px;">
+    How TaskSA Works
+  </h2>
+  <p style="text-align:center;color:var(--t3);font-size:14px;margin-bottom:44px;">
+    Get any job done in three simple steps
+  </p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;">
+
+    <!-- Step 1 -->
+    <div style="background:var(--surf);border:1px solid var(--bd);border-radius:16px;padding:28px 24px;text-align:center;position:relative;">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));
+                  display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:22px;">
+        🔍
+      </div>
+      <div style="position:absolute;top:20px;left:20px;width:26px;height:26px;border-radius:50%;
+                  background:var(--blue);color:#fff;font-size:12px;font-weight:800;
+                  display:flex;align-items:center;justify-content:center;">1</div>
+      <h3 style="font-size:16px;font-weight:700;color:var(--t1);margin-bottom:10px;">Browse &amp; Choose</h3>
+      <p style="font-size:13px;color:var(--t3);line-height:1.6;">
+        Explore services, shops and stays across South Africa. Filter by location and category.
+      </p>
+    </div>
+
+    <!-- Step 2 -->
+    <div style="background:var(--surf);border:1px solid var(--bd);border-radius:16px;padding:28px 24px;text-align:center;position:relative;">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6d28d9);
+                  display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:22px;">
+        📅
+      </div>
+      <div style="position:absolute;top:20px;left:20px;width:26px;height:26px;border-radius:50%;
+                  background:#8b5cf6;color:#fff;font-size:12px;font-weight:800;
+                  display:flex;align-items:center;justify-content:center;">2</div>
+      <h3 style="font-size:16px;font-weight:700;color:var(--t1);margin-bottom:10px;">Book a Provider</h3>
+      <p style="font-size:13px;color:var(--t3);line-height:1.6;">
+        Pick your date and time. View ratings, reviews and prices. Book instantly — no waiting.
+      </p>
+    </div>
+
+    <!-- Step 3 -->
+    <div style="background:var(--surf);border:1px solid var(--bd);border-radius:16px;padding:28px 24px;text-align:center;position:relative;">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);
+                  display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:22px;">
+        ✅
+      </div>
+      <div style="position:absolute;top:20px;left:20px;width:26px;height:26px;border-radius:50%;
+                  background:#10b981;color:#fff;font-size:12px;font-weight:800;
+                  display:flex;align-items:center;justify-content:center;">3</div>
+      <h3 style="font-size:16px;font-weight:700;color:var(--t1);margin-bottom:10px;">Get It Done</h3>
+      <p style="font-size:13px;color:var(--t3);line-height:1.6;">
+        Your provider arrives. Job completed. Rate your experience and help others find great service.
+      </p>
+    </div>
+
+  </div>
+  <!-- CTA -->
+  <div style="text-align:center;margin-top:36px;">
+    <button onclick="showPage('services')"
+      style="background:linear-gradient(135deg,var(--blue),var(--blue2));
+             color:#fff;border:none;padding:13px 36px;border-radius:50px;
+             font-size:14px;font-weight:700;cursor:pointer;
+             box-shadow:0 4px 16px rgba(26,143,255,.35);">
+      Find a Provider Now
+    </button>
+  </div>
+</section>
+
+<footer>
     <div class="footer-grid">
       <div>
         <div class="footer-logo">Task<span>SA</span></div>
@@ -440,7 +842,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:48px 5% 0;}
           <a href="https://youtube.com" target="_blank" class="footer-social" style="background:#ff0000;" title="YouTube">
             <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
           </a>
-          <a href="https://wa.me/27210000000" target="_blank" class="footer-social" style="background:#25d366;" title="WhatsApp">
+          <a href="https://wa.me/27697473030" target="_blank" class="footer-social" style="background:#25d366;" title="WhatsApp">
             <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           </a>
         </div>
@@ -1798,6 +2200,23 @@ async function sendMessage(){
 <style>
 @keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 </style>
+
+
+<!-- Floating WhatsApp Button -->
+<a href="https://wa.me/27697473030" target="_blank" rel="noopener noreferrer"
+   aria-label="Chat with TaskSA on WhatsApp"
+   style="position:fixed;bottom:24px;right:20px;z-index:9999;
+          width:56px;height:56px;border-radius:50%;
+          background:#25d366;display:flex;align-items:center;justify-content:center;
+          box-shadow:0 4px 20px rgba(37,211,102,.45);
+          transition:transform .2s,box-shadow .2s;text-decoration:none;"
+   onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 28px rgba(37,211,102,.6)'"
+   onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(37,211,102,.45)'">
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.555 4.122 1.526 5.855L.057 23.882a.5.5 0 00.609.61l6.098-1.596A11.947 11.947 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.657-.522-5.162-1.426l-.361-.214-3.741.98.999-3.648-.235-.374A10 10 0 0112 2c5.514 0 10 4.486 10 10s-4.486 10-10 10z"/>
+  </svg>
+</a>
 
 </body>
 </html>
