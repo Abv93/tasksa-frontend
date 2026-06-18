@@ -1989,45 +1989,56 @@ document.addEventListener('click',function(e){
 
 // ── PWA INSTALL ───────────────────────────────────────────────────
 var _installPrompt = null;
+
+function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; }
+
+// Capture native prompt if Chrome offers it
 window.addEventListener('beforeinstallprompt', function(e){
   e.preventDefault();
   _installPrompt = e;
-  if(!localStorage.getItem('installDismissed')){
-    setTimeout(function(){
-      var b = document.getElementById('installBanner');
-      if(b) b.style.display = 'block';
-    }, 4000);
-  }
 });
+
 window.addEventListener('appinstalled', function(){
   var b = document.getElementById('installBanner');
   if(b) b.style.display = 'none';
   _installPrompt = null;
+  localStorage.setItem('installDismissed','1');
 });
+
 function installApp(){
+  var b = document.getElementById('installBanner');
   if(_installPrompt){
     _installPrompt.prompt();
-    _installPrompt.userChoice.then(function(){
+    _installPrompt.userChoice.then(function(result){
       _installPrompt = null;
-      var b = document.getElementById('installBanner');
       if(b) b.style.display = 'none';
+      if(result.outcome === 'accepted') localStorage.setItem('installDismissed','1');
     });
+  } else {
+    if(b) b.style.display = 'none';
+    toast('Tap the browser menu ( \u22ee ) then "Add to Home screen"','info');
   }
 }
+
 function dismissInstall(){
   localStorage.setItem('installDismissed','1');
   var b = document.getElementById('installBanner');
   if(b) b.style.display = 'none';
 }
-// iOS detection
-function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
-function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; }
-if(isIOS() && !isStandalone() && !localStorage.getItem('installDismissed')){
-  setTimeout(function(){
+
+// Show banner every visit after 3 seconds
+setTimeout(function(){
+  if(isStandalone()) return;
+  if(localStorage.getItem('installDismissed')) return;
+  if(isIOS()){
     var p = document.getElementById('iosInstallPopup');
     if(p) p.style.display = 'block';
-  }, 5000);
-}
+  } else {
+    var b = document.getElementById('installBanner');
+    if(b) b.style.display = 'block';
+  }
+}, 3000);
 
 // ── INIT ──────────────────────────────────────────────────────────
 async function init(){
