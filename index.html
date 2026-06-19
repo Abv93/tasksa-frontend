@@ -552,7 +552,7 @@ function openRegisterAsProvider(){
     <div style="position:absolute;right:0;top:0;bottom:0;width:60px;
                 background:linear-gradient(to left,var(--bg),transparent);z-index:2;pointer-events:none;"></div>
     <!-- Scrolling track -->
-    <div id="activityTrack" style="display:flex;gap:12px;animation:scrollLeft 30s linear infinite;width:max-content;">
+    <div id="activityTrack" style="display:flex;gap:12px;animation:scrollLeft 60s linear infinite;width:max-content;">
     </div>
   </div>
 </section>
@@ -1226,6 +1226,41 @@ function toggleFaq(i){
   </div>
 </div>
 
+<!-- ADD LISTING MODAL -->
+<div class="modal-overlay" id="addListingModal">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('addListingModal')">✕</button>
+    <h2 style="font-size:18px;font-weight:800;margin-bottom:20px;">➕ Add New Listing</h2>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">LISTING NAME *</label>
+        <input id="newListingName" type="text" placeholder="e.g. Professional Plumbing Service" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">DESCRIPTION *</label>
+        <textarea id="newListingDesc" placeholder="Describe what you offer, your experience, what's included..." rows="3" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">PRICE FROM (R) *</label>
+          <input id="newListingPrice" type="number" placeholder="350" min="0" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">CITY *</label>
+          <input id="newListingCity" type="text" placeholder="Cape Town" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+        </div>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">CATEGORY *</label>
+        <select id="newListingCat" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+          <option value="">Select a category...</option>
+        </select>
+      </div>
+      <button onclick="submitNewListing()" class="btn-primary" style="width:100%;padding:13px;font-size:14px;font-weight:700;margin-top:4px;">Create Listing</button>
+    </div>
+  </div>
+</div>
+
 <!-- LOGIN -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal">
@@ -1685,7 +1720,7 @@ async function loadDash(){
 
   if(role === 'PROVIDER' || role === 'HOST'){
     if(title) title.textContent = role === 'HOST' ? 'Host Dashboard' : 'Provider Dashboard';
-    if(actions) actions.innerHTML = '<button class="btn-primary" style="padding:9px 18px;font-size:13px;" onclick="openModal(\'addListingModal\')">+ Add Listing</button>';
+    if(actions) actions.innerHTML = '<button class="btn-primary" style="padding:9px 18px;font-size:13px;" onclick="openAddListingModal()">+ Add Listing</button>';
     await loadProviderDash(stats, main, role);
   } else if(role === 'SHOP_OWNER'){
     if(title) title.textContent = 'Shop Dashboard';
@@ -1708,11 +1743,46 @@ async function loadClientDash(stats, main){
     var d = r.data;
     if(stats) stats.innerHTML =
       '<div class="dash-stat"><div class="dash-stat-label">My Bookings</div><div class="dash-stat-val">'+d.totalBookings+'</div><div class="dash-stat-sub">All time</div></div>'
-      +'<div class="dash-stat"><div class="dash-stat-label">My Orders</div><div class="dash-stat-val">'+d.totalOrders+'</div><div class="dash-stat-sub">Shop orders</div></div>';
+      +'<div class="dash-stat"><div class="dash-stat-label">My Orders</div><div class="dash-stat-val">'+d.totalOrders+'</div><div class="dash-stat-sub">Shop orders</div></div>'
+      +'<div class="dash-stat"><div class="dash-stat-label">Pending</div><div class="dash-stat-val" style="color:var(--amber);">'+(d.pendingBookings||0)+'</div><div class="dash-stat-sub">Awaiting confirmation</div></div>'
+      +'<div class="dash-stat"><div class="dash-stat-label">Messages</div><div class="dash-stat-val" style="color:var(--blue3);cursor:pointer;" onclick="goPage(\'messages\')">'+(d.unreadMessages||0)+'</div><div class="dash-stat-sub">Unread</div></div>';
   } catch(e){ console.error('client stats:', e.message); }
 
   if(!main) return;
-  main.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" id="clientGrid"><div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;"><div style="font-size:14px;font-weight:800;margin-bottom:14px;">Recent Bookings</div><div id="clientBookings"></div></div><div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;"><div style="font-size:14px;font-weight:800;margin-bottom:14px;">Recent Orders</div><div id="clientOrders"></div></div></div>';
+
+  // Quick actions row
+  main.innerHTML =
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;">'
+      +'<button onclick="goPage(\'services\')" style="background:var(--surf);border:1px solid var(--bd);border-radius:14px;padding:16px 12px;cursor:pointer;text-align:center;">'
+        +'<div style="font-size:28px;margin-bottom:6px;">🔧</div>'
+        +'<div style="font-size:12px;font-weight:700;color:var(--t);">Browse Services</div>'
+      +'</button>'
+      +'<button onclick="goPage(\'shop\')" style="background:var(--surf);border:1px solid var(--bd);border-radius:14px;padding:16px 12px;cursor:pointer;text-align:center;">'
+        +'<div style="font-size:28px;margin-bottom:6px;">🛍️</div>'
+        +'<div style="font-size:12px;font-weight:700;color:var(--t);">Shop Local</div>'
+      +'</button>'
+      +'<button onclick="goPage(\'accommodation\')" style="background:var(--surf);border:1px solid var(--bd);border-radius:14px;padding:16px 12px;cursor:pointer;text-align:center;">'
+        +'<div style="font-size:28px;margin-bottom:6px;">🏡</div>'
+        +'<div style="font-size:12px;font-weight:700;color:var(--t);">Find a Stay</div>'
+      +'</button>'
+      +'<button onclick="goPage(\'messages\')" style="background:var(--surf);border:1px solid var(--bd);border-radius:14px;padding:16px 12px;cursor:pointer;text-align:center;">'
+        +'<div style="font-size:28px;margin-bottom:6px;">💬</div>'
+        +'<div style="font-size:12px;font-weight:700;color:var(--t);">Messages</div>'
+      +'</button>'
+    +'</div>'
+    // Bookings + Orders side by side
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="clientGrid">'
+      +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;">'
+        +'<div style="font-size:14px;font-weight:800;margin-bottom:14px;">📅 Recent Bookings</div>'
+        +'<div id="clientBookings"></div>'
+        +'<button onclick="goPage(\'services\')" style="width:100%;margin-top:12px;background:transparent;border:1px solid var(--bd);border-radius:50px;padding:9px;font-size:12px;font-weight:700;color:var(--t3);cursor:pointer;">+ Book a Service</button>'
+      +'</div>'
+      +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;">'
+        +'<div style="font-size:14px;font-weight:800;margin-bottom:14px;">🛒 Recent Orders</div>'
+        +'<div id="clientOrders"></div>'
+        +'<button onclick="goPage(\'shop\')" style="width:100%;margin-top:12px;background:transparent;border:1px solid var(--bd);border-radius:50px;padding:9px;font-size:12px;font-weight:700;color:var(--t3);cursor:pointer;">+ Shop Now</button>'
+      +'</div>'
+    +'</div>';
 
   try {
     var bk = await api('/bookings?limit=5');
@@ -1892,6 +1962,7 @@ async function openBookModal(listingId,listingName){
   openModal('bookingModal');
 }
 async function submitBooking(){
+  if(!S.user){closeModal('bookingModal');openModal('loginModal');return;}
   if(!S.bookingListingId){toast('No listing selected','error');return;}
   var date=document.getElementById('bookDate').value;
   var time=document.getElementById('bookTime').value;
@@ -1915,6 +1986,39 @@ function doSearch(){
   goPage('services');
   var si=document.getElementById('svcSearch');
   if(si&&q){ si.value=q; filterServices(); }
+}
+
+// ── ADD LISTING ───────────────────────────────────────────────────
+function openAddListingModal(){
+  var sel = document.getElementById('newListingCat');
+  if(sel && S.cats){
+    var type = (S.user&&S.user.role==='HOST') ? 'ACCOMMODATION' : 'SERVICE';
+    var filtered = S.cats.filter(function(c){ return c.type===type; });
+    sel.innerHTML = '<option value="">Select a category...</option>';
+    filtered.forEach(function(c){
+      sel.innerHTML += '<option value="'+c.id+'">'+(c.icon||'')+' '+c.name+'</option>';
+    });
+  }
+  openModal('addListingModal');
+}
+
+async function submitNewListing(){
+  var name  = (document.getElementById('newListingName')||{}).value||'';
+  var desc  = (document.getElementById('newListingDesc')||{}).value||'';
+  var price = (document.getElementById('newListingPrice')||{}).value||'';
+  var city  = (document.getElementById('newListingCity')||{}).value||'';
+  var catId = (document.getElementById('newListingCat')||{}).value||'';
+  if(!name||!price||!city||!catId){ toast('Please fill in all required fields','error'); return; }
+  var type = (S.user&&S.user.role==='HOST') ? 'ACCOMMODATION' : 'SERVICE';
+  try {
+    await api('/listings','POST',{name:name,description:desc,priceFrom:parseFloat(price),city:city,categoryId:catId,type:type});
+    closeModal('addListingModal');
+    toast('Listing created! It will be reviewed shortly.','success');
+    ['newListingName','newListingDesc','newListingPrice','newListingCity'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.value='';
+    });
+    loadDash();
+  } catch(e){ toast(e.message||'Could not create listing','error'); }
 }
 
 // ── CART ──────────────────────────────────────────────────────────
@@ -1991,14 +2095,15 @@ document.addEventListener('click',function(e){
 var _installPrompt = null;
 
 function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
-function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; }
+function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
 
-// Capture native prompt if Chrome offers it
+// Capture Chrome's native install prompt the moment it fires
 window.addEventListener('beforeinstallprompt', function(e){
   e.preventDefault();
   _installPrompt = e;
 });
 
+// Hide banner once installed
 window.addEventListener('appinstalled', function(){
   var b = document.getElementById('installBanner');
   if(b) b.style.display = 'none';
@@ -2006,19 +2111,16 @@ window.addEventListener('appinstalled', function(){
   localStorage.setItem('installDismissed','1');
 });
 
+// Tap Install → Chrome installs directly to home screen
 function installApp(){
-  var b = document.getElementById('installBanner');
-  if(_installPrompt){
-    _installPrompt.prompt();
-    _installPrompt.userChoice.then(function(result){
-      _installPrompt = null;
-      if(b) b.style.display = 'none';
-      if(result.outcome === 'accepted') localStorage.setItem('installDismissed','1');
-    });
-  } else {
+  if(!_installPrompt) return;
+  _installPrompt.prompt();
+  _installPrompt.userChoice.then(function(result){
+    _installPrompt = null;
+    var b = document.getElementById('installBanner');
     if(b) b.style.display = 'none';
-    toast('Tap the browser menu ( \u22ee ) then "Add to Home screen"','info');
-  }
+    if(result.outcome === 'accepted') localStorage.setItem('installDismissed','1');
+  });
 }
 
 function dismissInstall(){
@@ -2027,7 +2129,8 @@ function dismissInstall(){
   if(b) b.style.display = 'none';
 }
 
-// Show banner every visit after 3 seconds
+// Show banner 5 seconds after page load
+// (gives Chrome enough time to fire beforeinstallprompt first)
 setTimeout(function(){
   if(isStandalone()) return;
   if(localStorage.getItem('installDismissed')) return;
@@ -2035,10 +2138,13 @@ setTimeout(function(){
     var p = document.getElementById('iosInstallPopup');
     if(p) p.style.display = 'block';
   } else {
-    var b = document.getElementById('installBanner');
-    if(b) b.style.display = 'block';
+    // Only show Install banner if Chrome has offered the native prompt
+    if(_installPrompt){
+      var b = document.getElementById('installBanner');
+      if(b) b.style.display = 'block';
+    }
   }
-}, 3000);
+}, 5000);
 
 // ── INIT ──────────────────────────────────────────────────────────
 async function init(){
@@ -2182,7 +2288,7 @@ async function sendMessage(){
 <!-- PWA INSTALL BANNER -->
 <div id="installBanner" style="display:none;position:fixed;bottom:24px;left:16px;right:16px;z-index:350;background:linear-gradient(135deg,#041020,#082035);border:1px solid rgba(26,143,255,.35);border-radius:18px;padding:16px 18px;box-shadow:0 8px 40px rgba(0,0,0,.6);animation:slideUp .4s ease;">
   <div style="display:flex;align-items:center;gap:14px;">
-    <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#0a6edb,#1a8fff);display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:16px;font-weight:900;color:#fff;flex-shrink:0;">T<span style="color:#F5A623;">S</span></div>
+    <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#0a6edb,#1a8fff);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0;">T<span style="color:#F5A623;">S</span></div>
     <div style="flex:1;">
       <div style="font-weight:800;font-size:14px;color:#fff;margin-bottom:2px;">Install TaskSA App</div>
       <div style="font-size:12px;color:rgba(255,255,255,.6);">Add to your home screen for instant access</div>
@@ -2190,8 +2296,8 @@ async function sendMessage(){
     <button onclick="dismissInstall()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:20px;cursor:pointer;padding:4px;line-height:1;">✕</button>
   </div>
   <div style="display:flex;gap:10px;margin-top:14px;">
-    <button onclick="installApp()" style="flex:1;background:linear-gradient(135deg,#0a6edb,#1a8fff);border:none;border-radius:50px;color:#fff;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">📲 Install Now</button>
-    <button onclick="dismissInstall()" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:50px;color:rgba(255,255,255,.7);padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Maybe Later</button>
+    <button onclick="installApp()" style="flex:1;background:linear-gradient(135deg,#0a6edb,#1a8fff);border:none;border-radius:50px;color:#fff;padding:11px;font-size:13px;font-weight:700;cursor:pointer;">📲 Install Now</button>
+    <button onclick="dismissInstall()" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:50px;color:rgba(255,255,255,.7);padding:11px;font-size:13px;font-weight:700;cursor:pointer;">Maybe Later</button>
   </div>
 </div>
 
