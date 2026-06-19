@@ -1,15 +1,14 @@
 {
   "name": "TaskSA — South Africa's Service Marketplace",
   "short_name": "TaskSA",
-  "description": "Find trusted service providers, local shops and holiday stays across South Africa.",
+  "description": "Book trusted service providers, shop local stores and find holiday stays across South Africa.",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
+  "background_color": "#020b1a",
+  "theme_color": "#0a6edb",
   "orientation": "portrait-primary",
-  "background_color": "#0a0f1e",
-  "theme_color": "#1a8fff",
+  "scope": "/",
   "lang": "en-ZA",
-  "categories": ["lifestyle", "shopping", "utilities"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -24,28 +23,9 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [],
   "shortcuts": [
-    {
-      "name": "Services",
-      "short_name": "Services",
-      "description": "Browse service providers",
-      "url": "/#services",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Shops",
-      "short_name": "Shop",
-      "description": "Browse local shops",
-      "url": "/#shop",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Stays",
-      "short_name": "Stays",
-      "description": "Find holiday accommodation",
-      "url": "/#accommodation",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    }
+    { "name": "Services", "short_name": "Services", "url": "/?page=services" },
+    { "name": "Shop Local", "short_name": "Shop", "url": "/?page=shop" },
+    { "name": "Stays", "short_name": "Stays", "url": "/?page=accommodation" }
   ]
 }
