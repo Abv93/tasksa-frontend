@@ -9,6 +9,7 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en-ZA",
+  "categories": ["business", "lifestyle", "utilities"],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -24,8 +25,24 @@
     }
   ],
   "shortcuts": [
-    { "name": "Services", "short_name": "Services", "url": "/?page=services" },
-    { "name": "Shop Local", "short_name": "Shop", "url": "/?page=shop" },
-    { "name": "Stays", "short_name": "Stays", "url": "/?page=accommodation" }
-  ]
+    {
+      "name": "Browse Services",
+      "short_name": "Services",
+      "url": "/?page=services",
+      "description": "Find verified service providers"
+    },
+    {
+      "name": "Shop Local",
+      "short_name": "Shop",
+      "url": "/?page=shop",
+      "description": "Shop from local SA stores"
+    },
+    {
+      "name": "Holiday Stays",
+      "short_name": "Stays",
+      "url": "/?page=accommodation",
+      "description": "Find holiday accommodation"
+    }
+  ],
+  "screenshots": []
 }

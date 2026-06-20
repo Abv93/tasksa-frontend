@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TaskSA">
-<link rel="apple-touch-icon" href="https://via.placeholder.com/180x180/0a6edb/ffffff?text=TSA">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230a6edb'/><text x='90' y='120' font-family='Arial Black,sans-serif' font-size='90' font-weight='900' text-anchor='middle' fill='white'>T</text><text x='135' y='120' font-family='Arial Black,sans-serif' font-size='45' font-weight='900' text-anchor='middle' fill='%23F5A623'>SA</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 
@@ -2419,59 +2419,63 @@ document.addEventListener('click',function(e){
 
 
 // ── PWA INSTALL ───────────────────────────────────────────────────
-var _installPrompt = null;
+var _deferredPrompt = null;
 
 function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
 
-// Capture Chrome's native install prompt the moment it fires
+// Chrome/Android: capture native install prompt when Chrome offers it
 window.addEventListener('beforeinstallprompt', function(e){
   e.preventDefault();
-  _installPrompt = e;
+  _deferredPrompt = e;
+  if(!localStorage.getItem('installDismissed') && !isStandalone()){
+    setTimeout(showInstallBanner, 3000);
+  }
 });
 
-// Hide banner once installed
 window.addEventListener('appinstalled', function(){
-  var b = document.getElementById('installBanner');
-  if(b) b.style.display = 'none';
-  _installPrompt = null;
+  hideBanner();
+  _deferredPrompt = null;
   localStorage.setItem('installDismissed','1');
 });
 
-// Tap Install → Chrome installs directly to home screen
+function showInstallBanner(){
+  if(!_deferredPrompt) return; // Only show if Chrome has offered the prompt
+  if(isStandalone()) return;
+  if(localStorage.getItem('installDismissed')) return;
+  var banner = document.getElementById('installBanner');
+  if(banner) banner.style.display = 'block';
+}
+
+function hideBanner(){
+  var banner = document.getElementById('installBanner');
+  if(banner) banner.style.display = 'none';
+}
+
 function installApp(){
-  if(!_installPrompt) return;
-  _installPrompt.prompt();
-  _installPrompt.userChoice.then(function(result){
-    _installPrompt = null;
-    var b = document.getElementById('installBanner');
-    if(b) b.style.display = 'none';
+  hideBanner();
+  if(!_deferredPrompt) return;
+  _deferredPrompt.prompt();
+  _deferredPrompt.userChoice.then(function(result){
     if(result.outcome === 'accepted') localStorage.setItem('installDismissed','1');
+    _deferredPrompt = null;
   });
 }
 
 function dismissInstall(){
   localStorage.setItem('installDismissed','1');
-  var b = document.getElementById('installBanner');
-  if(b) b.style.display = 'none';
+  hideBanner();
+  var ios = document.getElementById('iosInstallPopup');
+  if(ios) ios.style.display = 'none';
 }
 
-// Show banner 5 seconds after page load
-// (gives Chrome enough time to fire beforeinstallprompt first)
-setTimeout(function(){
-  if(isStandalone()) return;
-  if(localStorage.getItem('installDismissed')) return;
-  if(isIOS()){
+// iOS: show manual instructions popup
+if(isIOS() && !isStandalone() && !localStorage.getItem('installDismissed')){
+  setTimeout(function(){
     var p = document.getElementById('iosInstallPopup');
     if(p) p.style.display = 'block';
-  } else {
-    // Only show Install banner if Chrome has offered the native prompt
-    if(_installPrompt){
-      var b = document.getElementById('installBanner');
-      if(b) b.style.display = 'block';
-    }
-  }
-}, 5000);
+  }, 3000);
+}
 
 // ── INIT ──────────────────────────────────────────────────────────
 // ── LANGUAGE TOGGLE (EN / AF) ─────────────────────────────────────
