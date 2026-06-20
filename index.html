@@ -6,6 +6,14 @@
 <meta name="theme-color" content="#020b1a">
 <title>TaskSA — South Africa's Service Marketplace</title>
 <link rel="manifest" href="/manifest.json">
+<!-- Capture PWA install prompt as early as possible - before any other script loads -->
+<script>
+window._deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  window._deferredPrompt = e;
+});
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TaskSA">
@@ -2419,32 +2427,25 @@ document.addEventListener('click',function(e){
 
 
 // ── PWA INSTALL ───────────────────────────────────────────────────
-var _deferredPrompt = null;
+// Note: window._deferredPrompt is captured in <head> as early as possible
+// to prevent missing the beforeinstallprompt event before scripts load
 
 function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
 
-// Chrome/Android: capture native install prompt when Chrome offers it
-window.addEventListener('beforeinstallprompt', function(e){
-  e.preventDefault();
-  _deferredPrompt = e;
-  if(!localStorage.getItem('installDismissed') && !isStandalone()){
-    setTimeout(showInstallBanner, 3000);
-  }
-});
-
 window.addEventListener('appinstalled', function(){
-  hideBanner();
-  _deferredPrompt = null;
+  var b = document.getElementById('installBanner');
+  if(b) b.style.display = 'none';
+  window._deferredPrompt = null;
   localStorage.setItem('installDismissed','1');
 });
 
 function showInstallBanner(){
-  if(!_deferredPrompt) return; // Only show if Chrome has offered the prompt
   if(isStandalone()) return;
   if(localStorage.getItem('installDismissed')) return;
+  if(!window._deferredPrompt) return;
   var banner = document.getElementById('installBanner');
-  if(banner) banner.style.display = 'block';
+  if(banner && banner.style.display === 'none') banner.style.display = 'block';
 }
 
 function hideBanner(){
@@ -2453,12 +2454,12 @@ function hideBanner(){
 }
 
 function installApp(){
+  if(!window._deferredPrompt) return;
   hideBanner();
-  if(!_deferredPrompt) return;
-  _deferredPrompt.prompt();
-  _deferredPrompt.userChoice.then(function(result){
+  window._deferredPrompt.prompt();
+  window._deferredPrompt.userChoice.then(function(result){
     if(result.outcome === 'accepted') localStorage.setItem('installDismissed','1');
-    _deferredPrompt = null;
+    window._deferredPrompt = null;
   });
 }
 
@@ -2476,6 +2477,23 @@ if(isIOS() && !isStandalone() && !localStorage.getItem('installDismissed')){
     if(p) p.style.display = 'block';
   }, 3000);
 }
+
+// Poll every 2 seconds for up to 30 seconds to catch the prompt
+// (handles cases where beforeinstallprompt fires at unpredictable times)
+(function(){
+  if(isStandalone()) return;
+  if(localStorage.getItem('installDismissed')) return;
+  if(isIOS()) return;
+  var checks = 0;
+  var poll = setInterval(function(){
+    checks++;
+    if(window._deferredPrompt){
+      clearInterval(poll);
+      setTimeout(showInstallBanner, 1000); // short delay after detecting prompt
+    }
+    if(checks >= 15) clearInterval(poll); // stop after 30 seconds
+  }, 2000);
+})();
 
 // ── INIT ──────────────────────────────────────────────────────────
 // ── LANGUAGE TOGGLE (EN / AF) ─────────────────────────────────────
