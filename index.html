@@ -1511,9 +1511,12 @@ window.addEventListener('popstate', function(e){
   document.addEventListener('touchend',function(e){
     var dx=e.changedTouches[0].clientX-sx;
     var dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<70||Math.abs(dy)>Math.abs(dx)*0.7) return; // not a clean horizontal swipe
-    if(e.target.closest('.modal-overlay.open')) return; // don't swipe inside modals
-    if(e.target.closest('#stayDetailContent')) return; // don't swipe inside stay detail scroll
+    if(Math.abs(dx)<70||Math.abs(dy)>Math.abs(dx)*0.7) return;
+    // Safety check — text nodes don't have closest()
+    var el = e.target && e.target.nodeType===1 ? e.target : null;
+    if(el && el.closest('.modal-overlay.open')) return;
+    if(el && el.closest('#stayDetailContent')) return;
+    if(el && el.closest('.accom-grid,.prov-grid,.shop-grid')) return; // don't swipe inside card grids
     if(dx>0) history.back(); else history.forward();
   },{passive:true});
 })();
@@ -2431,11 +2434,11 @@ document.addEventListener('click',function(e){
 
 function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+function isAppInstalled(){ return localStorage.getItem('tasksa_installed') === '1'; }
 
 function installWasDismissed(){
   var t = localStorage.getItem('installDismissedAt');
   if(!t) return false;
-  // Re-show banner after 3 days
   return (Date.now() - parseInt(t)) < (3 * 24 * 60 * 60 * 1000);
 }
 
@@ -2443,11 +2446,13 @@ window.addEventListener('appinstalled', function(){
   var b = document.getElementById('installBanner');
   if(b) b.style.display = 'none';
   window._deferredPrompt = null;
+  localStorage.setItem('tasksa_installed', '1');
   localStorage.setItem('installDismissedAt', Date.now().toString());
 });
 
 function showInstallBanner(){
   if(isStandalone()) return;
+  if(isAppInstalled()) return;
   if(installWasDismissed()) return;
   if(!window._deferredPrompt) return;
   var banner = document.getElementById('installBanner');
@@ -2464,7 +2469,10 @@ function installApp(){
   hideBanner();
   window._deferredPrompt.prompt();
   window._deferredPrompt.userChoice.then(function(result){
-    if(result.outcome === 'accepted') localStorage.setItem('installDismissedAt', Date.now().toString());
+    if(result.outcome === 'accepted'){
+      localStorage.setItem('tasksa_installed', '1');
+      localStorage.setItem('installDismissedAt', Date.now().toString());
+    }
     window._deferredPrompt = null;
   });
 }
@@ -2476,22 +2484,33 @@ function dismissInstall(){
   if(ios) ios.style.display = 'none';
 }
 
-// iOS: show manual instructions popup
-if(isIOS() && !isStandalone() && !installWasDismissed()){
+// iOS
+if(isIOS() && !isStandalone() && !isAppInstalled() && !installWasDismissed()){
   setTimeout(function(){
     var p = document.getElementById('iosInstallPopup');
     if(p) p.style.display = 'block';
   }, 3000);
 }
 
-// Poll every 2 seconds for 30 seconds waiting for Chrome to offer the prompt
+// Android/Chrome: poll for prompt
 (function(){
   if(isStandalone()) return;
+  if(isAppInstalled()) return;
   if(installWasDismissed()) return;
   if(isIOS()) return;
+  // Also check using getInstalledRelatedApps if available
+  if(navigator.getInstalledRelatedApps){
+    navigator.getInstalledRelatedApps().then(function(apps){
+      if(apps && apps.length > 0){
+        localStorage.setItem('tasksa_installed','1');
+        return; // already installed, don't show banner
+      }
+    }).catch(function(){});
+  }
   var checks = 0;
   var poll = setInterval(function(){
     checks++;
+    if(isAppInstalled()){ clearInterval(poll); return; }
     if(window._deferredPrompt){
       clearInterval(poll);
       setTimeout(showInstallBanner, 1000);
@@ -2515,11 +2534,10 @@ if(isIOS() && !isStandalone() && !installWasDismissed()){
         '=== TaskSA PWA Debug ===',
         'Standalone: ' + isStandalone(),
         'iOS device: ' + isIOS(),
+        'Installed flag: ' + (isAppInstalled() ? 'YES' : 'NO'),
         'Dismissed: ' + (installWasDismissed() ? 'YES (within 3 days)' : 'NO'),
-        'Dismissed at: ' + (localStorage.getItem('installDismissedAt') ? new Date(parseInt(localStorage.getItem('installDismissedAt'))).toLocaleString() : 'never'),
         'Native prompt: ' + (window._deferredPrompt ? '✅ READY' : '❌ Not fired by Chrome'),
-        'SW support: ' + ('serviceWorker' in navigator),
-        'Old dismissed key: ' + (localStorage.getItem('installDismissed')||'not set')
+        'SW support: ' + ('serviceWorker' in navigator)
       ];
       alert(lines.join('\n'));
     }
