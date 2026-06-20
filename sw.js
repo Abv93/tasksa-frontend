@@ -1,4 +1,4 @@
-const CACHE = 'tasksa-v1';
+const CACHE = 'tasksa-v4';
 const OFFLINE_URL = '/';
 const ASSETS = ['/', '/index.html'];
 
