@@ -900,7 +900,7 @@ function toggleFaq(i){
     <div style="position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&w=1400&q=80') center/cover no-repeat;"></div>
     <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(2,11,26,.92),rgba(4,16,32,.80));"></div>
     <div style="position:relative;z-index:1;padding:60px 5%;max-width:700px;">
-      <button class="back-btn" onclick="history.back()" style="margin-bottom:20px;">← Back</button>
+      <button class="back-btn" onclick="goBack()" style="margin-bottom:20px;">← Back</button>
       <div class="live-badge" style="margin-bottom:16px;width:fit-content;"><span class="live-dot"></span>Our Story</div>
       <h1 style="font-size:clamp(28px,4vw,48px);font-weight:900;color:#fff;line-height:1.2;margin-bottom:16px;">Built for South Africa.<br><span style="color:var(--blue3);">By South Africans.</span></h1>
       <p style="font-size:15px;color:rgba(255,255,255,.8);line-height:1.7;max-width:560px;">TaskSA was born from a simple frustration — finding reliable, verified service professionals across South Africa is too difficult. We decided to fix that.</p>
@@ -985,7 +985,7 @@ function toggleFaq(i){
 
 <div class="page" id="page-services">
   <div class="page-header">
-    <button class="back-btn" onclick="history.back()">← Back</button>
+    <button class="back-btn" onclick="goBack()">← Back</button>
     <h2>Home &amp; Local Services</h2>
     <p>Book trusted verified professionals anywhere in South Africa</p>
     <div class="filter-row" style="margin-top:14px;">
@@ -1011,7 +1011,7 @@ function toggleFaq(i){
   <!-- SHOP DIRECTORY -->
   <div id="shopDirectory">
     <div class="page-header">
-      <button class="back-btn" onclick="history.back()">← Back</button>
+      <button class="back-btn" onclick="goBack()">← Back</button>
       <h2>Local Shop Marketplace</h2>
       <p>Discover hidden-gem stores across South Africa — from Khayelitsha to Franschhoek</p>
       <div class="filter-row" style="margin-top:14px;">
@@ -1033,7 +1033,7 @@ function toggleFaq(i){
 
 <div class="page" id="page-accommodation">
   <div class="page-header">
-    <button class="back-btn" onclick="history.back()">← Back</button>
+    <button class="back-btn" onclick="goBack()">← Back</button>
     <h2>Holiday Stays</h2>
     <p>Find and book accommodation across South Africa</p>
     <div class="filter-row" style="margin-top:14px;">
@@ -1488,7 +1488,11 @@ function goPage(id, fromPop){
   document.querySelectorAll('.nav-links a').forEach(function(a){a.classList.remove('active');});
   var na=document.getElementById('nav-'+id);
   if(na) na.classList.add('active');
-  if(!fromPop) history.pushState({page:id}, '', '#'+id);
+  if(!fromPop){
+    history.pushState({page:id}, '', '#'+id);
+    // Maintain our own stack - don't add if same as current
+    if(_pageStack[_pageStack.length-1] !== id) _pageStack.push(id);
+  }
   if(id==='home') loadHome();
   if(id==='services') loadServices();
   if(id==='shop') loadShop();
@@ -1496,28 +1500,49 @@ function goPage(id, fromPop){
   if(id==='dashboard') loadDash();
   if(id==='messages') loadMessages();
 }
+
+function goBack(){
+  if(_pageStack.length > 1){
+    _pageStack.pop();
+    var prev = _pageStack[_pageStack.length-1];
+    goPage(prev, true);
+    history.pushState({page:prev}, '', '#'+prev);
+  } else {
+    goPage('home');
+  }
+}
+
 window.addEventListener('popstate', function(e){
   var id = (e.state && e.state.page) ? e.state.page : 'home';
   goPage(id, true);
 });
 
+// ── PAGE HISTORY STACK ────────────────────────────────────────────
+var _pageStack = ['home']; // tracks where we've been within the app
+
 // ── SWIPE NAVIGATION ──────────────────────────────────────────────
 (function(){
   var sx=0, sy=0;
   document.addEventListener('touchstart',function(e){
-    sx=e.touches[0].clientX;
-    sy=e.touches[0].clientY;
+    if(e.touches[0]){ sx=e.touches[0].clientX; sy=e.touches[0].clientY; }
   },{passive:true});
   document.addEventListener('touchend',function(e){
+    if(!e.changedTouches[0]) return;
     var dx=e.changedTouches[0].clientX-sx;
     var dy=e.changedTouches[0].clientY-sy;
     if(Math.abs(dx)<70||Math.abs(dy)>Math.abs(dx)*0.7) return;
-    // Safety check — text nodes don't have closest()
-    var el = e.target && e.target.nodeType===1 ? e.target : null;
-    if(el && el.closest('.modal-overlay.open')) return;
-    if(el && el.closest('#stayDetailContent')) return;
-    if(el && el.closest('.accom-grid,.prov-grid,.shop-grid')) return; // don't swipe inside card grids
-    if(dx>0) history.back(); else history.forward();
+    try {
+      var el = e.target && e.target.nodeType===1 ? e.target : document.body;
+      if(el.closest('.modal-overlay.open,.cart-sidebar.open,[data-noswipe]')) return;
+    } catch(err){}
+    if(dx>0){
+      // Swipe right = go back
+      if(_pageStack.length > 1){
+        _pageStack.pop();
+        goPage(_pageStack[_pageStack.length-1], true);
+      }
+    }
+    // Swipe left = no forward navigation (avoids accidental nav)
   },{passive:true});
 })();
 function toggleMobileMenu(){ document.getElementById('mobileMenu').classList.toggle('open'); }
@@ -2435,19 +2460,13 @@ document.addEventListener('click',function(e){
 function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
 function isAppInstalled(){ return localStorage.getItem('tasksa_installed') === '1'; }
-
-function installWasDismissed(){
-  var t = localStorage.getItem('installDismissedAt');
-  if(!t) return false;
-  return (Date.now() - parseInt(t)) < (3 * 24 * 60 * 60 * 1000);
-}
+function installWasDismissed(){ return sessionStorage.getItem('installDismissedSession') === '1'; }
 
 window.addEventListener('appinstalled', function(){
   var b = document.getElementById('installBanner');
   if(b) b.style.display = 'none';
   window._deferredPrompt = null;
   localStorage.setItem('tasksa_installed', '1');
-  localStorage.setItem('installDismissedAt', Date.now().toString());
 });
 
 function showInstallBanner(){
@@ -2469,16 +2488,13 @@ function installApp(){
   hideBanner();
   window._deferredPrompt.prompt();
   window._deferredPrompt.userChoice.then(function(result){
-    if(result.outcome === 'accepted'){
-      localStorage.setItem('tasksa_installed', '1');
-      localStorage.setItem('installDismissedAt', Date.now().toString());
-    }
+    if(result.outcome === 'accepted') localStorage.setItem('tasksa_installed', '1');
     window._deferredPrompt = null;
   });
 }
 
 function dismissInstall(){
-  localStorage.setItem('installDismissedAt', Date.now().toString());
+  sessionStorage.setItem('installDismissedSession', '1');
   hideBanner();
   var ios = document.getElementById('iosInstallPopup');
   if(ios) ios.style.display = 'none';
@@ -2496,15 +2512,10 @@ if(isIOS() && !isStandalone() && !isAppInstalled() && !installWasDismissed()){
 (function(){
   if(isStandalone()) return;
   if(isAppInstalled()) return;
-  if(installWasDismissed()) return;
   if(isIOS()) return;
-  // Also check using getInstalledRelatedApps if available
   if(navigator.getInstalledRelatedApps){
     navigator.getInstalledRelatedApps().then(function(apps){
-      if(apps && apps.length > 0){
-        localStorage.setItem('tasksa_installed','1');
-        return; // already installed, don't show banner
-      }
+      if(apps && apps.length > 0) localStorage.setItem('tasksa_installed','1');
     }).catch(function(){});
   }
   var checks = 0;
