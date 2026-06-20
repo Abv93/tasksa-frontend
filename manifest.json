@@ -12,37 +12,20 @@
   "categories": ["business", "lifestyle", "utilities"],
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230a6edb'/><text x='96' y='130' font-family='Arial Black,sans-serif' font-size='90' font-weight='900' text-anchor='middle' fill='white'>T</text></svg>",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%230a6edb'/><text x='256' y='340' font-family='Arial Black,sans-serif' font-size='240' font-weight='900' text-anchor='middle' fill='white'>T</text></svg>",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
   "shortcuts": [
-    {
-      "name": "Browse Services",
-      "short_name": "Services",
-      "url": "/?page=services",
-      "description": "Find verified service providers"
-    },
-    {
-      "name": "Shop Local",
-      "short_name": "Shop",
-      "url": "/?page=shop",
-      "description": "Shop from local SA stores"
-    },
-    {
-      "name": "Holiday Stays",
-      "short_name": "Stays",
-      "url": "/?page=accommodation",
-      "description": "Find holiday accommodation"
-    }
-  ],
-  "screenshots": []
+    { "name": "Browse Services", "short_name": "Services", "url": "/?page=services" },
+    { "name": "Shop Local", "short_name": "Shop", "url": "/?page=shop" }
+  ]
 }

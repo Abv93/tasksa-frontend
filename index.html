@@ -3,21 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#020b1a">
+<meta name="theme-color" content="#0a6edb">
 <title>TaskSA — South Africa's Service Marketplace</title>
-<link rel="manifest" href="/manifest.json">
-<!-- Capture PWA install prompt as early as possible - before any other script loads -->
-<script>
-window._deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', function(e){
-  e.preventDefault();
-  window._deferredPrompt = e;
-});
-</script>
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TaskSA">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230a6edb'/><text x='90' y='120' font-family='Arial Black,sans-serif' font-size='90' font-weight='900' text-anchor='middle' fill='white'>T</text><text x='135' y='120' font-family='Arial Black,sans-serif' font-size='45' font-weight='900' text-anchor='middle' fill='%23F5A623'>SA</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230a6edb'/><text x='90' y='125' font-family='Arial Black' font-size='80' font-weight='900' text-anchor='middle' fill='white'>T</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 
@@ -2457,105 +2450,52 @@ document.addEventListener('click',function(e){
 
 
 // ── PWA INSTALL ───────────────────────────────────────────────────
-// Note: window._deferredPrompt is captured in <head> as early as possible
+var _deferredPrompt = null;
 
-function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
-function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
-function isAppInstalled(){ return localStorage.getItem('tasksa_installed') === '1'; }
-function installWasDismissed(){ return sessionStorage.getItem('installDismissedSession') === '1'; }
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  _deferredPrompt = e;
+  setTimeout(showInstallBanner, 3000);
+});
 
 window.addEventListener('appinstalled', function(){
   var b = document.getElementById('installBanner');
   if(b) b.style.display = 'none';
-  window._deferredPrompt = null;
-  localStorage.setItem('tasksa_installed', '1');
+  _deferredPrompt = null;
 });
 
 function showInstallBanner(){
-  if(isStandalone()) return;
-  if(isAppInstalled()) return;
-  if(installWasDismissed()) return;
-  if(!window._deferredPrompt) return;
+  if(!_deferredPrompt) return;
   var banner = document.getElementById('installBanner');
-  if(banner && banner.style.display === 'none') banner.style.display = 'block';
-}
-
-function hideBanner(){
-  var banner = document.getElementById('installBanner');
-  if(banner) banner.style.display = 'none';
+  if(banner) banner.style.display = 'flex';
 }
 
 function installApp(){
-  if(!window._deferredPrompt) return;
-  hideBanner();
-  window._deferredPrompt.prompt();
-  window._deferredPrompt.userChoice.then(function(result){
-    if(result.outcome === 'accepted') localStorage.setItem('tasksa_installed', '1');
-    window._deferredPrompt = null;
+  if(!_deferredPrompt) return;
+  var banner = document.getElementById('installBanner');
+  if(banner) banner.style.display = 'none';
+  _deferredPrompt.prompt();
+  _deferredPrompt.userChoice.then(function(result){
+    _deferredPrompt = null;
   });
 }
 
 function dismissInstall(){
-  sessionStorage.setItem('installDismissedSession', '1');
-  hideBanner();
+  var banner = document.getElementById('installBanner');
+  if(banner) banner.style.display = 'none';
   var ios = document.getElementById('iosInstallPopup');
   if(ios) ios.style.display = 'none';
 }
 
-// iOS
-if(isIOS() && !isStandalone() && !isAppInstalled() && !installWasDismissed()){
+function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+
+if(isIOS() && !isStandalone()){
   setTimeout(function(){
     var p = document.getElementById('iosInstallPopup');
     if(p) p.style.display = 'block';
   }, 3000);
 }
-
-// Android/Chrome: poll for prompt
-(function(){
-  if(isStandalone()) return;
-  if(isAppInstalled()) return;
-  if(isIOS()) return;
-  if(navigator.getInstalledRelatedApps){
-    navigator.getInstalledRelatedApps().then(function(apps){
-      if(apps && apps.length > 0) localStorage.setItem('tasksa_installed','1');
-    }).catch(function(){});
-  }
-  var checks = 0;
-  var poll = setInterval(function(){
-    checks++;
-    if(isAppInstalled()){ clearInterval(poll); return; }
-    if(window._deferredPrompt){
-      clearInterval(poll);
-      setTimeout(showInstallBanner, 1000);
-    }
-    if(checks >= 15) clearInterval(poll);
-  }, 2000);
-})();
-
-// ── PWA DIAGNOSTIC (tap logo 5 times quickly) ─────────────────────
-(function(){
-  var taps = 0, tapTimer;
-  var logo = document.querySelector('.logo');
-  if(!logo) return;
-  logo.addEventListener('click', function(){
-    taps++;
-    clearTimeout(tapTimer);
-    tapTimer = setTimeout(function(){ taps = 0; }, 1500);
-    if(taps >= 5){
-      taps = 0;
-      var lines = [
-        '=== TaskSA PWA Debug ===',
-        'Standalone: ' + isStandalone(),
-        'iOS device: ' + isIOS(),
-        'Installed flag: ' + (isAppInstalled() ? 'YES' : 'NO'),
-        'Dismissed: ' + (installWasDismissed() ? 'YES (within 3 days)' : 'NO'),
-        'Native prompt: ' + (window._deferredPrompt ? '✅ READY' : '❌ Not fired by Chrome'),
-        'SW support: ' + ('serviceWorker' in navigator)
-      ];
-      alert(lines.join('\n'));
-    }
-  });
-})();
 
 // ── INIT ──────────────────────────────────────────────────────────
 // ── LANGUAGE TOGGLE (EN / AF) ─────────────────────────────────────
