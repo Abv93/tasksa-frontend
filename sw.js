@@ -1,4 +1,4 @@
-const CACHE = 'tasksa-v4';
+const CACHE = 'tasksa-v5';
 const OFFLINE_URL = '/';
 const ASSETS = ['/', '/index.html'];
 
@@ -18,8 +18,11 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.url.includes('/api/')) return;
+  // Navigation always gets fresh from network
   if (e.request.mode === 'navigate') {
-    e.respondWith(fetch(e.request).catch(() => caches.match(OFFLINE_URL)));
+    e.respondWith(
+      fetch(e.request, {cache: 'no-store'}).catch(() => caches.match(OFFLINE_URL))
+    );
     return;
   }
   e.respondWith(

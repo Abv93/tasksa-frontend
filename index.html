@@ -1230,6 +1230,18 @@ function toggleFaq(i){
 
 
 
+
+<!-- PROVIDER PROFILE MODAL -->
+<div class="modal-overlay" id="providerProfileModal">
+  <div class="modal" style="max-width:580px;max-height:92vh;padding:0;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd);flex-shrink:0;">
+      <div style="font-weight:800;font-size:15px;" id="provProfileTitle">Provider Profile</div>
+      <button onclick="closeModal('providerProfileModal')" style="background:var(--bg3);border:1px solid var(--bd);border-radius:50%;width:32px;height:32px;color:var(--t);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div id="provProfileContent" style="overflow-y:auto;flex:1;"></div>
+  </div>
+</div>
+
 <!-- STAY DETAIL MODAL -->
 <div class="modal-overlay" id="stayDetailModal">
   <div class="modal" style="max-width:560px;max-height:92vh;padding:0;display:flex;flex-direction:column;overflow:hidden;">
@@ -1515,30 +1527,23 @@ var _pageStack = ['home']; // tracks where we've been within the app
 
 // ── SWIPE NAVIGATION ──────────────────────────────────────────────
 (function(){
-  var sx=0, sy=0, moved=false;
+  var sx=0, sy=0;
   document.addEventListener('touchstart',function(e){
-    sx=e.touches[0].clientX;
-    sy=e.touches[0].clientY;
-    moved=false;
-  },{passive:true});
-  document.addEventListener('touchmove',function(e){
-    moved=true;
-  },{passive:true});
+    var t=e.touches[0];
+    if(t){sx=t.clientX;sy=t.clientY;}
+  },{passive:true,capture:true});
   document.addEventListener('touchend',function(e){
-    if(!moved) return;
-    var ex=e.changedTouches[0].clientX;
-    var ey=e.changedTouches[0].clientY;
-    var dx=ex-sx, dy=ey-sy;
-    // Must be mostly horizontal and at least 80px
-    if(Math.abs(dx)<80) return;
-    if(Math.abs(dy)>80) return; // too much vertical movement
-    // Don't swipe inside modals
-    try{ if(document.querySelector('.modal-overlay.open')) return; }catch(e){}
+    var t=e.changedTouches[0];
+    if(!t) return;
+    var dx=t.clientX-sx, dy=t.clientY-sy;
+    if(Math.abs(dx)<60) return;
+    if(Math.abs(dy)>Math.abs(dx)*0.8) return;
+    try{ if(document.querySelector('.modal-overlay.open')) return; }catch(err){}
     if(dx>0 && _pageStack.length>1){
       _pageStack.pop();
       goPage(_pageStack[_pageStack.length-1],true);
     }
-  },{passive:true});
+  },{passive:true,capture:true});
 })();
 function toggleMobileMenu(){ document.getElementById('mobileMenu').classList.toggle('open'); }
 function closeMobileMenu(){ document.getElementById('mobileMenu').classList.remove('open'); }
@@ -1653,6 +1658,105 @@ function renderAmenityBadge(icon, label, val){
     +'<div><div style="font-size:11px;color:var(--t3);">'+label+'</div>'
     +'<div style="font-size:12px;font-weight:700;color:'+(ok?'var(--green2)':'#f87171')+';">'+(val===true?'Yes':val===false?'No':val)+'</div></div></div>';
 }
+
+// ── PROVIDER PROFILE ──────────────────────────────────────────────
+async function openProviderProfile(lid){
+  var modal = document.getElementById('providerProfileModal');
+  var content = document.getElementById('provProfileContent');
+  if(!modal||!content) return;
+  content.innerHTML = '<div style="padding:32px;text-align:center;"><div class="skel-line" style="width:60%;margin:0 auto 12px;height:16px;"></div><div class="skel-line" style="width:40%;margin:0 auto;height:12px;"></div></div>';
+  modal.classList.add('open');
+  try {
+    var r = await publicApi('/listings/'+lid);
+    var l = r.data;
+    var catName = (l.category&&l.category.name)||'Service';
+    var city = l.city||''; var prov = l.province||'';
+    var loc = [city,prov].filter(Boolean).join(', ');
+    var priceLabels={HOURLY:'hr',DAILY:'day',PER_JOB:'job',FIXED:'fixed'};
+    var pl = priceLabels[l.priceType]||'job';
+    var priceStr = l.priceFrom ? 'From R'+l.priceFrom+' / '+pl : 'Get Quote';
+    var images = l.images||[];
+    var reviews = (l.reviews||[]);
+    var reviewCount = (l._count&&l._count.reviews)||0;
+    var avgRating = l.rating||5;
+    var starsHtml = '';
+    for(var s=1;s<=5;s++) starsHtml += s<=Math.round(avgRating)?'★':'☆';
+
+    // Photo gallery
+    var galleryHtml = '';
+    if(images.length){
+      galleryHtml = '<div style="padding:0 20px 20px;">'
+        +'<div style="font-size:13px;font-weight:800;margin-bottom:12px;color:var(--t);">📸 Work Photos</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">'
+        +images.map(function(url){
+          return '<div style="aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--bg3);">'
+            +'<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display=\'none\'">'
+            +'</div>';
+        }).join('')
+        +'</div></div>';
+    }
+
+    // Reviews
+    var reviewsHtml = '';
+    if(reviews.length){
+      reviewsHtml = '<div style="padding:0 20px 20px;">'
+        +'<div style="font-size:13px;font-weight:800;margin-bottom:12px;color:var(--t);">⭐ Reviews</div>'
+        +reviews.slice(0,5).map(function(rv){
+          var rStars='';for(var s=1;s<=5;s++) rStars+=s<=(rv.rating||5)?'★':'☆';
+          return '<div style="padding:12px;background:var(--bg3);border-radius:10px;margin-bottom:8px;">'
+            +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
+              +'<div style="font-size:12px;font-weight:700;">'+(rv.client&&rv.client.name||'Client')+'</div>'
+              +'<div style="font-size:12px;color:var(--gold);">'+rStars+'</div>'
+            +'</div>'
+            +'<div style="font-size:13px;color:var(--t2);line-height:1.5;">'+(rv.comment||'')+'</div>'
+            +'</div>';
+        }).join('')
+        +'</div>';
+    } else {
+      reviewsHtml = '<div style="padding:0 20px 20px;"><div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--t);">⭐ Reviews</div><div style="padding:16px;background:var(--bg3);border-radius:10px;text-align:center;color:var(--t3);font-size:13px;">No reviews yet — be the first to book!</div></div>';
+    }
+
+    document.getElementById('provProfileTitle').textContent = l.name;
+    content.innerHTML =
+      // Hero banner with category image
+      '<div style="height:180px;background:linear-gradient(135deg,rgba(10,110,219,.9),rgba(26,143,255,.7));position:relative;display:flex;align-items:center;padding:0 24px;flex-shrink:0;">'
+        +(l.isVerified?'<span style="position:absolute;top:14px;right:14px;background:var(--green2);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;">✓ Verified</span>':'')
+        +'<div>'
+          +'<div style="font-size:28px;margin-bottom:8px;">🔧</div>'
+          +'<div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">'+l.name+'</div>'
+          +'<div style="font-size:13px;color:rgba(255,255,255,.8);">'+catName+(loc?' · '+loc:'')+'</div>'
+        +'</div>'
+      +'</div>'
+      // Stats row
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--bd);">'
+        +'<div style="padding:16px;text-align:center;border-right:1px solid var(--bd);">'
+          +'<div style="font-size:16px;font-weight:800;color:var(--gold);">'+starsHtml+'</div>'
+          +'<div style="font-size:11px;color:var(--t3);margin-top:2px;">'+reviewCount+' reviews</div>'
+        +'</div>'
+        +'<div style="padding:16px;text-align:center;border-right:1px solid var(--bd);">'
+          +'<div style="font-size:15px;font-weight:800;color:var(--blue3);">'+priceStr+'</div>'
+          +'<div style="font-size:11px;color:var(--t3);margin-top:2px;">Pricing</div>'
+        +'</div>'
+        +'<div style="padding:16px;text-align:center;">'
+          +'<div style="font-size:15px;font-weight:800;color:var(--t);">'+images.length+'</div>'
+          +'<div style="font-size:11px;color:var(--t3);margin-top:2px;">Photos</div>'
+        +'</div>'
+      +'</div>'
+      // About
+      +(l.description?'<div style="padding:20px 20px 12px;"><div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--t);">About</div><div style="font-size:13px;color:var(--t2);line-height:1.7;">'+l.description+'</div></div>':'')
+      // Photos
+      + galleryHtml
+      // Reviews
+      + reviewsHtml
+      // Book button
+      +'<div style="padding:16px 20px 24px;">'
+        +'<button onclick="closeModal(\'providerProfileModal\');openBookModal(\''+l.id+'\',\''+encodeURIComponent(l.name)+'\')" class="btn-primary" style="width:100%;padding:14px;font-size:15px;font-weight:700;">📅 Book '+catName+'</button>'
+      +'</div>';
+  } catch(e){
+    content.innerHTML = '<div class="empty" style="padding:40px;"><div class="empty-icon">⚠️</div><h3>Could not load profile</h3><p>'+e.message+'</p></div>';
+  }
+}
+
 
 function openStayDetail(lid){
   // Find from cached data
@@ -2146,6 +2250,7 @@ async function loadProviderDash(stats, main, role){
             +'</div>'
             +'<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">'
               +'<button onclick="openEditListing(\''+l.id+'\',\''+encodeURIComponent(l.name)+'\',\''+encodeURIComponent(l.description||'')+'\',\''+l.priceFrom+'\',\''+encodeURIComponent(l.city||'')+'\',\''+encodeURIComponent(l.location||'')+'\',\''+encodeURIComponent(l.province||'')+'\')" style="background:rgba(26,143,255,.12);border:none;border-radius:8px;color:var(--blue3);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">✏️ Edit</button>'
+              +'<button onclick="openPhotoUpload(\''+l.id+'\','+(l.images&&l.images.length||0)+')" style="background:rgba(245,166,35,.12);border:none;border-radius:8px;color:var(--gold);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">📸 Photos ('+(l.images&&l.images.length||0)+')</button>'
               +'<button onclick="deleteListing(\''+l.id+'\')" style="background:rgba(239,68,68,.12);border:none;border-radius:8px;color:#f87171;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">🗑️ Delete</button>'
             +'</div>'
             +'</div>';
@@ -2275,6 +2380,64 @@ function doSearch(){
   goPage('services');
   var si=document.getElementById('svcSearch');
   if(si&&q){ si.value=q; filterServices(); }
+}
+
+// ── CLOUDINARY PHOTO UPLOAD ───────────────────────────────────────
+var CLOUDINARY_CLOUD = 'dn1ldm8lu';
+var CLOUDINARY_PRESET = 'tasksa';
+
+function openPhotoUpload(listingId, currentCount){
+  if(typeof cloudinary === 'undefined'){
+    toast('Loading photo uploader...','info');
+    var s=document.createElement('script');
+    s.src='https://widget.cloudinary.com/v2.0/global/all.js';
+    s.onload=function(){ doPhotoUpload(listingId, currentCount); };
+    document.head.appendChild(s);
+  } else {
+    doPhotoUpload(listingId, currentCount);
+  }
+}
+
+function doPhotoUpload(listingId, currentCount){
+  var remaining = 8 - (currentCount||0);
+  if(remaining <= 0){ toast('Maximum 8 photos per listing reached','error'); return; }
+  var widget = cloudinary.createUploadWidget({
+    cloudName: CLOUDINARY_CLOUD,
+    uploadPreset: CLOUDINARY_PRESET,
+    folder: 'tasksa/providers',
+    multiple: true,
+    maxFiles: remaining,
+    maxFileSize: 5000000, // 5MB per photo
+    clientAllowedFormats: ['jpg','jpeg','png','webp'],
+    cropping: false,
+    sources: ['local','camera'],
+    styles:{
+      palette:{
+        window:'#020b1a', windowBorder:'#1a8fff',
+        tabIcon:'#1a8fff', menuIcons:'#93b8d8',
+        textDark:'#020b1a', textLight:'#ffffff',
+        link:'#1a8fff', action:'#0a6edb',
+        inactiveTabIcon:'#4a7aa0', error:'#ef4444',
+        inProgress:'#1a8fff', complete:'#22c55e',
+        sourceBg:'#041020'
+      }
+    }
+  }, async function(error, result){
+    if(error){ toast('Upload failed: '+error.message,'error'); return; }
+    if(result.event === 'success'){
+      var url = result.info.secure_url;
+      try {
+        // Fetch current images then add new one
+        var r = await publicApi('/listings/'+listingId);
+        var existing = r.data.images || [];
+        existing.push(url);
+        await api('/listings/'+listingId,'PUT',{images:existing});
+        toast('Photo added!','success');
+        loadDash();
+      } catch(e){ toast('Photo uploaded but could not save: '+e.message,'error'); }
+    }
+  });
+  widget.open();
 }
 
 // ── EDIT / DELETE LISTING ─────────────────────────────────────────
@@ -2429,12 +2592,12 @@ document.addEventListener('click',function(e){
   // Accommodation cards — open stay detail modal
   var accomCard=e.target.closest('[data-accom]');
   if(accomCard){ var lid=accomCard.dataset.lid||e.target.closest('[data-lid]')&&e.target.closest('[data-lid]').dataset.lid; if(lid) openStayDetail(lid); return; }
-  // Provider book buttons (services only)
+  // Provider BOOK button — opens booking modal directly
   var bookBtn=e.target.closest('.prov-book-btn:not([data-accom])');
   if(bookBtn&&!bookBtn.dataset.accom){ openBookModal(bookBtn.dataset.lid, decodeURIComponent(bookBtn.dataset.lname||'')); return; }
-  // Provider cards (click anywhere on card — services only)
+  // Provider CARD (anywhere except book button) — opens provider profile
   var provCard=e.target.closest('[data-lid]:not([data-accom])');
-  if(provCard&&!provCard.dataset.accom&&!e.target.closest('.prov-book-btn')){ openBookModal(provCard.dataset.lid,''); return; }
+  if(provCard&&!provCard.dataset.accom&&!e.target.closest('.prov-book-btn')){ openProviderProfile(provCard.dataset.lid); return; }
   // Add to cart
   if(e.target.classList.contains('add-btn')){
     var d=e.target.dataset;
@@ -2467,7 +2630,7 @@ window.addEventListener('appinstalled', function(){
 function showInstallBanner(){
   if(!_deferredPrompt) return;
   var banner = document.getElementById('installBanner');
-  if(banner) banner.style.display = 'flex';
+  if(banner) banner.style.display = 'block';
 }
 
 function installApp(){
@@ -2571,7 +2734,19 @@ async function init(){
   await tryAutoLogin();
   // Register service worker for PWA install
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js').catch(function(){});
+    navigator.serviceWorker.register('/sw.js').then(function(reg){
+      // Auto-reload when new version is available so standalone app stays current
+      reg.addEventListener('updatefound', function(){
+        var newWorker = reg.installing;
+        if(!newWorker) return;
+        newWorker.addEventListener('statechange', function(){
+          if(newWorker.state === 'activated'){
+            // New version just took over — reload to get fresh files
+            window.location.reload();
+          }
+        });
+      });
+    }).catch(function(){});
   }
   // Handle URL hash for back button
   var hash = window.location.hash.replace('#','');
