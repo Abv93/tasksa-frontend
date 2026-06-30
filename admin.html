@@ -11,16 +11,12 @@
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;display:flex;}
 h1,h2,h3,h4,h5{font-family:'Sora',sans-serif;}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--blue);border-radius:3px;}
-
-/* LOGIN */
 #loginScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
 .login-box{background:var(--bg2);border:1px solid var(--bd2);border-radius:20px;padding:36px;max-width:400px;width:100%;}
 .logo-admin{font-family:'Sora',sans-serif;font-size:26px;font-weight:900;color:var(--blue2);text-align:center;margin-bottom:4px;}
 .logo-admin span{color:var(--gold);}
 .admin-badge{text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:28px;}
 .hint{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:9px;padding:11px 14px;font-size:12px;color:var(--amber2);margin-bottom:16px;}
-
-/* SIDEBAR */
 #sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto;}
 .side-logo{padding:18px 16px;border-bottom:1px solid var(--bd);}
 .side-logo-text{font-family:'Sora',sans-serif;font-size:18px;font-weight:900;color:var(--blue2);}
@@ -37,18 +33,12 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif;}
 .slink-icon{font-size:15px;width:18px;text-align:center;}
 .sbadge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 6px;border-radius:50px;color:white;background:var(--red);}
 .side-bottom{margin-top:auto;padding:14px 8px;border-top:1px solid var(--bd);}
-
-/* MAIN */
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
 .topbar{background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .topbar h2{font-size:17px;font-weight:800;}
 .topbar-actions{display:flex;gap:8px;align-items:center;}
 .content{flex:1;overflow-y:auto;padding:24px;}
-
-/* PANELS */
 .panel{display:none;}.panel.active{display:block;}
-
-/* CARDS */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
 @media(max-width:900px){.stat-grid{grid-template-columns:1fr 1fr;}}
 .stat-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;position:relative;overflow:hidden;}
@@ -61,8 +51,6 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif;}
 .sc-val{font-size:26px;font-weight:800;line-height:1;}
 .sc-sub{font-size:11px;color:var(--t3);margin-top:5px;}
 .sc-icon{font-size:22px;position:absolute;top:14px;right:14px;opacity:.4;}
-
-/* TABLES */
 .table-wrap{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;}
 .table-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bd);flex-wrap:wrap;gap:8px;}
 .table-hdr h3{font-size:14px;font-weight:800;}
@@ -98,8 +86,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
 .pag-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--surf);color:var(--t2);cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif;}
 .pag-btn.active{background:var(--blue2);color:white;border-color:var(--blue2);}
 .empty-row td{text-align:center;padding:32px;color:var(--t3);}
-
-/* FORMS */
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:4px;}
 .field input,.field select,.field textarea{width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:9px 12px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;}
@@ -107,8 +93,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
 .field select option{background:var(--bg2);}
 .field textarea{resize:vertical;min-height:72px;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-
-/* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .2s;}
 .btn:disabled{opacity:.5;cursor:not-allowed;}
 .btn-p{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;}
@@ -117,8 +101,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
 .btn-g:hover{color:var(--t);}
 .btn-d{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;}
 .btn-s{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green2);}
-
-/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--bg2);border:1px solid var(--bd2);border-radius:20px;padding:26px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;position:relative;}
@@ -126,31 +108,21 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
 .modal-sub{font-size:12px;color:var(--t2);margin-bottom:18px;}
 .modal-close{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;background:var(--surf);border:1px solid var(--bd);color:var(--t2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
 .mfooter{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
-
-/* TOAST */
 #toast{position:fixed;bottom:20px;right:20px;z-index:9999;background:var(--surf2);border:1px solid var(--bd2);color:var(--blue3);padding:10px 18px;border-radius:var(--r);font-size:12px;font-weight:700;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;max-width:300px;}
 #toast.show{opacity:1;transform:translateY(0);}
 #toast.success{border-color:rgba(34,197,94,.35);color:var(--green2);}
 #toast.error{border-color:rgba(239,68,68,.35);color:#f87171;}
-
-/* GRID */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 @media(max-width:800px){.grid2{grid-template-columns:1fr;}}
 .card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;}
 .card h4{font-size:13px;font-weight:800;margin-bottom:12px;}
-
-/* REVENUE */
 .rev-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:13px;}
 .rev-row:last-child{border:none;}
 .rev-label{color:var(--t2);}
 .rev-val{font-weight:700;}
-
-/* NOTIFY */
 .notify-types{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
 .ntype{padding:6px 14px;border-radius:50px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--bd);background:var(--surf);color:var(--t2);font-family:'DM Sans',sans-serif;transition:all .2s;}
 .ntype.active{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border-color:transparent;}
-
-/* BANNER COLOR SWATCHES */
 .swatches{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px;}
 .swatch{width:32px;height:32px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:all .2s;}
 .swatch.selected{border-color:white;transform:scale(1.15);}
@@ -158,8 +130,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
 </head>
 <body>
 <div id="toast"></div>
-
-<!-- LOGIN SCREEN -->
 <div id="loginScreen">
   <div class="login-box">
     <div class="logo-admin">Task<span>SA</span></div>
@@ -170,8 +140,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
     <button class="btn btn-p" id="loginBtn" style="width:100%;padding:12px;font-size:14px;" onclick="doLogin()">Sign In to Admin Panel</button>
   </div>
 </div>
-
-<!-- MODALS -->
 <div class="modal-overlay" id="userModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('userModal')">✕</button>
@@ -203,7 +171,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
     </div>
   </div>
 </div>
-
 <div class="modal-overlay" id="catModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('catModal')">✕</button>
@@ -225,7 +192,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
     </div>
   </div>
 </div>
-
 <div class="modal-overlay" id="bannerModal">
   <div class="modal" style="max-width:520px;">
     <button class="modal-close" onclick="closeModal('bannerModal')">✕</button>
@@ -251,7 +217,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
     </div>
   </div>
 </div>
-
 <div class="modal-overlay" id="notifyModal">
   <div class="modal" style="max-width:480px;">
     <button class="modal-close" onclick="closeModal('notifyModal')">✕</button>
@@ -273,8 +238,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
     </div>
   </div>
 </div>
-
-<!-- LAYOUT -->
 <div id="sidebar" style="display:none;">
   <div class="side-logo">
     <div class="side-logo-text">Task<span>SA</span></div>
@@ -285,24 +248,23 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
     <div class="sa-role">Platform Administrator</div>
   </div>
   <div class="nav-group">Overview</div>
-  <div class="slink active" onclick="showPanel('dashboard',this)"><span class="slink-icon">📊</span>Dashboard</div>
-  <div class="slink" onclick="showPanel('revenue',this)"><span class="slink-icon">💰</span>Revenue</div>
+  <div class="slink active" data-panel="dashboard" onclick="showPanel('dashboard',this)"><span class="slink-icon">📊</span>Dashboard</div>
+  <div class="slink" data-panel="revenue" onclick="showPanel('revenue',this)"><span class="slink-icon">💰</span>Revenue</div>
   <div class="nav-group">Management</div>
-  <div class="slink" onclick="showPanel('users',this)"><span class="slink-icon">👥</span>Users<span class="sbadge" id="sbPending" style="display:none">!</span></div>
-  <div class="slink" onclick="showPanel('listings',this)"><span class="slink-icon">📋</span>Listings</div>
-  <div class="slink" onclick="showPanel('bookings',this)"><span class="slink-icon">📅</span>Bookings</div>
-  <div class="slink" onclick="showPanel('orders',this)"><span class="slink-icon">🛒</span>Orders</div>
-  <div class="slink" onclick="showPanel('reviews',this)"><span class="slink-icon">⭐</span>Reviews</div>
+  <div class="slink" data-panel="users" onclick="showPanel('users',this)"><span class="slink-icon">👥</span>Users<span class="sbadge" id="sbPending" style="display:none">!</span></div>
+  <div class="slink" data-panel="listings" onclick="showPanel('listings',this)"><span class="slink-icon">📋</span>Listings</div>
+  <div class="slink" data-panel="bookings" onclick="showPanel('bookings',this)"><span class="slink-icon">📅</span>Bookings</div>
+  <div class="slink" data-panel="orders" onclick="showPanel('orders',this)"><span class="slink-icon">🛒</span>Orders</div>
+  <div class="slink" data-panel="reviews" onclick="showPanel('reviews',this)"><span class="slink-icon">⭐</span>Reviews</div>
   <div class="nav-group">Platform</div>
-  <div class="slink" onclick="showPanel('categories',this)"><span class="slink-icon">🏷️</span>Categories</div>
-  <div class="slink" onclick="showPanel('banners',this)"><span class="slink-icon">📣</span>Banner Ads</div>
-  <div class="slink" onclick="showPanel('notify',this)"><span class="slink-icon">🔔</span>Notifications</div>
-  <div class="slink" onclick="showPanel('settings',this)"><span class="slink-icon">⚙️</span>Settings</div>
+  <div class="slink" data-panel="categories" onclick="showPanel('categories',this)"><span class="slink-icon">🏷️</span>Categories</div>
+  <div class="slink" data-panel="banners" onclick="showPanel('banners',this)"><span class="slink-icon">📣</span>Banner Ads</div>
+  <div class="slink" data-panel="notify" onclick="showPanel('notify',this)"><span class="slink-icon">🔔</span>Notifications</div>
+  <div class="slink" data-panel="settings" onclick="showPanel('settings',this)"><span class="slink-icon">⚙️</span>Settings</div>
   <div class="side-bottom">
     <div class="slink" onclick="doLogout()"><span class="slink-icon">🚪</span>Sign Out</div>
   </div>
 </div>
-
 <div id="main" style="display:none;">
   <div class="topbar">
     <h2 id="topbarTitle">Dashboard</h2>
@@ -312,8 +274,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
     </div>
   </div>
   <div class="content">
-
-    <!-- DASHBOARD -->
     <div class="panel active" id="panel-dashboard">
       <div class="stat-grid" id="statsGrid"></div>
       <div class="grid2">
@@ -321,8 +281,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         <div class="card"><h4>Recent Registrations</h4><div id="recentUsers"></div></div>
       </div>
     </div>
-
-    <!-- REVENUE -->
     <div class="panel" id="panel-revenue">
       <div class="stat-grid" id="revStatsGrid"></div>
       <div class="grid2">
@@ -350,8 +308,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         </div>
       </div>
     </div>
-
-    <!-- USERS -->
     <div class="panel" id="panel-users">
       <div class="table-wrap">
         <div class="table-hdr">
@@ -378,8 +334,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         <div class="table-foot"><span id="usersCount">Loading...</span><div class="pagination" id="usersPag"></div></div>
       </div>
     </div>
-
-    <!-- LISTINGS -->
     <div class="panel" id="panel-listings">
       <div class="table-wrap">
         <div class="table-hdr">
@@ -403,8 +357,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         <div class="table-foot"><span id="listingsCount">Loading...</span><div class="pagination" id="listingsPag"></div></div>
       </div>
     </div>
-
-    <!-- BOOKINGS -->
     <div class="panel" id="panel-bookings">
       <div class="table-wrap">
         <div class="table-hdr">
@@ -428,8 +380,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         <div class="table-foot"><span id="bookingsCount">Loading...</span></div>
       </div>
     </div>
-
-    <!-- ORDERS -->
     <div class="panel" id="panel-orders">
       <div class="table-wrap">
         <div class="table-hdr">
@@ -454,8 +404,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         <div class="table-foot"><span id="ordersCount">Loading...</span></div>
       </div>
     </div>
-
-    <!-- REVIEWS -->
     <div class="panel" id="panel-reviews">
       <div class="table-wrap">
         <div class="table-hdr"><h3>All Reviews</h3></div>
@@ -468,8 +416,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         <div class="table-foot"><span id="reviewsCount">Loading...</span></div>
       </div>
     </div>
-
-    <!-- CATEGORIES -->
     <div class="panel" id="panel-categories">
       <div class="table-wrap">
         <div class="table-hdr">
@@ -484,8 +430,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         </div>
       </div>
     </div>
-
-    <!-- BANNERS -->
     <div class="panel" id="panel-banners">
       <div class="table-wrap">
         <div class="table-hdr">
@@ -500,8 +444,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         </div>
       </div>
     </div>
-
-    <!-- NOTIFICATIONS -->
     <div class="panel" id="panel-notify">
       <div class="card" style="max-width:560px;">
         <h4 style="margin-bottom:16px;">Send Platform Notification</h4>
@@ -518,8 +460,6 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         <button class="btn btn-p" id="n2Btn" onclick="sendNotification2()" style="margin-top:4px;">Send Notification</button>
       </div>
     </div>
-
-    <!-- SETTINGS -->
     <div class="panel" id="panel-settings">
       <div class="grid2">
         <div class="card">
@@ -568,22 +508,15 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         </div>
       </div>
     </div>
-
   </div>
 </div>
-
 <script>
-// ╔═══════════════════════════════════════════════════╗
-// ║  UPDATE THIS TO YOUR RAILWAY URL                  ║
-// ╚═══════════════════════════════════════════════════╝
 const API = localStorage.getItem('tasksa_api_url') || 'https://tasksa-backend-production.up.railway.app/api';
-
 let TOKEN = localStorage.getItem('tasksa_admin_token') || null;
 let currentEditId = null;
 let notifyTarget = 'all';
 let notifyTarget2 = 'all';
 let selectedBannerColor = 'linear-gradient(135deg,#041a3a,#0a6edb)';
-
 const COLORS = [
   'linear-gradient(135deg,#041a3a,#0a6edb)',
   'linear-gradient(135deg,#1a1a0a,#4a3a0a)',
@@ -594,7 +527,6 @@ const COLORS = [
   'linear-gradient(135deg,#041a3a,#0a3a5f)',
   'linear-gradient(135deg,#1a0a2e,#6d28d9)',
 ];
-
 function toast(msg, type){
   const t=document.getElementById('toast');
   t.textContent=(type==='success'?'✓ ':type==='error'?'✕ ':'')+msg;
@@ -602,7 +534,6 @@ function toast(msg, type){
   clearTimeout(t._t);
   t._t=setTimeout(()=>{t.className='';},3000);
 }
-
 async function api(path, method='GET', body=null){
   const h={'Content-Type':'application/json'};
   if(TOKEN) h['Authorization']='Bearer '+TOKEN;
@@ -613,16 +544,12 @@ async function api(path, method='GET', body=null){
   if(!r.ok) throw new Error(d.error||'Request failed');
   return d;
 }
-
 function R(n){ return 'R'+Math.round(n||0).toLocaleString('en-ZA'); }
 function fDate(d){ return new Date(d).toLocaleDateString('en-ZA'); }
 function ini(name){ return (name||'??').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
-
 function openModal(id){ document.getElementById(id)?.classList.add('open'); }
 function closeModal(id){ document.getElementById(id)?.classList.remove('open'); }
 document.addEventListener('click',e=>{ if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open'); });
-
-// ── AUTH ─────────────────────────────────────────────────────
 async function doLogin(){
   const email=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPass').value;
@@ -642,15 +569,12 @@ async function doLogin(){
   } catch(e){ toast(e.message,'error'); }
   btn.textContent='Sign In to Admin Panel'; btn.disabled=false;
 }
-
 function doLogout(){
   TOKEN=null; localStorage.removeItem('tasksa_admin_token');
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('sidebar').style.display='none';
   document.getElementById('main').style.display='none';
 }
-
-// Auto-login if token exists
 async function tryAutoLogin(){
   if(!TOKEN) return;
   try {
@@ -664,8 +588,6 @@ async function tryAutoLogin(){
     } else { TOKEN=null; localStorage.removeItem('tasksa_admin_token'); }
   } catch(e){ TOKEN=null; localStorage.removeItem('tasksa_admin_token'); }
 }
-
-// ── NAVIGATION ────────────────────────────────────────────────
 const PANEL_CONFIG = {
   dashboard:{title:'Dashboard',action:''},
   revenue:{title:'Revenue & Commission',action:''},
@@ -685,7 +607,6 @@ const PANEL_LOADERS = {
   reviews:loadReviews, categories:loadCategories, banners:loadBanners,
   settings:loadSettings
 };
-
 function showPanel(name, el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+name)?.classList.add('active');
@@ -698,8 +619,6 @@ function showPanel(name, el){
   ab.onclick=name==='users'?openAddUser:name==='categories'?openAddCat:name==='banners'?openAddBanner:null;
   if(PANEL_LOADERS[name]) PANEL_LOADERS[name]();
 }
-
-// ── DASHBOARD ─────────────────────────────────────────────────
 async function loadDashboard(){
   try {
     const r=await api('/admin/stats');
@@ -724,8 +643,6 @@ async function loadDashboard(){
     document.getElementById('recentUsers').innerHTML=uHtml||'<p style="font-size:12px;color:var(--t3);padding:12px 0">No users yet</p>';
   } catch(e){ toast('Failed to load dashboard: '+e.message,'error'); }
 }
-
-// ── REVENUE ───────────────────────────────────────────────────
 async function loadRevenue(){
   try {
     const [r,s]=await Promise.all([api('/admin/revenue'),api('/admin/settings')]);
@@ -746,8 +663,6 @@ async function loadRevenue(){
       <div class="rev-row"><span class="rev-label">Total Orders</span><span class="rev-val">${d.orders.count}</span></div>`;
   } catch(e){ toast('Failed to load revenue','error'); }
 }
-
-// ── USERS ─────────────────────────────────────────────────────
 async function loadUsers(page=1){
   const search=document.getElementById('userSearch')?.value||'';
   const role=document.getElementById('userRoleFilter')?.value||'';
@@ -766,13 +681,13 @@ async function loadUsers(page=1){
       <td style="font-size:11px;color:var(--t3)">${fDate(u.createdAt)}</td>
       <td><div class="act-btns">
         <button class="act-btn ab-blue" onclick="openEditUser('${u.id}','${u.name}','${u.email}','${u.phone||''}','${u.role}','${u.province||''}','${u.city||''}',${u.isActive})">Edit</button>
+        <button class="act-btn ab-gold" onclick="openResetUserPassword('${u.id}','${u.name}')">Reset Pass</button>
         <button class="act-btn ${u.isActive?'ab-red':'ab-green'}" onclick="toggleUser('${u.id}',${u.isActive})">${u.isActive?'Deactivate':'Activate'}</button>
       </div></td>
     </tr>`).join('') || '<tr class="empty-row"><td colspan="7">No users found</td></tr>';
   } catch(e){ toast('Failed to load users','error'); }
 }
 function searchUsers(){ loadUsers(1); }
-
 function openAddUser(){
   currentEditId=null;
   document.getElementById('userModalTitle').textContent='Add User';
@@ -807,8 +722,18 @@ async function toggleUser(id,isActive){
   try { await api(`/admin/users/${id}`,'PUT',{isActive:!isActive}); loadUsers(); toast(isActive?'User deactivated':'User activated',isActive?'error':'success'); }
   catch(e){ toast(e.message,'error'); }
 }
-
-// ── LISTINGS ──────────────────────────────────────────────────
+function openResetUserPassword(id,name){
+  const newPass = prompt('Enter a new password for '+name+' (min 8 characters):');
+  if(!newPass) return;
+  if(newPass.length<8){ toast('Password must be at least 8 characters','error'); return; }
+  resetUserPassword(id,newPass);
+}
+async function resetUserPassword(id,newPass){
+  try {
+    await api(`/admin/users/${id}`,'PUT',{password:newPass});
+    toast('Password reset successfully!','success');
+  } catch(e){ toast(e.message,'error'); }
+}
 async function loadListings(page=1){
   const search=document.getElementById('listSearch')?.value||'';
   const type=document.getElementById('listTypeFilter')?.value||'';
@@ -841,8 +766,6 @@ function searchListings(){ loadListings(1); }
 async function verifyListing(id,isVerified){ try{ await api(`/admin/listings/${id}`,'PUT',{isVerified:!isVerified}); loadListings(); toast(isVerified?'Verification removed':'Listing verified!',isVerified?'error':'success'); }catch(e){ toast(e.message,'error'); }}
 async function featureListing(id,isFeatured){ try{ await api(`/admin/listings/${id}`,'PUT',{isFeatured:!isFeatured}); loadListings(); toast(isFeatured?'Removed from featured':'Listing featured!','success'); }catch(e){ toast(e.message,'error'); }}
 async function toggleListing(id,isActive){ try{ await api(`/admin/listings/${id}`,'PUT',{isActive:!isActive}); loadListings(); toast(isActive?'Listing disabled':'Listing enabled','success'); }catch(e){ toast(e.message,'error'); }}
-
-// ── BOOKINGS ──────────────────────────────────────────────────
 async function loadBookings(){
   const status=document.getElementById('bkStatusFilter')?.value||'';
   try {
@@ -865,8 +788,6 @@ async function loadBookings(){
   } catch(e){ toast('Failed to load bookings','error'); }
 }
 async function updateBooking(id,status){ try{ await api(`/admin/bookings/${id}`,'PUT',{status}); loadBookings(); toast('Booking updated','success'); }catch(e){ toast(e.message,'error'); }}
-
-// ── ORDERS ────────────────────────────────────────────────────
 async function loadOrders(){
   const status=document.getElementById('ordStatusFilter')?.value||'';
   try {
@@ -889,8 +810,6 @@ async function loadOrders(){
   } catch(e){ toast('Failed to load orders','error'); }
 }
 async function updateOrder(id,status){ try{ await api(`/orders/${id}/status`,'PATCH',{status}); loadOrders(); toast('Order updated','success'); }catch(e){ toast(e.message,'error'); }}
-
-// ── REVIEWS ───────────────────────────────────────────────────
 async function loadReviews(){
   try {
     const r=await api('/admin/reviews?limit=20');
@@ -906,8 +825,6 @@ async function loadReviews(){
   } catch(e){ toast('Failed to load reviews','error'); }
 }
 async function deleteReview(id){ if(!confirm('Delete this review?')) return; try{ await api(`/admin/reviews/${id}`,'DELETE'); loadReviews(); toast('Review deleted','success'); }catch(e){ toast(e.message,'error'); }}
-
-// ── CATEGORIES ────────────────────────────────────────────────
 async function loadCategories(){
   try {
     const r=await api('/admin/categories');
@@ -938,15 +855,12 @@ async function saveCat(){
   btn.disabled=false; btn.textContent='Save Category';
 }
 async function toggleCat(id,isActive){ try{ await api(`/admin/categories/${id}`,'PUT',{isActive:!isActive}); loadCategories(); toast('Category updated','success'); }catch(e){ toast(e.message,'error'); }}
-
-// ── BANNERS ───────────────────────────────────────────────────
 function buildColorSwatches(){
   const el=document.getElementById('colorSwatches');
   if(!el) return;
   el.innerHTML=COLORS.map((c,i)=>`<div class="swatch${i===0?' selected':''}" style="background:${c}" onclick="selectColor(this,'${c}')"></div>`).join('');
 }
 function selectColor(el,color){ document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected')); el.classList.add('selected'); selectedBannerColor=color; }
-
 async function loadBanners(){
   try {
     const r=await api('/admin/banners');
@@ -987,11 +901,8 @@ async function saveBanner(){
 }
 async function toggleBanner(id,isActive){ try{ await api(`/admin/banners/${id}`,'PUT',{isActive:!isActive}); loadBanners(); toast('Banner updated','success'); }catch(e){ toast(e.message,'error'); }}
 async function deleteBanner(id){ if(!confirm('Delete this banner?')) return; try{ await api(`/admin/banners/${id}`,'DELETE'); loadBanners(); toast('Banner deleted','success'); }catch(e){ toast(e.message,'error'); }}
-
-// ── NOTIFICATIONS ─────────────────────────────────────────────
 function setNotifyTarget(el,val){ notifyTarget=val; document.querySelectorAll('#notifyTypes .ntype').forEach(b=>b.classList.remove('active')); el.classList.add('active'); }
 function setNotifyTarget2(el,val){ notifyTarget2=val; document.querySelectorAll('#notifyTypes2 .ntype').forEach(b=>b.classList.remove('active')); el.classList.add('active'); }
-
 async function sendNotification(){
   const title=document.getElementById('nTitle').value.trim();
   const msg=document.getElementById('nMsg').value.trim();
@@ -1004,7 +915,6 @@ async function sendNotification(){
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Send Notification';
 }
-
 async function sendNotification2(){
   const title=document.getElementById('n2Title').value.trim();
   const msg=document.getElementById('n2Msg').value.trim();
@@ -1017,15 +927,12 @@ async function sendNotification2(){
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Send Notification';
 }
-
-// ── SETTINGS ──────────────────────────────────────────────────
 async function loadSettings(){
   try {
     const r=await api('/admin/settings');
     document.getElementById('settCommRate').textContent=r.data.commissionPercent+'%';
   } catch(e){}
 }
-
 async function changeAdminPassword(){
   const curr = document.getElementById('currPass').value;
   const newp = document.getElementById('newPass').value;
@@ -1043,12 +950,10 @@ async function changeAdminPassword(){
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Change Password';
 }
-
 function showPanelByName(name){
-  const link = document.querySelector('.slink[onclick*="''+name+''"]');
+  const link = document.querySelector('.slink[data-panel="'+name+'"]');
   showPanel(name, link);
 }
-
 tryAutoLogin();
 </script>
 </body>

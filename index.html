@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TaskSA">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230a6edb'/><text x='90' y='125' font-family='Arial Black' font-size='80' font-weight='900' text-anchor='middle' fill='white'>T</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%23020b1a'/><text x='90' y='125' font-family='Arial Black' font-size='80' font-weight='900' text-anchor='middle' fill='%23F5A623'>T</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 
@@ -1385,9 +1385,51 @@ function toggleFaq(i){
     <h3>Welcome back</h3>
     <div class="modal-sub">Sign in to your TaskSA account</div>
     <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.co.za"></div>
-    <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="field"><label>Password</label><div style="position:relative;"><input type="password" id="loginPass" placeholder="••••••••" style="padding-right:44px;" onkeydown="if(event.key==='Enter')doLogin()"><button type="button" onclick="togglePass('loginPass',this)" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t3);cursor:pointer;padding:8px;font-size:16px;">👁️</button></div>
+      <div style="text-align:right;margin-top:6px;"><a href="#" onclick="event.preventDefault();openForgotPassword();" style="font-size:12px;color:var(--blue3);text-decoration:none;">Forgot password?</a></div>
+    </div>
     <button class="btn-primary" id="loginBtn" onclick="doLogin()">Sign In</button>
     <div class="modal-footer-text">Don't have an account? <a onclick="switchModal('loginModal','registerModal')">Register free</a></div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD -->
+<div class="modal-overlay" id="forgotPassModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('forgotPassModal')">✕</button>
+    <div id="forgotPassForm">
+      <h3>Reset Password</h3>
+      <div class="modal-sub">Enter your email and we'll send you a link to reset your password</div>
+      <div class="field"><label>Email</label><input type="email" id="forgotEmail" placeholder="you@example.co.za" onkeydown="if(event.key==='Enter')submitForgotPassword()"></div>
+      <button class="btn-primary" id="forgotBtn" onclick="submitForgotPassword()">Send Reset Link</button>
+      <div class="modal-footer-text">Remembered your password? <a onclick="closeModal('forgotPassModal');openModal('loginModal')">Back to login</a></div>
+    </div>
+    <div id="forgotPassSuccess" style="display:none;text-align:center;padding:20px 0;">
+      <div style="font-size:48px;margin-bottom:16px;">📧</div>
+      <h3 style="margin-bottom:8px;">Check your email</h3>
+      <p style="font-size:13px;color:var(--t3);line-height:1.6;">If an account exists with that email, we've sent a password reset link. It may take a few minutes to arrive — check your spam folder too.</p>
+      <button class="btn-primary" style="margin-top:20px;" onclick="closeModal('forgotPassModal');openModal('loginModal')">Back to Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD (opened from email link) -->
+<div class="modal-overlay" id="resetPassModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('resetPassModal')">✕</button>
+    <div id="resetPassForm">
+      <h3>Choose a New Password</h3>
+      <div class="modal-sub">Enter your new password below</div>
+      <div class="field"><label>New Password</label><div style="position:relative;"><input type="password" id="resetNewPass" placeholder="Min 8 characters" style="padding-right:44px;"><button type="button" onclick="togglePass('resetNewPass',this)" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t3);cursor:pointer;padding:8px;font-size:16px;">👁️</button></div></div>
+      <div class="field"><label>Confirm Password</label><input type="password" id="resetConfirmPass" placeholder="Re-enter password"></div>
+      <button class="btn-primary" id="resetPassBtn" onclick="submitResetPassword()">Reset Password</button>
+    </div>
+    <div id="resetPassSuccess" style="display:none;text-align:center;padding:20px 0;">
+      <div style="font-size:48px;margin-bottom:16px;">✅</div>
+      <h3 style="margin-bottom:8px;">Password Reset!</h3>
+      <p style="font-size:13px;color:var(--t3);">Your password has been changed successfully.</p>
+      <button class="btn-primary" style="margin-top:20px;" onclick="closeModal('resetPassModal');openModal('loginModal')">Log In Now</button>
+    </div>
   </div>
 </div>
 
@@ -1408,7 +1450,7 @@ function toggleFaq(i){
       <div class="field"><label>Phone</label><input id="regPhone" placeholder="+27 82 000 0000"></div>
     </div>
     <div class="field"><label>Email *</label><input type="email" id="regEmail" placeholder="you@example.co.za"></div>
-    <div class="field"><label>Password *</label><input type="password" id="regPass" placeholder="Min 8 characters" onkeydown="if(event.key==='Enter')doRegister()"></div>
+    <div class="field"><label>Password *</label><div style="position:relative;"><input type="password" id="regPass" placeholder="Min 8 characters" style="padding-right:44px;" onkeydown="if(event.key==='Enter')doRegister()"><button type="button" onclick="togglePass('regPass',this)" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t3);cursor:pointer;padding:8px;font-size:16px;">👁️</button></div></div>
     <button class="btn-primary" id="regBtn" onclick="doRegister()">Create Account</button>
     <div class="modal-footer-text">Already have an account? <a onclick="switchModal('registerModal','loginModal')">Sign in</a></div>
   </div>
@@ -1595,6 +1637,70 @@ function setRole(btn){
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────
+async function submitResetPassword(){
+  var newPass = document.getElementById('resetNewPass').value;
+  var confirmPass = document.getElementById('resetConfirmPass').value;
+  if(!newPass||newPass.length<8){ toast('Password must be at least 8 characters','error'); return; }
+  if(newPass!==confirmPass){ toast('Passwords do not match','error'); return; }
+  var btn=document.getElementById('resetPassBtn'); btn.disabled=true; btn.textContent='Resetting...';
+  try {
+    await api('/auth/reset-password','POST',{
+      userId: S._resetUserId,
+      token:  S._resetToken,
+      newPassword: newPass
+    });
+    document.getElementById('resetPassForm').style.display='none';
+    document.getElementById('resetPassSuccess').style.display='block';
+    // Clean URL so refresh doesn't reopen this modal
+    history.replaceState({}, '', window.location.pathname);
+  } catch(e){
+    toast(e.message||'Could not reset password','error');
+  }
+  btn.disabled=false; btn.textContent='Reset Password';
+}
+
+// Check URL for reset-password link on page load
+(function(){
+  var hash = window.location.hash;
+  if(hash.indexOf('reset-password') !== -1){
+    var params = new URLSearchParams(hash.split('?')[1]||'');
+    var token = params.get('token');
+    var id = params.get('id');
+    if(token && id){
+      S._resetToken = token;
+      S._resetUserId = id;
+      setTimeout(function(){ openModal('resetPassModal'); }, 300);
+    }
+  }
+})();
+
+function togglePass(id, btn){
+  var input = document.getElementById(id);
+  if(!input) return;
+  if(input.type === 'password'){ input.type='text'; btn.textContent='🙈'; }
+  else { input.type='password'; btn.textContent='👁️'; }
+}
+
+function openForgotPassword(){
+  closeModal('loginModal');
+  openModal('forgotPassModal');
+}
+
+async function submitForgotPassword(){
+  var email = document.getElementById('forgotEmail').value.trim();
+  if(!email){ toast('Please enter your email','error'); return; }
+  var btn = document.getElementById('forgotBtn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    await api('/auth/forgot-password','POST',{email:email});
+    document.getElementById('forgotPassForm').style.display='none';
+    document.getElementById('forgotPassSuccess').style.display='block';
+  } catch(e){
+    toast(e.message||'Could not send reset email','error');
+  }
+  btn.disabled = false; btn.textContent = 'Send Reset Link';
+}
+
 async function doLogin(){
   var email=document.getElementById('loginEmail').value.trim();
   var pass=document.getElementById('loginPass').value;
@@ -2251,15 +2357,15 @@ async function loadClientDash(stats, main){
         +'<div style="font-size:12px;font-weight:700;color:var(--t);">Messages</div>'
       +'</button>'
     +'</div>'
-    // Bookings + Orders side by side
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="clientGrid">'
+    // Bookings + Orders stacked vertically
+    +'<div style="display:flex;flex-direction:column;gap:16px;" id="clientGrid">'
       +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;">'
-        +'<div style="font-size:14px;font-weight:800;margin-bottom:14px;">📅 Recent Bookings</div>'
+        +'<div style="font-size:14px;font-weight:800;margin-bottom:14px;">📅 My Bookings</div>'
         +'<div id="clientBookings"></div>'
         +'<button onclick="goPage(\'services\')" style="width:100%;margin-top:12px;background:transparent;border:1px solid var(--bd);border-radius:50px;padding:9px;font-size:12px;font-weight:700;color:var(--t3);cursor:pointer;">+ Book a Service</button>'
       +'</div>'
       +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;">'
-        +'<div style="font-size:14px;font-weight:800;margin-bottom:14px;">🛒 Recent Orders</div>'
+        +'<div style="font-size:14px;font-weight:800;margin-bottom:14px;">🛒 My Orders</div>'
         +'<div id="clientOrders"></div>'
         +'<button onclick="goPage(\'shop\')" style="width:100%;margin-top:12px;background:transparent;border:1px solid var(--bd);border-radius:50px;padding:9px;font-size:12px;font-weight:700;color:var(--t3);cursor:pointer;">+ Shop Now</button>'
       +'</div>'
@@ -2272,10 +2378,15 @@ async function loadClientDash(stats, main){
       if(bk.data && bk.data.length){
         cb.innerHTML = bk.data.map(function(b){
           var statusColor = b.status==='CONFIRMED'?'var(--green2)':b.status==='COMPLETED'?'var(--blue3)':b.status==='CANCELLED'?'#f87171':'var(--amber)';
-          return '<div style="padding:11px 0;border-bottom:1px solid var(--bd);">'
-            +'<div style="font-weight:700;font-size:13px;">'+(b.listing?b.listing.name:'Booking')+'</div>'
-            +'<div style="font-size:11px;color:var(--t3);margin-top:2px;">'+fDate(b.scheduledAt)+'</div>'
-            +'<div style="font-size:11px;margin-top:3px;font-weight:700;color:'+statusColor+';">'+b.status+'</div>'
+          var statusLabel = b.status==='CONFIRMED'?'✓ Confirmed':b.status==='COMPLETED'?'✓ Completed':b.status==='CANCELLED'?'✕ Cancelled':'⏳ Pending';
+          return '<div style="padding:14px 0;border-bottom:1px solid var(--bd);">'
+            +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+              +'<div style="font-weight:700;font-size:13px;">'+(b.listing?b.listing.name:'Booking')+'</div>'
+              +'<span style="font-size:11px;font-weight:700;color:'+statusColor+';">'+statusLabel+'</span>'
+            +'</div>'
+            +'<div style="font-size:12px;color:var(--t3);margin-top:4px;">📅 '+fDate(b.scheduledAt)+'</div>'
+            +(b.notes?'<div style="font-size:12px;color:var(--t2);margin-top:4px;padding:8px;background:var(--bg3);border-radius:8px;">📝 '+b.notes+'</div>':'')
+            +'<div style="font-size:12px;color:var(--blue3);margin-top:4px;">'+R(b.totalAmount)+'</div>'
             +'</div>';
         }).join('');
       } else { cb.innerHTML = '<div class="empty" style="padding:24px 0;"><div class="empty-icon" style="font-size:32px;">📅</div><p style="font-size:13px;">No bookings yet</p></div>'; }
@@ -2356,18 +2467,20 @@ async function loadProviderDash(stats, main, role){
     if(pb){
       if(bk.data && bk.data.length){
         pb.innerHTML = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
-          +'<thead><tr style="border-bottom:1px solid var(--bd);"><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;text-transform:uppercase;">Client</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Date</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Amount</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Status</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Action</th></tr></thead>'
+          +'<thead><tr style="border-bottom:1px solid var(--bd);"><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Client</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Date</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Details</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Amount</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Status</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Action</th></tr></thead>'
           +'<tbody>'+bk.data.map(function(b){
             var sc = b.status==='CONFIRMED'?'var(--green2)':b.status==='COMPLETED'?'var(--blue3)':b.status==='CANCELLED'?'#f87171':'var(--amber)';
+            var notes = b.notes||'No notes';
             var actionBtns = b.status==='PENDING'
               ? '<button onclick="updateBookingStatus(\''+b.id+'\',\'CONFIRMED\')" style="background:rgba(34,197,94,.15);border:none;border-radius:6px;color:var(--green2);padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">✓ Accept</button>'
                 +'<button onclick="updateBookingStatus(\''+b.id+'\',\'CANCELLED\')" style="background:rgba(239,68,68,.15);border:none;border-radius:6px;color:#f87171;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✕ Decline</button>'
               : b.status==='CONFIRMED'
-              ? '<button onclick="updateBookingStatus(\''+b.id+'\',\'COMPLETED\')" style="background:rgba(26,143,255,.15);border:none;border-radius:6px;color:var(--blue3);padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✓ Complete</button>'
+              ? '<button onclick="confirmComplete(\''+b.id+'\',\''+encodeURIComponent(b.listing?b.listing.name:'booking')+'\',\''+fDate(b.scheduledAt)+'\')" style="background:rgba(26,143,255,.15);border:none;border-radius:6px;color:var(--blue3);padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✓ Complete</button>'
               : '—';
             return '<tr style="border-bottom:1px solid var(--bd);">'
-              +'<td style="padding:10px 8px;font-weight:700;">'+(b.client?b.client.name:'Client')+'</td>'
-              +'<td style="padding:10px 8px;color:var(--t3);">'+fDate(b.scheduledAt)+'</td>'
+              +'<td style="padding:10px 8px;font-weight:700;">'+(b.client?b.client.name:'Client')+'<br><span style="font-size:10px;color:var(--t3);font-weight:400;">'+(b.client&&b.client.phone||'')+'</span></td>'
+              +'<td style="padding:10px 8px;color:var(--t3);white-space:nowrap;">'+fDate(b.scheduledAt)+'</td>'
+              +'<td style="padding:10px 8px;max-width:200px;"><div style="font-size:11px;color:var(--t2);">'+notes+'</div></td>'
               +'<td style="padding:10px 8px;color:var(--blue3);">'+R(b.totalAmount)+'</td>'
               +'<td style="padding:10px 8px;"><span style="font-size:10px;font-weight:700;color:'+sc+';">'+b.status+'</span></td>'
               +'<td style="padding:10px 8px;">'+actionBtns+'</td>'
@@ -2479,6 +2592,8 @@ async function submitBooking(){
     document.getElementById('bookAddr').value='';
     document.getElementById('bookNotes').value='';
     S.bookingListingId=null;
+    // Auto-refresh dashboard so booking appears immediately
+    if(document.getElementById('page-dashboard').classList.contains('active')) loadDash();
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Confirm Booking';
 }
@@ -2490,6 +2605,13 @@ async function messageUser(partnerId, partnerName){
   setTimeout(function(){
     loadThread(partnerId, decodeURIComponent(partnerName), true);
   }, 400);
+}
+
+function confirmComplete(bookingId, listingName, scheduledDate){
+  var name = decodeURIComponent(listingName);
+  if(confirm('Mark "'+name+'" as COMPLETE?\n\nScheduled date: '+scheduledDate+'\n\nOnly mark complete when the job is actually done.')){
+    updateBookingStatus(bookingId, 'COMPLETED');
+  }
 }
 
 async function updateBookingStatus(bookingId, status){
@@ -2906,7 +3028,7 @@ async function loadMessages(){
   if(_msgPollInterval) clearInterval(_msgPollInterval);
   _msgPollInterval = setInterval(function(){
     loadConversations();
-    if(_currentConvPartner) loadThread(_currentConvPartner.id, _currentConvPartner.name, false);
+    if(_currentConvPartner) refreshThreadMessages(_currentConvPartner.id, false);
   }, 10000);
 }
 
@@ -2956,50 +3078,72 @@ async function loadThread(partnerId, partnerName, scrollToBottom){
   _currentConvPartner = { id: partnerId, name: partnerName };
   var area = document.getElementById('msgArea');
   if(!area) return;
-  area.innerHTML =
-    '<div style="padding:14px 18px;border-bottom:1px solid var(--bd);background:var(--bg2);display:flex;align-items:center;gap:12px;">'
-      +'<div class="conv-avatar" style="width:36px;height:36px;font-size:12px;">'+partnerName.split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)+'</div>'
-      +'<div style="font-weight:700;font-size:14px;">'+partnerName+'</div>'
-    +'</div>'
-    +'<div id="msgThread" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;"></div>'
-    +'<div class="msg-input-row">'
-      +'<input class="msg-input" id="msgInput" placeholder="Type a message..." autocomplete="off">'
-      +'<button class="msg-send-btn" onclick="sendMessage()">➤</button>'
-    +'</div>';
+
+  // Only build shell once — NEVER rebuild the input field (causes flicker + wipes text)
+  if(!document.getElementById('msgThread')){
+    area.innerHTML =
+      '<div style="padding:14px 18px;border-bottom:1px solid var(--bd);background:var(--bg2);display:flex;align-items:center;gap:12px;">'
+        +'<div class="conv-avatar" style="width:36px;height:36px;font-size:12px;" id="msgPartnerAvatar"></div>'
+        +'<div style="font-weight:700;font-size:14px;" id="msgPartnerName"></div>'
+      +'</div>'
+      +'<div id="msgThread" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;"></div>'
+      +'<div class="msg-input-row">'
+        +'<input class="msg-input" id="msgInput" placeholder="Type a message..." autocomplete="off">'
+        +'<button class="msg-send-btn" onclick="sendMessage()">&#x27A4;</button>'
+      +'</div>';
+  }
+
+  // Update header without touching input
+  var av = document.getElementById('msgPartnerAvatar');
+  var nm = document.getElementById('msgPartnerName');
+  if(av) av.textContent = partnerName.split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
+  if(nm) nm.textContent = partnerName;
+
+  document.querySelectorAll('.conv-item').forEach(function(el){
+    el.classList.toggle('active', el.dataset.partnerid === partnerId);
+  });
+
+  await refreshThreadMessages(partnerId, scrollToBottom);
+}
+
+async function refreshThreadMessages(partnerId, scrollToBottom){
+  var thread = document.getElementById('msgThread');
+  if(!thread) return;
   try {
     var r = await api('/messages/'+partnerId);
-    var thread = document.getElementById('msgThread');
-    if(!thread) return;
     if(!r.data.length){
       thread.innerHTML = '<div style="text-align:center;color:var(--t3);font-size:13px;padding:20px;">No messages yet. Say hello!</div>';
     } else {
+      var newCount = r.data.length;
+      if(thread.dataset.msgCount === String(newCount) && !scrollToBottom) return;
+      thread.dataset.msgCount = newCount;
       thread.innerHTML = r.data.map(function(m){
-        var isMine = m.senderId === S.user.id;
-        return '<div style="display:flex;justify-content:'+(isMine?'flex-end':'flex-start')+';margin-bottom:4px;">'
-          +'<div style="max-width:70%;background:'+(isMine?'var(--blue2)':'var(--surf)')+';color:'+(isMine?'#fff':'var(--t)')+';padding:10px 14px;border-radius:'+(isMine?'16px 16px 4px 16px':'16px 16px 16px 4px')+';font-size:13px;line-height:1.5;">'
+        var mine = m.senderId === S.user.id;
+        return '<div style="display:flex;justify-content:'+(mine?'flex-end':'flex-start')+';margin-bottom:4px;">'
+          +'<div style="max-width:75%;background:'+(mine?'var(--blue2)':'var(--surf)')+';color:'+(mine?'#fff':'var(--t)')+';padding:10px 14px;border-radius:'+(mine?'16px 16px 4px 16px':'16px 16px 16px 4px')+';font-size:13px;line-height:1.5;word-break:break-word;">'
             +m.content
             +'<div style="font-size:10px;opacity:.6;margin-top:4px;text-align:right;">'+new Date(m.createdAt).toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'})+'</div>'
           +'</div></div>';
       }).join('');
       if(scrollToBottom) thread.scrollTop = thread.scrollHeight;
     }
-    // Highlight active conversation
-    document.querySelectorAll('.conv-item').forEach(function(el){
-      el.classList.toggle('active', el.dataset.partnerid === partnerId);
-    });
-  } catch(e){ console.error('loadThread:', e.message); }
+  } catch(e){ console.error('refreshThread:', e.message); }
 }
 
 async function sendMessage(){
   var input = document.getElementById('msgInput');
-  if(!input || !input.value.trim() || !_currentConvPartner) return;
+  if(!input||!input.value.trim()||!_currentConvPartner) return;
   var content = input.value.trim();
   input.value = '';
+  input.focus();
   try {
-    await api('/messages', 'POST', { receiverId: _currentConvPartner.id, content: content });
-    loadThread(_currentConvPartner.id, _currentConvPartner.name, true);
+    await api('/messages','POST',{receiverId:_currentConvPartner.id,content:content});
+    await refreshThreadMessages(_currentConvPartner.id, true);
     loadConversations();
-  } catch(e){ toast('Failed to send message', 'error'); }
+  } catch(e){
+    input.value = content;
+    toast('Failed to send message','error');
+  }
 }
 </script>
 
