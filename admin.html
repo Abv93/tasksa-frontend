@@ -18,11 +18,15 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif;}
 .admin-badge{text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:28px;}
 .hint{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:9px;padding:11px 14px;font-size:12px;color:var(--amber2);margin-bottom:16px;}
 #sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto;transition:width .25s,transform .25s;}
-#sidebar.collapsed{width:54px;}
+#sidebar.collapsed{width:58px;overflow:hidden;}
 #sidebar.collapsed .slink span:not(.slink-icon){display:none;}
+#sidebar.collapsed .slink{justify-content:center;padding:10px 0;margin:1px 4px;}
 #sidebar.collapsed .nav-group{display:none;}
-#sidebar.collapsed .sa-name,.#sidebar.collapsed .sa-role{display:none;}
-#sidebar.collapsed .side-logo-text,.#sidebar.collapsed .side-badge{display:none;}
+#sidebar.collapsed .sa-name,#sidebar.collapsed .sa-role{display:none;}
+#sidebar.collapsed .side-logo-text,#sidebar.collapsed .side-badge{display:none;}
+#sidebar.collapsed .side-logo{justify-content:center;padding:14px 8px;}
+#sidebar.collapsed .sbadge{display:none;}
+#sidebar.collapsed .side-bottom .slink span:not(.slink-icon){display:none;}
 .sidebar-toggle{background:none;border:none;color:var(--t3);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;}
 .sidebar-toggle:hover{color:var(--t);background:var(--surf);}
 @media(max-width:768px){
@@ -261,10 +265,10 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
   </div>
 </div>
 <div id="sidebar" style="display:none;">
-  <div class="side-logo" style="display:flex;justify-content:space-between;align-items:center;">
-    <div><div class="side-logo-text">Task<span>SA</span></div>
+  <div class="side-logo" style="display:flex;justify-content:space-between;align-items:center;min-height:60px;">
+    <div id="sideLogoText"><div class="side-logo-text">Task<span>SA</span></div>
     <div class="side-badge">Admin Panel</div></div>
-    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Collapse sidebar">☰</button>
+    <button class="sidebar-toggle" onclick="toggleSidebar()" id="sideToggle" title="Toggle sidebar" style="flex-shrink:0;z-index:10;">☰</button>
   </div>
   <div class="side-admin">
     <div class="sa-name" id="sideAdminName">Admin</div>
@@ -706,6 +710,7 @@ async function loadUsers(page=1){
         <button class="act-btn ab-blue" onclick="openEditUser('${u.id}','${u.name}','${u.email}','${u.phone||''}','${u.role}','${u.province||''}','${u.city||''}',${u.isActive})">Edit</button>
         <button class="act-btn ab-gold" onclick="openResetUserPassword('${u.id}','${u.name}')">Reset Pass</button>
         <button class="act-btn ${u.isActive?'ab-red':'ab-green'}" onclick="toggleUser('${u.id}',${u.isActive})">${u.isActive?'Deactivate':'Activate'}</button>
+        ${u.role!=='ADMIN'?`<button class="act-btn ab-red" onclick="hardDeleteUser('${u.id}','${u.name}')" style="opacity:.8;" title="Permanently delete user">🗑️</button>`:''}  
       </div></td>
     </tr>`).join('') || '<tr class="empty-row"><td colspan="7">No users found</td></tr>';
   } catch(e){ toast('Failed to load users','error'); }
@@ -973,13 +978,28 @@ async function changeAdminPassword(){
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Change Password';
 }
+async function hardDeleteUser(id, name){
+  if(!confirm('⚠️ PERMANENTLY DELETE ' + name + '?\n\nThis cannot be undone. All their data including bookings, messages and reviews will be deleted.\n\nType DELETE to confirm.')) return;
+  const confirm2 = prompt('Type DELETE to permanently remove ' + name);
+  if(confirm2 !== 'DELETE'){ toast('Deletion cancelled','error'); return; }
+  try {
+    await api(`/admin/users/${id}/delete`,'DELETE');
+    loadUsers();
+    toast(name + ' permanently deleted','success');
+  } catch(e){ toast(e.message,'error'); }
+}
+
 function showPanelByName(name){
   const link = document.querySelector('.slink[data-panel="'+name+'"]');
   showPanel(name, link);
 }
 function toggleSidebar(){
   var s = document.getElementById('sidebar');
-  s.classList.toggle('collapsed');
+  var collapsed = s.classList.toggle('collapsed');
+  var btn = document.getElementById('sideToggle');
+  if(btn) btn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+  var logoText = document.getElementById('sideLogoText');
+  if(logoText) logoText.style.display = collapsed ? 'none' : 'block';
 }
 
 tryAutoLogin();

@@ -1274,6 +1274,28 @@ function toggleFaq(i){
 </div>
 
 
+
+<!-- LEAVE A REVIEW MODAL -->
+<div class="modal-overlay" id="reviewModal">
+  <div class="modal" style="max-width:440px;">
+    <button class="modal-close" onclick="closeModal('reviewModal')">✕</button>
+    <h3 id="reviewTitle">Leave a Review</h3>
+    <div class="modal-sub" id="reviewSub">Share your experience</div>
+    <div style="text-align:center;margin:16px 0;">
+      <div style="font-size:36px;letter-spacing:8px;cursor:pointer;" id="starPicker">
+        <span onclick="setReviewRating(1)" data-star="1">☆</span>
+        <span onclick="setReviewRating(2)" data-star="2">☆</span>
+        <span onclick="setReviewRating(3)" data-star="3">☆</span>
+        <span onclick="setReviewRating(4)" data-star="4">☆</span>
+        <span onclick="setReviewRating(5)" data-star="5">☆</span>
+      </div>
+      <div id="ratingLabel" style="font-size:12px;color:var(--t3);margin-top:4px;">Tap to rate</div>
+    </div>
+    <div class="field"><label>Your Review (optional)</label><textarea id="reviewComment" placeholder="Tell others about your experience..." style="min-height:80px;resize:none;"></textarea></div>
+    <button class="btn-primary" id="reviewSubmitBtn" onclick="submitReview()" style="width:100%;padding:13px;">Submit Review</button>
+  </div>
+</div>
+
 <!-- PHOTO MANAGER MODAL -->
 <div class="modal-overlay" id="photoManagerModal">
   <div class="modal" style="max-width:560px;padding:0;overflow:hidden;">
@@ -1941,8 +1963,14 @@ async function openProviderProfile(lid){
     // Reviews
     var reviewsHtml = '';
     if(reviews.length){
+      var writeReviewBtn = (S.user && S.user.role==='CLIENT')
+        ? '<button onclick="openLeaveReview(\''+l.id+'\',\''+encodeURIComponent(l.name)+'\',\''+encodeURIComponent((l.owner&&l.owner.name)||'')+'\')" style="background:rgba(245,166,35,.12);border:none;border-radius:8px;color:var(--gold);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">+ Write Review</button>'
+        : '';
       reviewsHtml = '<div style="padding:0 20px 20px;">'
-        +'<div style="font-size:13px;font-weight:800;margin-bottom:12px;color:var(--t);">⭐ Reviews</div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'
+          +'<div style="font-size:13px;font-weight:800;color:var(--t);">⭐ Reviews ('+reviewCount+')</div>'
+          +writeReviewBtn
+        +'</div>'
         +reviews.slice(0,5).map(function(rv){
           var rStars='';for(var s=1;s<=5;s++) rStars+=s<=(rv.rating||5)?'★':'☆';
           return '<div style="padding:12px;background:var(--bg3);border-radius:10px;margin-bottom:8px;">'
@@ -1955,7 +1983,11 @@ async function openProviderProfile(lid){
         }).join('')
         +'</div>';
     } else {
-      reviewsHtml = '<div style="padding:0 20px 20px;"><div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--t);">⭐ Reviews</div><div style="padding:16px;background:var(--bg3);border-radius:10px;text-align:center;color:var(--t3);font-size:13px;">No reviews yet — be the first to book!</div></div>';
+      var canReview = S.user && S.user.role === 'CLIENT';
+      var reviewCta = canReview
+        ? '<button onclick="openLeaveReview(\''+l.id+'\',\''+encodeURIComponent(l.name)+'\',\''+encodeURIComponent(l.owner&&l.owner.name||'')+'\')" style="margin-top:12px;background:linear-gradient(135deg,var(--gold),#e89a1e);border:none;border-radius:50px;color:#000;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;">⭐ Leave a Review</button>'
+        : '';
+      reviewsHtml = '<div style="padding:0 20px 20px;"><div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--t);">⭐ Reviews</div><div style="padding:16px;background:var(--bg3);border-radius:10px;text-align:center;color:var(--t3);font-size:13px;">No reviews yet — be the first!'+reviewCta+'</div></div>';
     }
 
     document.getElementById('provProfileTitle').textContent = l.name;
@@ -2737,10 +2769,17 @@ function msgClick(el){
 }
 
 function closeMessageThread(){
-  // On mobile: show conv list, hide thread
+  // If there's a previous page in our stack, go back to it
+  if(_pageStack.length > 1){
+    _pageStack.pop();
+    var prev = _pageStack[_pageStack.length-1];
+    goPage(prev, true);
+    history.pushState({page:prev},'','#'+prev);
+    return;
+  }
+  // Otherwise just show conversation list on mobile
   var layout = document.querySelector('.msg-layout');
   if(layout) layout.classList.remove('thread-open');
-  // Reset thread area to empty state
   var area = document.getElementById('msgArea');
   if(area){ area.innerHTML='<div style="flex:1;display:flex;align-items:center;justify-content:center;"><div class=\"empty\"><div class=\"empty-icon\">💬</div><h3>Select a conversation</h3><p>Choose someone to message from the list</p></div></div>'; }
   _currentConvPartner = null;
@@ -2893,6 +2932,61 @@ function doSearch(){
   goPage('services');
   var si=document.getElementById('svcSearch');
   if(si&&q){ si.value=q; filterServices(); }
+}
+
+// ── REVIEWS ──────────────────────────────────────────────────────
+var _reviewListingId = null;
+var _reviewRating = 0;
+
+function openLeaveReview(listingId, listingName, providerName){
+  if(!S.user){ openModal('loginModal'); return; }
+  _reviewListingId = listingId;
+  _reviewRating = 0;
+  document.getElementById('reviewTitle').textContent = 'Review ' + decodeURIComponent(listingName);
+  document.getElementById('reviewSub').textContent = 'How was your experience with ' + decodeURIComponent(providerName) + '?';
+  document.getElementById('reviewComment').value = '';
+  setReviewRating(0);
+  openModal('reviewModal');
+}
+
+function setReviewRating(rating){
+  _reviewRating = rating;
+  var stars = document.querySelectorAll('#starPicker span');
+  var labels = ['Tap to rate','Poor','Fair','Good','Very Good','Excellent!'];
+  stars.forEach(function(s, i){
+    s.textContent = i < rating ? '★' : '☆';
+    s.style.color = i < rating ? 'var(--gold)' : 'var(--t3)';
+  });
+  document.getElementById('ratingLabel').textContent = labels[rating] || 'Tap to rate';
+}
+
+async function submitReview(){
+  if(!_reviewRating){ toast('Please select a star rating','error'); return; }
+  if(!_reviewListingId){ return; }
+  var comment = document.getElementById('reviewComment').value.trim();
+  var btn = document.getElementById('reviewSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  try {
+    await api('/reviews','POST',{
+      listingId: _reviewListingId,
+      rating: _reviewRating,
+      comment: comment || undefined
+    });
+    closeModal('reviewModal');
+    toast('Review submitted! Thank you.','success');
+    if(document.getElementById('providerProfileModal').classList.contains('open')){
+      openProviderProfile(_reviewListingId);
+    }
+  } catch(e){
+    if(e.message && e.message.includes('completed')){
+      toast('You can only review after your booking is marked complete by the provider','error');
+    } else if(e.message && e.message.includes('already reviewed')){
+      toast('You have already left a review for this provider','error');
+    } else {
+      toast(e.message||'Failed to submit review','error');
+    }
+  }
+  btn.disabled = false; btn.textContent = 'Submit Review';
 }
 
 // ── PROFILE PHOTO UPLOAD ─────────────────────────────────────────
