@@ -42,6 +42,18 @@ nav{position:sticky;top:0;z-index:200;background:rgba(2,11,26,.92);backdrop-filt
 .nav-links a{font-size:15px;font-weight:800;padding:8px 20px;border-radius:8px;cursor:pointer;color:var(--t);transition:all .2s;white-space:nowrap;letter-spacing:.3px;text-align:center;}
 .nav-links a:hover{color:#fff;background:var(--surf);}.nav-links a.active{color:var(--blue3);font-weight:900;}
 .nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.notif-btn{position:relative;background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer;padding:6px;border-radius:8px;display:none;}
+.notif-btn:hover{background:var(--surf);color:var(--t);}
+.notif-badge{position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:50px;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1;}
+.notif-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:320px;max-height:400px;background:var(--bg2);border:1px solid var(--bd2);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.5);z-index:400;overflow:hidden;display:none;flex-direction:column;}
+.notif-dropdown.open{display:flex;}
+.notif-header{padding:14px 16px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.notif-list{overflow-y:auto;flex:1;}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s;}
+.notif-item:hover{background:var(--surf);}
+.notif-item.unread{background:rgba(26,143,255,.06);}
+.notif-item.unread::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue2);margin-right:8px;flex-shrink:0;}
+.notif-wrap{position:relative;}
 .btn-signin{background:transparent;border:1px solid var(--bd2);color:var(--t2);padding:7px 16px;border-radius:50px;font-size:13px;transition:all .2s;}
 .btn-signin:hover{border-color:var(--blue2);color:var(--t);}
 .btn-start{background:linear-gradient(135deg,var(--blue),var(--blue2));border:none;color:#fff;padding:7px 16px;border-radius:50px;font-size:13px;font-weight:700;}
@@ -283,7 +295,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:48px 5% 0;}
 
 /* MESSAGES */
 .msg-layout{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 60px);}
-@media(max-width:600px){.msg-layout{grid-template-columns:1fr;}}
+@media(max-width:600px){.msg-layout{grid-template-columns:1fr;} .msg-layout .conv-list{display:block;} .msg-layout .msg-area{display:none;} .msg-layout.thread-open .conv-list{display:none;} .msg-layout.thread-open .msg-area{display:flex;}}
 .conv-list{border-right:1px solid var(--bd);overflow-y:auto;}
 .conv-item{padding:14px 18px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .2s;}
 .conv-item:hover,.conv-item.active{background:var(--surf);}
@@ -318,6 +330,21 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:48px 5% 0;}
     <a onclick="goPage('dashboard')" id="nav-dashboard" class="nav-auth-only" style="display:none;">Dashboard</a>
   </div>
   <div class="nav-right" id="navRight">
+    <div class="notif-wrap">
+      <button class="notif-btn nav-auth-only" id="notifBtn" onclick="toggleNotifDropdown()" title="Notifications">
+        🔔
+        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+      </button>
+      <div class="notif-dropdown" id="notifDropdown">
+        <div class="notif-header">
+          <div style="font-size:13px;font-weight:800;">Notifications</div>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--blue3);font-size:11px;font-weight:700;cursor:pointer;">Mark all read</button>
+        </div>
+        <div class="notif-list" id="notifList">
+          <div style="padding:24px;text-align:center;color:var(--t3);font-size:13px;">No notifications yet</div>
+        </div>
+      </div>
+    </div>
     <button id="langToggle" onclick="toggleLang()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;color:var(--t2);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.5px;">AF</button>
     <button class="btn-signin" onclick="openModal('loginModal')">Sign In</button>
     <button class="btn-start" onclick="openModal('registerModal')">Get Started</button>
@@ -1246,6 +1273,25 @@ function toggleFaq(i){
   <div id="lbCounter" style="color:rgba(255,255,255,.6);font-size:13px;margin-top:14px;"></div>
 </div>
 
+
+<!-- PHOTO MANAGER MODAL -->
+<div class="modal-overlay" id="photoManagerModal">
+  <div class="modal" style="max-width:560px;padding:0;overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd);">
+      <div style="font-weight:800;font-size:15px;">📸 Manage Photos</div>
+      <button onclick="closeModal('photoManagerModal')" style="background:var(--bg3);border:1px solid var(--bd);border-radius:50%;width:32px;height:32px;color:var(--t);cursor:pointer;">✕</button>
+    </div>
+    <div style="padding:20px;">
+      <div id="photoGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;min-height:80px;"></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button id="addPhotoBtn" onclick="addMorePhotos()" class="btn-primary" style="padding:10px 18px;font-size:13px;">+ Add Photos</button>
+        <div id="photoCount" style="font-size:12px;color:var(--t3);"></div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--t3);">Tap ✕ on any photo to remove it. Maximum 8 photos per listing.</div>
+    </div>
+  </div>
+</div>
+
 <!-- PROVIDER PROFILE MODAL -->
 <div class="modal-overlay" id="providerProfileModal">
   <div class="modal" style="max-width:580px;max-height:92vh;padding:0;display:flex;flex-direction:column;overflow:hidden;">
@@ -1290,7 +1336,7 @@ function toggleFaq(i){
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">CITY *</label>
-          <input id="editListingCity" type="text" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+          <select id="editListingCity" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;"><option value="">Select city...</option></select>
         </div>
       </div>
       <div>
@@ -1299,7 +1345,7 @@ function toggleFaq(i){
       </div>
       <div>
         <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">PROVINCE *</label>
-        <select id="editListingProvince" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+        <select id="editListingProvince" onchange="populateCities('editListingProvince','editListingCity')" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
           <option value="">Select province...</option>
           <option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option>
           <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
@@ -1335,7 +1381,7 @@ function toggleFaq(i){
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">CITY *</label>
-          <input id="newListingCity" type="text" placeholder="Cape Town" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+          <select id="newListingCity" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;"><option value="">Select province first...</option></select>
         </div>
       </div>
       <div>
@@ -1344,7 +1390,7 @@ function toggleFaq(i){
       </div>
       <div>
         <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">PROVINCE *</label>
-        <select id="newListingProvince" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+        <select id="newListingProvince" onchange="populateCities('newListingProvince','newListingCity')" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
           <option value="">Select province...</option>
           <option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option>
           <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
@@ -1714,6 +1760,7 @@ async function doLogin(){
     closeModal('loginModal');
     updateNavForUser();
     toast('Welcome back, '+S.user.name+'!','success');
+    loadNotifications(); startNotifPolling();
     goPage('dashboard');
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Sign In';
@@ -1733,6 +1780,7 @@ async function doRegister(){
     closeModal('registerModal');
     updateNavForUser();
     toast('Welcome to TaskSA, '+S.user.name+'!','success');
+    loadNotifications(); startNotifPolling();
     goPage('dashboard');
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Create Account';
@@ -1741,6 +1789,9 @@ function doLogout(){
   S.token=null; S.user=null;
   localStorage.removeItem('tasksa_token');
   updateNavForUser();
+  if(_notifPoll){ clearInterval(_notifPoll); _notifPoll=null; }
+  var badge=document.getElementById('notifBadge'); if(badge) badge.style.display='none';
+  var btn=document.getElementById('notifBtn'); if(btn) btn.style.display='none';
   goPage('home');
   toast('Signed out','success');
 }
@@ -1759,6 +1810,8 @@ async function tryAutoLogin(){
     var r=await api('/auth/me');
     S.user=r.data;
     updateNavForUser();
+    loadNotifications();
+    startNotifPolling();
   } catch(e){ S.token=null; localStorage.removeItem('tasksa_token'); }
 }
 
@@ -1766,13 +1819,14 @@ async function tryAutoLogin(){
 function renderProvCard(l,i){
   var catName=(l.category&&l.category.name)?l.category.name:'';
   var city=l.city||'';
-  var photo=PROV_IMGS[catName]||PROV_DEFAULTS[i%PROV_DEFAULTS.length];
+  var placeholder=PROV_IMGS[catName]||PROV_DEFAULTS[i%PROV_DEFAULTS.length];
+  var cardPhoto=(l.owner&&l.owner.avatar)?l.owner.avatar:placeholder;
   var priceLabels={HOURLY:'hr',DAILY:'day',PER_JOB:'job',FIXED:'fixed'};
   var pl=priceLabels[l.priceType]||'job';
   var priceStr=l.priceFrom?'From '+R(l.priceFrom)+'/'+pl:'Get Quote';
   var stars='★★★★'+(l.rating>=4.8?'★':'☆');
   return '<div class="prov-card" data-lid="'+l.id+'" data-lname="'+encodeURIComponent(l.name)+'">'
-    +'<div class="prov-photo" style="background-image:url('+photo+');">'+(l.isVerified?'<span class="prov-vbadge">✓ Verified</span>':'')+'</div>'
+    +'<div class="prov-photo" style="background-image:url('+cardPhoto+');background-size:cover;background-position:center;">'+(l.isVerified?'<span class="prov-vbadge">✓ Verified</span>':'')+'</div>'
     +'<div class="prov-body">'
       +'<div class="prov-name">'+l.name+'</div>'
       +'<div class="prov-role">'+catName+(city?' · '+city:'')+'</div>'
@@ -1905,12 +1959,16 @@ async function openProviderProfile(lid){
     }
 
     document.getElementById('provProfileTitle').textContent = l.name;
+    // Avatar for hero section — shows real photo if provider has uploaded one
+    var ownerAvatar = (l.owner && l.owner.avatar) ? l.owner.avatar : '';
+    var heroContent = ownerAvatar
+      ? '<div style="width:80px;height:80px;border-radius:50%;background-image:url(' + ownerAvatar + ');background-size:cover;background-position:center;border:3px solid rgba(255,255,255,.3);flex-shrink:0;"></div>'
+      : '<div style="font-size:36px;flex-shrink:0;">&#x1F527;</div>';
     content.innerHTML =
-      // Hero banner with category image
-      '<div style="height:180px;background:linear-gradient(135deg,rgba(10,110,219,.9),rgba(26,143,255,.7));position:relative;display:flex;align-items:center;padding:0 24px;flex-shrink:0;">'
-        +(l.isVerified?'<span style="position:absolute;top:14px;right:14px;background:var(--green2);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;">✓ Verified</span>':'')
+      '<div style="height:180px;background:linear-gradient(135deg,rgba(10,110,219,.9),rgba(26,143,255,.7));position:relative;display:flex;align-items:center;padding:0 24px;gap:16px;flex-shrink:0;">'
+        +(l.isVerified?'<span style="position:absolute;top:14px;right:14px;background:var(--green2);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;">&#x2713; Verified</span>':'')
+        +heroContent
         +'<div>'
-          +'<div style="font-size:28px;margin-bottom:8px;">🔧</div>'
           +'<div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">'+l.name+'</div>'
           +'<div style="font-size:13px;color:rgba(255,255,255,.8);">'+catName+(loc?' · '+loc:'')+'</div>'
         +'</div>'
@@ -2311,7 +2369,11 @@ async function loadDash(){
 
   if(role === 'PROVIDER' || role === 'HOST'){
     if(title) title.textContent = role === 'HOST' ? 'Host Dashboard' : 'Provider Dashboard';
-    if(actions) actions.innerHTML = '<button class="btn-primary" style="padding:9px 18px;font-size:13px;" onclick="openAddListingModal()">+ Add Listing</button>';
+    var avatarHtml = S.user && S.user.avatar
+      ? '<img src="'+S.user.avatar+'" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;">'
+      : '📷 ';
+    if(actions) actions.innerHTML = '<button class="btn-primary" style="padding:9px 18px;font-size:13px;" onclick="openAddListingModal()">+ Add Listing</button>'
+      +'<button onclick="uploadProfilePhoto()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:50px;color:var(--t2);font-size:13px;padding:9px 16px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;">'+avatarHtml+'Profile Photo</button>';
     await loadProviderDash(stats, main, role);
   } else if(role === 'SHOP_OWNER'){
     if(title) title.textContent = 'Shop Dashboard';
@@ -2479,7 +2541,7 @@ async function loadProviderDash(stats, main, role){
             +'</div>'
             +'<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">'
               +'<button onclick="openEditListing(\''+l.id+'\',\''+encodeURIComponent(l.name)+'\',\''+encodeURIComponent(l.description||'')+'\',\''+l.priceFrom+'\',\''+encodeURIComponent(l.city||'')+'\',\''+encodeURIComponent(l.location||'')+'\',\''+encodeURIComponent(l.province||'')+'\')" style="background:rgba(26,143,255,.12);border:none;border-radius:8px;color:var(--blue3);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">✏️ Edit</button>'
-              +'<button onclick="openPhotoUpload(\''+l.id+'\','+(l.images&&l.images.length||0)+')" style="background:rgba(245,166,35,.12);border:none;border-radius:8px;color:var(--gold);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">📸 Photos ('+(l.images&&l.images.length||0)+')</button>'
+              +'<button onclick="openPhotoManager(\''+l.id+'\')" style="background:rgba(245,166,35,.12);border:none;border-radius:8px;color:var(--gold);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">📸 Photos ('+(l.images&&l.images.length||0)+')</button>'
               +'<button onclick="deleteListing(\''+l.id+'\')" style="background:rgba(239,68,68,.12);border:none;border-radius:8px;color:#f87171;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">🗑️ Delete</button>'
             +'</div>'
             +'</div>';
@@ -2539,7 +2601,7 @@ async function loadProviderDash(stats, main, role){
             +'</div>';
         }).join('');
       } else {
-        pm.innerHTML = '<div style="font-size:13px;color:var(--t3);padding:12px 0;">No messages yet</div>';
+        pm.innerHTML = '<div style="font-size:13px;color:var(--t3);padding:12px 0;">No messages yet — when clients message you, they\'ll appear here.</div>';
       }
     }
   } catch(e){ console.error('provider messages:', e.message); }
@@ -2675,10 +2737,12 @@ function msgClick(el){
 }
 
 function closeMessageThread(){
-  // Hide the thread, show the conversation list
+  // On mobile: show conv list, hide thread
+  var layout = document.querySelector('.msg-layout');
+  if(layout) layout.classList.remove('thread-open');
+  // Reset thread area to empty state
   var area = document.getElementById('msgArea');
-  var list = document.getElementById('convPanel');
-  if(area){ area.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--t3);font-size:14px;">Select a conversation to start messaging</div>'; }
+  if(area){ area.innerHTML='<div style="flex:1;display:flex;align-items:center;justify-content:center;"><div class=\"empty\"><div class=\"empty-icon\">💬</div><h3>Select a conversation</h3><p>Choose someone to message from the list</p></div></div>'; }
   _currentConvPartner = null;
 }
 
@@ -2710,6 +2774,120 @@ async function updateBookingStatus(bookingId, status){
   } catch(e){ toast(e.message||'Could not update booking','error'); }
 }
 
+// ── NOTIFICATIONS ────────────────────────────────────────────────
+var _notifOpen = false;
+var _notifPoll = null;
+
+async function loadNotifications(){
+  if(!S.user) return;
+  try {
+    var r = await api('/notifications');
+    var unread = r.unread || 0;
+    var badge = document.getElementById('notifBadge');
+    var btn = document.getElementById('notifBtn');
+    if(badge){
+      badge.textContent = unread > 9 ? '9+' : unread;
+      badge.style.display = unread > 0 ? 'flex' : 'none';
+    }
+    if(btn) btn.style.display = 'flex';
+    renderNotifications(r.data || []);
+  } catch(e){ console.error('notifications:', e.message); }
+}
+
+function renderNotifications(notifications){
+  var list = document.getElementById('notifList');
+  if(!list) return;
+  if(!notifications.length){
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--t3);font-size:13px;">No notifications yet</div>';
+    return;
+  }
+  var icons = { BOOKING:'📅', MESSAGE:'💬', REVIEW:'⭐', SYSTEM:'📢' };
+  list.innerHTML = notifications.slice(0,20).map(function(n){
+    var icon = icons[n.type] || '🔔';
+    var time = timeAgo(n.createdAt);
+    return '<div class="notif-item'+(n.isRead?'':' unread')+'" onclick="handleNotifClick(\''+n.id+'\',\''+n.type+'\')">'
+      +'<div style="display:flex;align-items:flex-start;gap:10px;">'
+        +'<span style="font-size:18px;flex-shrink:0;">'+icon+'</span>'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-size:13px;font-weight:'+(n.isRead?'500':'700')+';color:var(--t);margin-bottom:2px;">'+n.title+'</div>'
+          +'<div style="font-size:12px;color:var(--t3);line-height:1.4;">'+n.message+'</div>'
+          +'<div style="font-size:10px;color:var(--t3);margin-top:4px;">'+time+'</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function timeAgo(dateStr){
+  var diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if(diff < 60) return 'just now';
+  if(diff < 3600) return Math.floor(diff/60)+'m ago';
+  if(diff < 86400) return Math.floor(diff/3600)+'h ago';
+  return Math.floor(diff/86400)+'d ago';
+}
+
+function toggleNotifDropdown(){
+  var dd = document.getElementById('notifDropdown');
+  if(!dd) return;
+  _notifOpen = !_notifOpen;
+  dd.classList.toggle('open', _notifOpen);
+  if(_notifOpen) loadNotifications();
+}
+
+function closeNotifDropdown(){
+  _notifOpen = false;
+  var dd = document.getElementById('notifDropdown');
+  if(dd) dd.classList.remove('open');
+}
+
+async function handleNotifClick(id, type){
+  try { await api('/notifications/'+id+'/read','PATCH'); } catch(e){}
+  if(type === 'MESSAGE') goPage('messages');
+  else goPage('dashboard');
+  closeNotifDropdown();
+  loadNotifications();
+}
+
+async function markAllRead(){
+  try {
+    await api('/notifications/read-all','PATCH');
+    loadNotifications();
+    toast('All notifications marked as read','success');
+  } catch(e){ toast('Failed to mark as read','error'); }
+}
+
+document.addEventListener('click', function(e){
+  if(_notifOpen && !e.target.closest('.notif-wrap')) closeNotifDropdown();
+});
+
+function startNotifPolling(){
+  if(_notifPoll) clearInterval(_notifPoll);
+  _notifPoll = setInterval(function(){ if(S.user) loadNotifications(); }, 30000);
+}
+
+var SA_CITIES = {
+  'Western Cape': ['Cape Town','Bellville','Brackenfell','Claremont','Durbanville','Fish Hoek','Franschhoek','George','Hermanus','Knysna','Kuilsrivier','Malmesbury','Mossel Bay','Muizenberg','Observatory','Oudtshoorn','Paarl','Plettenberg Bay','Rondebosch','Somerset West','Stellenbosch','Strand','Swellendam','Woodstock','Worcester'],
+  'Gauteng': ['Alberton','Bedfordview','Benoni','Boksburg','Brakpan','Centurion','Edenvale','Fourways','Germiston','Johannesburg','Kempton Park','Krugersdorp','Midrand','Northcliff','Pretoria','Randburg','Roodepoort','Sandton','Soweto','Springs','Vanderbijlpark','Vereeniging'],
+  'KwaZulu-Natal': ['Ballito','Chatsworth','Durban','Margate','Newcastle','Phoenix','Pietermaritzburg','Pinetown','Port Shepstone','Richards Bay','Stanger','Tongaat','Umhlanga','Umlazi'],
+  'Eastern Cape': ['Bhisho','East London','Grahamstown','Gqeberha (Port Elizabeth)','King Williams Town','Mthatha','Queenstown','Uitenhage'],
+  'Limpopo': ['Louis Trichardt','Mokopane','Phalaborwa','Polokwane','Thohoyandou','Tzaneen'],
+  'Mpumalanga': ['Ermelo','Mbombela (Nelspruit)','Middelburg','Secunda','Standerton','Witbank (eMalahleni)'],
+  'North West': ['Brits','Hartbeespoort','Klerksdorp','Lichtenburg','Mafikeng','Potchefstroom','Rustenburg'],
+  'Free State': ['Bloemfontein','Kroonstad','Phuthaditjhaba','Sasolburg','Welkom'],
+  'Northern Cape': ['De Aar','Kimberley','Springbok','Upington']
+};
+
+function populateCities(provinceId, cityId){
+  var prov = document.getElementById(provinceId);
+  var cityEl = document.getElementById(cityId);
+  if(!prov || !cityEl) return;
+  var cities = SA_CITIES[prov.value] || [];
+  var current = cityEl.value;
+  cityEl.innerHTML = '<option value="">Select city...</option>' + cities.map(function(c){
+    return '<option value="'+c+'"'+(c===current?' selected':'')+'>'+c+'</option>';
+  }).join('');
+}
+
 function doSearch(){
   var q=(document.getElementById('heroSearch')&&document.getElementById('heroSearch').value)||'';
   goPage('services');
@@ -2717,59 +2895,139 @@ function doSearch(){
   if(si&&q){ si.value=q; filterServices(); }
 }
 
-// ── CLOUDINARY PHOTO UPLOAD ───────────────────────────────────────
-var CLOUDINARY_CLOUD = 'dn1ldm8lu';
-var CLOUDINARY_PRESET = 'tasksa';
-
-function openPhotoUpload(listingId, currentCount){
+// ── PROFILE PHOTO UPLOAD ─────────────────────────────────────────
+function uploadProfilePhoto(){
   if(typeof cloudinary === 'undefined'){
-    toast('Loading photo uploader...','info');
-    var s=document.createElement('script');
-    s.src='https://widget.cloudinary.com/v2.0/global/all.js';
-    s.onload=function(){ doPhotoUpload(listingId, currentCount); };
+    toast('Loading uploader...','info');
+    var s = document.createElement('script');
+    s.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
+    s.onload = launchProfilePhotoWidget;
     document.head.appendChild(s);
   } else {
-    doPhotoUpload(listingId, currentCount);
+    launchProfilePhotoWidget();
   }
 }
 
-function doPhotoUpload(listingId, currentCount){
-  var remaining = 8 - (currentCount||0);
-  if(remaining <= 0){ toast('Maximum 8 photos per listing reached','error'); return; }
+function launchProfilePhotoWidget(){
+  var widget = cloudinary.createUploadWidget({
+    cloudName: CLOUDINARY_CLOUD,
+    uploadPreset: CLOUDINARY_PRESET,
+    folder: 'tasksa/avatars',
+    multiple: false,
+    maxFiles: 1,
+    maxFileSize: 5000000,
+    clientAllowedFormats: ['jpg','jpeg','png','webp'],
+    cropping: true,
+    croppingAspectRatio: 1,
+    croppingDefaultSelectionRatio: 1,
+    sources: ['local','camera'],
+    styles:{ palette:{ window:'#020b1a', windowBorder:'#1a8fff', tabIcon:'#1a8fff', menuIcons:'#93b8d8', textDark:'#020b1a', textLight:'#ffffff', link:'#1a8fff', action:'#0a6edb', inactiveTabIcon:'#4a7aa0', error:'#ef4444', inProgress:'#1a8fff', complete:'#22c55e', sourceBg:'#041020' } }
+  }, async function(error, result){
+    if(error){ toast('Upload failed: '+error.message,'error'); return; }
+    if(result.event === 'success'){
+      var url = result.info.secure_url;
+      try {
+        await api('/users/profile','PUT',{avatar: url});
+        S.user.avatar = url;
+        toast('Profile photo updated!','success');
+        loadDash(); // Refresh to show new photo in button
+      } catch(e){ toast('Photo saved but could not update profile: '+e.message,'error'); }
+    }
+  });
+  widget.open();
+}
+
+// ── PHOTO MANAGEMENT ─────────────────────────────────────────────
+var CLOUDINARY_CLOUD  = 'dn1ldm8lu';
+var CLOUDINARY_PRESET = 'tasksa';
+var _photoListingId   = null;
+var _photoImages      = [];
+
+async function openPhotoManager(listingId){
+  _photoListingId = listingId;
+  // Fetch latest images from backend
+  try {
+    var r = await publicApi('/listings/'+listingId);
+    _photoImages = r.data.images || [];
+  } catch(e){ _photoImages = []; }
+  renderPhotoGrid();
+  openModal('photoManagerModal');
+}
+
+function renderPhotoGrid(){
+  var grid  = document.getElementById('photoGrid');
+  var count = document.getElementById('photoCount');
+  var addBtn= document.getElementById('addPhotoBtn');
+  if(!grid) return;
+  if(_photoImages.length === 0){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--t3);font-size:13px;">No photos yet. Tap Add Photos to upload your first photo.</div>';
+  } else {
+    grid.innerHTML = _photoImages.map(function(url, idx){
+      return '<div style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--bg3);">'
+        +'<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;" loading="lazy">'
+        +'<button onclick="deletePhoto('+idx+')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);border:none;border-radius:50%;width:24px;height:24px;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>'
+      +'</div>';
+    }).join('');
+  }
+  if(count) count.textContent = _photoImages.length + ' / 8 photos';
+  if(addBtn) addBtn.style.display = _photoImages.length >= 8 ? 'none' : 'inline-flex';
+}
+
+async function deletePhoto(idx){
+  if(!confirm('Remove this photo? This cannot be undone.')) return;
+  _photoImages.splice(idx, 1);
+  // Save to backend immediately
+  try {
+    await api('/listings/'+_photoListingId,'PUT',{images:_photoImages});
+    renderPhotoGrid();
+    toast('Photo removed','success');
+    loadDash(); // Refresh dashboard listing card count
+  } catch(e){
+    toast('Failed to remove photo: '+e.message,'error');
+    // Restore the photo if save failed
+    var r = await publicApi('/listings/'+_photoListingId);
+    _photoImages = r.data.images || [];
+    renderPhotoGrid();
+  }
+}
+
+function addMorePhotos(){
+  if(_photoImages.length >= 8){ toast('Maximum 8 photos per listing','error'); return; }
+  if(typeof cloudinary === 'undefined'){
+    toast('Loading uploader...','info');
+    var s = document.createElement('script');
+    s.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
+    s.onload = function(){ launchUploadWidget(); };
+    document.head.appendChild(s);
+  } else {
+    launchUploadWidget();
+  }
+}
+
+function launchUploadWidget(){
+  var remaining = 8 - _photoImages.length;
   var widget = cloudinary.createUploadWidget({
     cloudName: CLOUDINARY_CLOUD,
     uploadPreset: CLOUDINARY_PRESET,
     folder: 'tasksa/providers',
     multiple: true,
     maxFiles: remaining,
-    maxFileSize: 5000000, // 5MB per photo
+    maxFileSize: 5000000,
     clientAllowedFormats: ['jpg','jpeg','png','webp'],
     cropping: false,
     sources: ['local','camera'],
-    styles:{
-      palette:{
-        window:'#020b1a', windowBorder:'#1a8fff',
-        tabIcon:'#1a8fff', menuIcons:'#93b8d8',
-        textDark:'#020b1a', textLight:'#ffffff',
-        link:'#1a8fff', action:'#0a6edb',
-        inactiveTabIcon:'#4a7aa0', error:'#ef4444',
-        inProgress:'#1a8fff', complete:'#22c55e',
-        sourceBg:'#041020'
-      }
-    }
+    styles:{ palette:{ window:'#020b1a', windowBorder:'#1a8fff', tabIcon:'#1a8fff', menuIcons:'#93b8d8', textDark:'#020b1a', textLight:'#ffffff', link:'#1a8fff', action:'#0a6edb', inactiveTabIcon:'#4a7aa0', error:'#ef4444', inProgress:'#1a8fff', complete:'#22c55e', sourceBg:'#041020' } }
   }, async function(error, result){
     if(error){ toast('Upload failed: '+error.message,'error'); return; }
     if(result.event === 'success'){
-      var url = result.info.secure_url;
+      _photoImages.push(result.info.secure_url);
+      // Save updated images array to backend
       try {
-        // Fetch current images then add new one
-        var r = await publicApi('/listings/'+listingId);
-        var existing = r.data.images || [];
-        existing.push(url);
-        await api('/listings/'+listingId,'PUT',{images:existing});
+        await api('/listings/'+_photoListingId,'PUT',{images:_photoImages});
+        renderPhotoGrid();
         toast('Photo added!','success');
         loadDash();
-      } catch(e){ toast('Photo uploaded but could not save: '+e.message,'error'); }
+      } catch(e){ toast('Uploaded but could not save: '+e.message,'error'); }
     }
   });
   widget.open();
@@ -2785,6 +3043,9 @@ function openEditListing(id, name, desc, price, city, location, province){
   document.getElementById('editListingLocation').value = decodeURIComponent(location||'');
   var provSel = document.getElementById('editListingProvince');
   if(provSel) provSel.value = decodeURIComponent(province||'');
+  populateCities('editListingProvince','editListingCity');
+  var citySel = document.getElementById('editListingCity');
+  if(citySel) citySel.value = decodeURIComponent(city||'');
   openModal('editListingModal');
 }
 
@@ -3181,6 +3442,10 @@ async function loadThread(partnerId, partnerName, scrollToBottom){
         +'<button class="msg-send-btn" onclick="sendMessage()">&#x27A4;</button>'
       +'</div>';
   }
+
+  // On mobile: hide conv list, show thread
+  var layout = document.querySelector('.msg-layout');
+  if(layout) layout.classList.add('thread-open');
 
   // Update header without touching input
   var av = document.getElementById('msgPartnerAvatar');
