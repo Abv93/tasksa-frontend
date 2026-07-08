@@ -1565,6 +1565,10 @@ function toggleFaq(i){
   </div>
   <div class="cart-footer" id="cartFooter" style="display:none;">
     <div class="cart-total"><span>Total</span><span id="cartTotal">R0</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+      <div onclick="selectPayment('CASH');this.style.borderColor='var(--blue2)';this.nextElementSibling.style.borderColor='var(--bd)';" style="border:2px solid var(--blue2);border-radius:8px;padding:8px;text-align:center;cursor:pointer;background:rgba(26,143,255,.08);font-size:12px;font-weight:700;">💵 Cash</div>
+      <div onclick="selectPayment('CARD');this.style.borderColor='var(--gold)';this.previousElementSibling.style.borderColor='var(--bd)';" style="border:2px solid var(--bd);border-radius:8px;padding:8px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;">💳 Card</div>
+    </div>
     <button class="btn-primary" onclick="openCheckout()">Checkout</button>
   </div>
 </div>
@@ -2121,7 +2125,7 @@ function openStayDetail(lid){
           +'<span style="font-size:16px;font-weight:800;color:var(--blue3);" id="stayTotal"></span>'
         +'</div>'
       +'</div>'
-      +'<button onclick="submitStayBooking(\''+lid+'\')" class="btn-primary" style="width:100%;padding:13px;font-size:14px;font-weight:700;">🏡 Book This Stay</button>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0;">'        +'<div id="stayPayCash" onclick="selectPayment(\'CASH\');this.style.borderColor=\'var(--blue2)\';document.getElementById(\'stayPayCard\').style.borderColor=\'var(--bd)\';" style="border:2px solid var(--blue2);border-radius:10px;padding:10px;text-align:center;cursor:pointer;background:rgba(26,143,255,.08);"><div>💵</div><div style=\"font-size:11px;font-weight:700;\">Cash</div></div>'        +'<div id="stayPayCard" onclick="selectPayment(\'CARD\');this.style.borderColor=\'var(--gold)\';document.getElementById(\'stayPayCash\').style.borderColor=\'var(--bd)\';" style="border:2px solid var(--bd);border-radius:10px;padding:10px;text-align:center;cursor:pointer;"><div>💳</div><div style=\"font-size:11px;font-weight:700;\">Card</div></div>'      +'</div>'      +'<button onclick="submitStayBooking(\''+lid+'\')" class="btn-primary" style="width:100%;padding:13px;font-size:14px;font-weight:700;">🏡 Book This Stay</button>'
     +'</div>';
 
   document.getElementById('stayDetailModal').classList.add('open');
@@ -2164,16 +2168,31 @@ async function submitStayBooking(lid){
   if(!checkIn||!checkOut){ toast('Please select check-in and check-out dates','error'); return; }
   if(new Date(checkOut)<=new Date(checkIn)){ toast('Check-out must be after check-in','error'); return; }
   var fullNotes = 'Adults: '+adults+' | Children: '+kids+(notes?' | '+notes:'');
+  var payMethod = _selectedPayment || 'CASH';
   try {
-    await api('/bookings','POST',{
+    var booking = await api('/bookings','POST',{
       listingId:     lid,
       scheduledAt:   new Date(checkIn+'T14:00:00').toISOString(),
       checkoutAt:    new Date(checkOut+'T10:00:00').toISOString(),
-      paymentMethod: 'CASH',
+      paymentMethod: payMethod,
       notes:         fullNotes,
       totalAmount:   undefined
     });
     document.getElementById('stayDetailModal').classList.remove('open');
+    if(payMethod === 'CARD' && booking.data && booking.data.id){
+      var pf = await api('/payments/initiate','POST',{bookingId: booking.data.id});
+      if(pf.data && pf.data.paymentUrl){
+        toast('Redirecting to payment...','success');
+        var form = document.createElement('form');
+        form.method = 'POST'; form.action = pf.data.paymentUrl;
+        Object.keys(pf.data.params).forEach(function(key){
+          var input = document.createElement('input');
+          input.type='hidden'; input.name=key; input.value=pf.data.params[key];
+          form.appendChild(input);
+        });
+        document.body.appendChild(form); form.submit(); return;
+      }
+    }
     toast('Stay booked! The host will confirm shortly.','success');
   } catch(e){ toast(e.message||'Could not complete booking','error'); }
 }
@@ -2837,11 +2856,19 @@ function closeMessageThread(){
     var prev = _pageStack[_pageStack.length-1];
     goPage(prev, true);
     history.pushState({page:prev},'','#'+prev);
+    _currentConvPartner = null;
     return;
   }
-  // Otherwise just show conversation list on mobile
+  // On mobile: remove thread-open to show conversation list
   var layout = document.querySelector('.msg-layout');
   if(layout) layout.classList.remove('thread-open');
+  // On desktop: go to dashboard since there's no back page
+  var isMobile = window.innerWidth <= 600;
+  if(!isMobile){
+    goPage('dashboard');
+    _currentConvPartner = null;
+    return;
+  }
   var area = document.getElementById('msgArea');
   if(area){ area.innerHTML='<div style="flex:1;display:flex;align-items:center;justify-content:center;"><div class=\"empty\"><div class=\"empty-icon\">💬</div><h3>Select a conversation</h3><p>Choose someone to message from the list</p></div></div>'; }
   _currentConvPartner = null;
@@ -3410,7 +3437,40 @@ function toggleCart(){
 }
 function openCheckout(){
   if(!S.user){openModal('loginModal');return;}
-  toast('Checkout coming soon!','success');
+  if(!S.cart||Object.keys(S.cart).length===0){toast('Your cart is empty','error');return;}
+  // Show payment selection modal
+  openShopCheckout();
+}
+
+async function openShopCheckout(){
+  var total = 0;
+  var items = [];
+  Object.keys(S.cart).forEach(function(pid){
+    var item = S.cart[pid];
+    total += item.price * item.qty;
+    items.push({productId: pid, quantity: item.qty, price: item.price});
+  });
+  var method = _selectedPayment || 'CASH';
+  if(!confirm('Total: R'+total.toFixed(2)+'\n\nPayment: '+(method==='CARD'?'Card (you\'ll be redirected to PayFast)':'Cash on Collection')+'\n\nPlace order?')) return;
+  try {
+    var order = await api('/orders','POST',{items, paymentMethod: method, totalAmount: total});
+    if(method === 'CARD' && order.data && order.data.id){
+      var pf = await api('/payments/initiate','POST',{bookingId: order.data.id});
+      if(pf.data && pf.data.paymentUrl){
+        toast('Redirecting to payment...','success');
+        var form = document.createElement('form');
+        form.method='POST'; form.action=pf.data.paymentUrl;
+        Object.keys(pf.data.params).forEach(function(key){
+          var inp=document.createElement('input'); inp.type='hidden'; inp.name=key; inp.value=pf.data.params[key]; form.appendChild(inp);
+        });
+        document.body.appendChild(form); form.submit(); return;
+      }
+    }
+    S.cart={};
+    document.getElementById('cartSidebar').classList.remove('open');
+    toast('Order placed! Collect with code: '+(order.data.collectionCode||''),'success');
+    updateCartBadge();
+  } catch(e){ toast(e.message||'Order failed','error'); }
 }
 
 // ── EVENT DELEGATION ──────────────────────────────────────────────
@@ -3722,9 +3782,12 @@ async function refreshThreadMessages(partnerId, scrollToBottom){
 async function sendMessage(){
   var input = document.getElementById('msgInput');
   if(!input||!input.value.trim()||!_currentConvPartner) return;
+  var sendBtn = document.querySelector('.msg-send-btn');
+  if(sendBtn && sendBtn.disabled) return; // Prevent double send
   var content = input.value.trim();
   input.value = '';
   input.focus();
+  if(sendBtn){ sendBtn.disabled=true; sendBtn.style.opacity='0.5'; }
   try {
     await api('/messages','POST',{receiverId:_currentConvPartner.id,content:content});
     await refreshThreadMessages(_currentConvPartner.id, true);
@@ -3732,6 +3795,8 @@ async function sendMessage(){
   } catch(e){
     input.value = content;
     toast('Failed to send message','error');
+  } finally {
+    if(sendBtn){ sendBtn.disabled=false; sendBtn.style.opacity='1'; }
   }
 }
 </script>
