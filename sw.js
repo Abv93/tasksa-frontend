@@ -1,39 +1,69 @@
-const CACHE = 'tasksa-v13';
-const OFFLINE_URL = '/';
-const ASSETS = ['/', '/index.html'];
+const CACHE = 'tasksa-v17';
+const STATIC = ['/','index.html','/manifest.json','/icon-192.png','/icon-512.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
-  );
+  e.waitUntil(caches.keys().then(keys =>
+    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+  ).then(() => self.clients.claim()));
 });
 
 self.addEventListener('fetch', e => {
-  if (e.request.url.includes('/api/')) return;
-  // Navigation always gets fresh from network
   if (e.request.mode === 'navigate') {
-    e.respondWith(
-      fetch(e.request, {cache: 'no-store'}).catch(() => caches.match(OFFLINE_URL))
-    );
+    e.respondWith(fetch(e.request, { cache: 'no-store' }).catch(() => caches.match('index.html')));
     return;
   }
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(response => {
-        if (!response || response.status !== 200 || response.type === 'opaque') return response;
-        const clone = response.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
-        return response;
-      }).catch(() => caches.match(OFFLINE_URL));
+  if (e.request.url.includes('/api/')) return;
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+});
+
+// ── PUSH NOTIFICATIONS ────────────────────────────────────────────
+self.addEventListener('push', function(event) {
+  let data = { title: 'TaskSA', body: 'You have a new notification', url: '/' };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch(e) {
+    if (event.data) data.body = event.data.text();
+  }
+
+  const options = {
+    body: data.body,
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    vibrate: [200, 100, 200],
+    data: { url: data.url || '/' },
+    actions: [
+      { action: 'open', title: 'View' },
+      { action: 'close', title: 'Dismiss' }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
+
+  if (event.action === 'close') return;
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      // If TaskSA is already open, focus it and navigate
+      for (let client of clientList) {
+        if (client.url.includes('tasksa.co.za') && 'focus' in client) {
+          client.focus();
+          client.postMessage({ type: 'PUSH_NAVIGATE', url });
+          return;
+        }
+      }
+      // Otherwise open a new window
+      if (clients.openWindow) return clients.openWindow('https://tasksa.co.za/' + url);
     })
   );
 });

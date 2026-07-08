@@ -1535,6 +1535,21 @@ function toggleFaq(i){
     <div class="field"><label>Time</label><input type="time" id="bookTime" value="09:00"></div>
     <div class="field"><label>Address *</label><input id="bookAddr" placeholder="Your address"></div>
     <div class="field"><label>Notes</label><textarea id="bookNotes" placeholder="Any special instructions..."></textarea></div>
+    <div class="field">
+      <label>Payment Method</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+        <div id="payOptCash" onclick="selectPayment('CASH')" style="border:2px solid var(--blue2);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:rgba(26,143,255,.08);">
+          <div style="font-size:20px;margin-bottom:4px;">💵</div>
+          <div style="font-size:12px;font-weight:700;color:var(--t);">Cash</div>
+          <div style="font-size:10px;color:var(--t3);">Pay on completion</div>
+        </div>
+        <div id="payOptCard" onclick="selectPayment('CARD')" style="border:2px solid var(--bd);border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
+          <div style="font-size:20px;margin-bottom:4px;">💳</div>
+          <div style="font-size:12px;font-weight:700;color:var(--t);">Card</div>
+          <div style="font-size:10px;color:var(--t3);">Secure online payment</div>
+        </div>
+      </div>
+    </div>
     <button class="btn-primary" id="bookBtn" onclick="submitBooking()">Confirm Booking</button>
   </div>
 </div>
@@ -1782,7 +1797,7 @@ async function doLogin(){
     closeModal('loginModal');
     updateNavForUser();
     toast('Welcome back, '+S.user.name+'!','success');
-    loadNotifications(); startNotifPolling();
+    loadNotifications(); startNotifPolling(); subscribeToPush();
     goPage('dashboard');
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Sign In';
@@ -1793,6 +1808,7 @@ async function doRegister(){
   var phone=document.getElementById('regPhone').value.trim();
   var pass=document.getElementById('regPass').value;
   if(!name||!email||!pass){toast('Name, email and password required','error');return;}
+  if(!email.includes('@')||!email.includes('.')){toast('Please enter a valid email address (e.g. you@gmail.com)','error');return;}
   if(pass.length<8){toast('Password must be at least 8 characters','error');return;}
   var btn=document.getElementById('regBtn'); btn.disabled=true; btn.textContent='Creating account...';
   try {
@@ -1802,7 +1818,7 @@ async function doRegister(){
     closeModal('registerModal');
     updateNavForUser();
     toast('Welcome to TaskSA, '+S.user.name+'!','success');
-    loadNotifications(); startNotifPolling();
+    loadNotifications(); startNotifPolling(); subscribeToPush();
     goPage('dashboard');
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Create Account';
@@ -1834,6 +1850,7 @@ async function tryAutoLogin(){
     updateNavForUser();
     loadNotifications();
     startNotifPolling();
+    subscribeToPush();
   } catch(e){ S.token=null; localStorage.removeItem('tasksa_token'); }
 }
 
@@ -2706,15 +2723,33 @@ async function openBookModal(listingId, listingName, providerId, priceFrom){
   S.bookingListingId = listingId;
   S.bookingProviderId = providerId || null;
   S.bookingPrice = priceFrom || null;
-  S.bookingTitle = listingName || 'Service Booking';
+  // Decode URL-encoded name (fixes %20 showing as spaces issue)
+  var decodedName = listingName ? decodeURIComponent(listingName) : 'Service';
+  S.bookingTitle = decodedName;
   var t=document.getElementById('bookTitle');
   var s=document.getElementById('bookSub');
-  if(t) t.textContent='Book '+(listingName||'Service');
+  if(t) t.textContent='Book '+decodedName;
   if(s) s.textContent='Fill in the details for your booking';
   var d=document.getElementById('bookDate');
   if(d) d.min=new Date().toISOString().split('T')[0];
   openModal('bookingModal');
 }
+var _selectedPayment = 'CASH';
+
+function selectPayment(method){
+  _selectedPayment = method;
+  var cashEl = document.getElementById('payOptCash');
+  var cardEl = document.getElementById('payOptCard');
+  if(cashEl) cashEl.style.cssText = method==='CASH'
+    ? 'border:2px solid var(--blue2);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:rgba(26,143,255,.08);'
+    : 'border:2px solid var(--bd);border-radius:10px;padding:12px;text-align:center;cursor:pointer;';
+  if(cardEl) cardEl.style.cssText = method==='CARD'
+    ? 'border:2px solid var(--gold);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:rgba(245,166,35,.08);'
+    : 'border:2px solid var(--bd);border-radius:10px;padding:12px;text-align:center;cursor:pointer;';
+  var btn = document.getElementById('bookBtn');
+  if(btn) btn.textContent = method==='CARD' ? 'Pay by Card →' : 'Confirm Booking';
+}
+
 async function submitBooking(){
   if(!S.user){closeModal('bookingModal');openModal('loginModal');return;}
   if(!S.bookingListingId){toast('No listing selected','error');return;}
@@ -2723,27 +2758,54 @@ async function submitBooking(){
   var addr=document.getElementById('bookAddr').value;
   var notes=document.getElementById('bookNotes').value;
   if(!date||!addr){toast('Date and address are required','error');return;}
-  var btn=document.getElementById('bookBtn'); btn.disabled=true; btn.textContent='Booking...';
+  var btn=document.getElementById('bookBtn'); btn.disabled=true; btn.textContent='Processing...';
   try {
     var scheduledAt=new Date(date+'T'+(time||'09:00')+':00').toISOString();
     var fullNotes='Address: '+addr+(notes?' | Notes: '+notes:'');
-    await api('/bookings','POST',{
+    var booking = await api('/bookings','POST',{
       listingId:     S.bookingListingId,
       scheduledAt:   scheduledAt,
-      paymentMethod: 'CASH',
+      paymentMethod: _selectedPayment,
       notes:         fullNotes,
       totalAmount:   S.bookingPrice ? parseFloat(S.bookingPrice) : undefined
     });
+
+    if(_selectedPayment === 'CARD' && booking.data && booking.data.id){
+      // Redirect to PayFast for card payment
+      btn.textContent = 'Redirecting to payment...';
+      var pf = await api('/payments/initiate','POST',{bookingId: booking.data.id});
+      if(pf.data && pf.data.paymentUrl){
+        closeModal('bookingModal');
+        toast('Redirecting to secure payment...','success');
+        // Build and submit PayFast form
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = pf.data.paymentUrl;
+        Object.keys(pf.data.params).forEach(function(key){
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = pf.data.params[key];
+          form.appendChild(input);
+        });
+        document.body.appendChild(form);
+        form.submit();
+        return;
+      }
+    }
+
+    // Cash payment — just confirm
     closeModal('bookingModal');
     toast('Booking confirmed! The provider will be in touch shortly.','success');
     document.getElementById('bookDate').value='';
     document.getElementById('bookAddr').value='';
     document.getElementById('bookNotes').value='';
     S.bookingListingId=null;
-    // Auto-refresh dashboard so booking appears immediately
+    _selectedPayment='CASH';
     if(document.getElementById('page-dashboard').classList.contains('active')) loadDash();
   } catch(e){ toast(e.message,'error'); }
-  btn.disabled=false; btn.textContent='Confirm Booking';
+  btn.disabled=false;
+  btn.textContent=_selectedPayment==='CARD'?'Pay by Card →':'Confirm Booking';
 }
 async function messageUser(partnerId, partnerName){
   if(!S.user){ openModal('loginModal'); return; }
@@ -2903,6 +2965,84 @@ function startNotifPolling(){
   if(_notifPoll) clearInterval(_notifPoll);
   _notifPoll = setInterval(function(){ if(S.user) loadNotifications(); }, 30000);
 }
+
+
+// ── PUSH NOTIFICATIONS ────────────────────────────────────────────
+const VAPID_PUBLIC_KEY = 'BC9B4Ji3KfNBFP6tEGDa58zbeE-pqAYbphUj6qmEeaaDTNqCV7E2Oahq3CQvG9T5F2AmLen4tex_J5SDNsufTrs';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+async function subscribeToPush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if (!S.user) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) {
+      // Already subscribed — just make sure backend has it
+      await api('/push/subscribe', 'POST', {
+        endpoint: existing.endpoint,
+        keys: { p256dh: btoa(String.fromCharCode(...new Uint8Array(existing.getKey('p256dh')))), auth: btoa(String.fromCharCode(...new Uint8Array(existing.getKey('auth')))) }
+      }).catch(() => {});
+      return;
+    }
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.log('[Push] Permission denied');
+      return;
+    }
+    const subscription = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    const key = subscription.getKey('p256dh');
+    const auth = subscription.getKey('auth');
+    await api('/push/subscribe', 'POST', {
+      endpoint: subscription.endpoint,
+      keys: {
+        p256dh: btoa(String.fromCharCode(...new Uint8Array(key))),
+        auth: btoa(String.fromCharCode(...new Uint8Array(auth)))
+      }
+    });
+    console.log('[Push] Subscribed successfully');
+  } catch(e) {
+    console.error('[Push] Subscribe error:', e.message);
+  }
+}
+
+// Listen for navigation messages from service worker
+navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'PUSH_NAVIGATE') {
+    var url = e.data.url || '/';
+    if (url.startsWith('/#')) goPage(url.slice(2));
+    else if (url.startsWith('#')) goPage(url.slice(1));
+  }
+});
+
+// ── PAYFAST RETURN HANDLER ────────────────────────────────────────
+(function(){
+  var hash = window.location.hash;
+  if(hash.indexOf('payment=') === -1) return;
+  var params = new URLSearchParams(hash.split('?')[1]||'');
+  var status = params.get('payment');
+  history.replaceState({}, '', window.location.pathname);
+  if(status === 'success'){
+    setTimeout(function(){
+      toast('Payment successful! Your booking is confirmed.','success');
+      goPage('dashboard');
+    }, 800);
+  } else if(status === 'cancelled'){
+    setTimeout(function(){
+      toast('Payment cancelled. Your booking is saved — you can pay later or choose Cash.','error');
+      goPage('dashboard');
+    }, 800);
+  }
+})();
 
 var SA_CITIES = {
   'Western Cape': ['Cape Town','Bellville','Brackenfell','Claremont','Durbanville','Fish Hoek','Franschhoek','George','Hermanus','Knysna','Kuilsrivier','Malmesbury','Mossel Bay','Muizenberg','Observatory','Oudtshoorn','Paarl','Plettenberg Bay','Rondebosch','Somerset West','Stellenbosch','Strand','Swellendam','Woodstock','Worcester'],
