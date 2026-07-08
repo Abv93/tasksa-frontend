@@ -3049,6 +3049,10 @@ navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', f
     if (url.startsWith('/#')) goPage(url.slice(2));
     else if (url.startsWith('#')) goPage(url.slice(1));
   }
+  if (e.data && e.data.type === 'SW_UPDATED') {
+    // New service worker activated — reload to get fresh content
+    window.location.reload();
+  }
 });
 
 // ── PAYFAST RETURN HANDLER ────────────────────────────────────────

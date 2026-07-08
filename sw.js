@@ -1,4 +1,4 @@
-const CACHE = 'tasksa-v19';
+const CACHE = 'tasksa-v20';
 const STATIC = ['/','index.html','/manifest.json','/icon-192.png','/icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -15,9 +15,9 @@ self.addEventListener('activate', e => {
       .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
       .then(() => {
-        // Force all open tabs to reload with fresh content
+        // Tell all open tabs to reload cleanly
         return self.clients.matchAll({ type: 'window' }).then(clients => {
-          clients.forEach(client => client.navigate(client.url));
+          clients.forEach(client => client.postMessage({ type: 'SW_UPDATED' }));
         });
       })
   );
