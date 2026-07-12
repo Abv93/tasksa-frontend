@@ -3618,25 +3618,23 @@ function toggleCart(){
 }
 function openCheckout(){
   if(!S.user){openModal('loginModal');return;}
-  if(!S.cart||Object.keys(S.cart).length===0){toast('Your cart is empty','error');return;}
-  // Show payment selection modal
+  if(!S.cart||S.cart.length===0){toast('Your cart is empty','error');return;}
   openShopCheckout();
 }
 
 async function openShopCheckout(){
   var total = 0;
   var items = [];
-  Object.keys(S.cart).forEach(function(pid){
-    var item = S.cart[pid];
-    total += item.price * item.qty;
-    items.push({productId: pid, quantity: item.qty, price: item.price});
+  S.cart.forEach(function(item){
+    total += item.price;
+    items.push({productId: item.id, quantity: 1, price: item.price});
   });
   var method = _selectedPayment || 'CASH';
   if(!confirm('Total: R'+total.toFixed(2)+'\n\nPayment: '+(method==='CARD'?'Card (you\'ll be redirected to PayFast)':'Cash on Collection')+'\n\nPlace order?')) return;
   try {
     var order = await api('/orders','POST',{items, paymentMethod: method, totalAmount: total});
     if(method === 'CARD' && order.data && order.data.id){
-      var pf = await api('/payments/initiate','POST',{bookingId: order.data.id});
+      var pf = await api('/payments/initiate','POST',{orderId: order.data.id});
       if(pf.data && pf.data.paymentUrl){
         toast('Redirecting to payment...','success');
         var form = document.createElement('form');
@@ -3647,7 +3645,7 @@ async function openShopCheckout(){
         document.body.appendChild(form); form.submit(); return;
       }
     }
-    S.cart={};
+    S.cart=[];
     document.getElementById('cartSidebar').classList.remove('open');
     toast('Order placed! Collect with code: '+(order.data.collectionCode||''),'success');
     updateCartBadge();
