@@ -17,34 +17,21 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif;}
 .logo-admin span{color:var(--gold);}
 .admin-badge{text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:28px;}
 .hint{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:9px;padding:11px 14px;font-size:12px;color:var(--amber2);margin-bottom:16px;}
-#sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto;transition:width .25s,transform .25s;}
-#sidebar.collapsed{width:58px;overflow:hidden;}
-#sidebar.collapsed .slink span:not(.slink-icon){display:none;}
-#sidebar.collapsed .slink{justify-content:center;padding:10px 0;margin:1px 4px;}
-#sidebar.collapsed .nav-group{display:none;}
-#sidebar.collapsed .sa-name,#sidebar.collapsed .sa-role{display:none;}
-#sidebar.collapsed .side-logo-text,#sidebar.collapsed .side-badge{display:none;}
-#sidebar.collapsed .side-logo{justify-content:center;padding:14px 8px;}
-#sidebar.collapsed .sbadge{display:none;}
-#sidebar.collapsed .side-bottom .slink span:not(.slink-icon){display:none;}
-.sidebar-toggle{background:none;border:none;color:var(--t3);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;}
+#sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto;transition:width .2s ease;}
+#sidebar.collapsed{width:54px;}
+#sidebar.collapsed .slink-label{display:none;}
+#sidebar.collapsed .slink{justify-content:center;padding:9px 0;margin:1px 4px;}
+#sidebar.collapsed .nav-group,
+#sidebar.collapsed .sa-name,
+#sidebar.collapsed .sa-role,
+#sidebar.collapsed .sbadge,
+#sidebar.collapsed .side-badge{display:none;}
+#sidebar.collapsed .side-logo-inner{display:none;}
+#sidebar.collapsed .side-logo{justify-content:center;padding:12px 8px;}
+.sidebar-toggle{background:none;border:none;color:var(--t3);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1;}
 .sidebar-toggle:hover{color:var(--t);background:var(--surf);}
-@media(max-width:600px){
-  body{flex-direction:column;}
-  #sidebar{width:100%!important;min-height:auto;height:auto;position:relative;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;border-right:none;border-bottom:1px solid var(--bd);}
-  #sidebar .side-logo{display:flex;align-items:center;padding:8px 10px;flex-shrink:0;}
-  #sidebar .side-admin{display:none;}
-  #sidebar .nav-group{display:none;}
-  #sidebar .slink{padding:8px 6px;margin:2px;font-size:10px;flex-direction:column;gap:2px;min-width:48px;text-align:center;flex-shrink:0;}
-  #sidebar .slink span:not(.slink-icon){display:none;}
-  #sidebar .slink-icon{font-size:18px;width:auto;}
-  #sidebar .side-bottom{margin-top:0;padding:4px;border-top:none;margin-left:auto;flex-shrink:0;}
-  #main{min-height:calc(100vh - 60px);}
-  .stat-grid{grid-template-columns:1fr 1fr!important;}
-  .grid2{grid-template-columns:1fr!important;}
-  table{font-size:11px;}
-  td,th{padding:6px 8px!important;}
-}
+@media(max-width:900px){.stat-grid{grid-template-columns:1fr 1fr!important;}}
+@media(max-width:700px){.grid2{grid-template-columns:1fr!important;} table{font-size:11px;} td,th{padding:6px 8px!important;}}
 .side-logo{padding:18px 16px;border-bottom:1px solid var(--bd);}
 .side-logo-text{font-family:'Sora',sans-serif;font-size:18px;font-weight:900;color:var(--blue2);}
 .side-logo-text span{color:var(--gold);}
@@ -266,31 +253,33 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
   </div>
 </div>
 <div id="sidebar" style="display:none;">
-  <div class="side-logo" style="display:flex;justify-content:space-between;align-items:center;min-height:60px;">
-    <div id="sideLogoText"><div class="side-logo-text">Task<span>SA</span></div>
-    <div class="side-badge">Admin Panel</div></div>
-    <button class="sidebar-toggle" onclick="toggleSidebar()" id="sideToggle" title="Toggle sidebar" style="flex-shrink:0;z-index:10;">☰</button>
+  <div class="side-logo" style="display:flex;justify-content:space-between;align-items:center;padding:14px 12px;min-height:60px;">
+    <div class="side-logo-inner">
+      <div class="side-logo-text">Task<span>SA</span></div>
+      <div class="side-badge">Admin Panel</div>
+    </div>
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Collapse sidebar">☰</button>
   </div>
   <div class="side-admin">
     <div class="sa-name" id="sideAdminName">Admin</div>
     <div class="sa-role">Platform Administrator</div>
   </div>
   <div class="nav-group">Overview</div>
-  <div class="slink active" data-panel="dashboard" onclick="showPanel('dashboard',this)"><span class="slink-icon">📊</span>Dashboard</div>
-  <div class="slink" data-panel="revenue" onclick="showPanel('revenue',this)"><span class="slink-icon">💰</span>Revenue</div>
+  <div class="slink active" data-panel="dashboard" onclick="showPanel('dashboard',this)"><span class="slink-icon">📊</span><span class="slink-label">Dashboard</span></div>
+  <div class="slink" data-panel="revenue" onclick="showPanel('revenue',this)"><span class="slink-icon">💰</span><span class="slink-label">Revenue</span></div>
   <div class="nav-group">Management</div>
-  <div class="slink" data-panel="users" onclick="showPanel('users',this)"><span class="slink-icon">👥</span>Users<span class="sbadge" id="sbPending" style="display:none">!</span></div>
-  <div class="slink" data-panel="listings" onclick="showPanel('listings',this)"><span class="slink-icon">📋</span>Listings</div>
-  <div class="slink" data-panel="bookings" onclick="showPanel('bookings',this)"><span class="slink-icon">📅</span>Bookings</div>
-  <div class="slink" data-panel="orders" onclick="showPanel('orders',this)"><span class="slink-icon">🛒</span>Orders</div>
-  <div class="slink" data-panel="reviews" onclick="showPanel('reviews',this)"><span class="slink-icon">⭐</span>Reviews</div>
+  <div class="slink" data-panel="users" onclick="showPanel('users',this)"><span class="slink-icon">👥</span><span class="slink-label">Users</span><span class="sbadge" id="sbPending" style="display:none">!</span></div>
+  <div class="slink" data-panel="listings" onclick="showPanel('listings',this)"><span class="slink-icon">📋</span><span class="slink-label">Listings</span></div>
+  <div class="slink" data-panel="bookings" onclick="showPanel('bookings',this)"><span class="slink-icon">📅</span><span class="slink-label">Bookings</span></div>
+  <div class="slink" data-panel="orders" onclick="showPanel('orders',this)"><span class="slink-icon">🛒</span><span class="slink-label">Orders</span></div>
+  <div class="slink" data-panel="reviews" onclick="showPanel('reviews',this)"><span class="slink-icon">⭐</span><span class="slink-label">Reviews</span></div>
   <div class="nav-group">Platform</div>
-  <div class="slink" data-panel="categories" onclick="showPanel('categories',this)"><span class="slink-icon">🏷️</span>Categories</div>
-  <div class="slink" data-panel="banners" onclick="showPanel('banners',this)"><span class="slink-icon">📣</span>Banner Ads</div>
-  <div class="slink" data-panel="notify" onclick="showPanel('notify',this)"><span class="slink-icon">🔔</span>Notifications</div>
-  <div class="slink" data-panel="settings" onclick="showPanel('settings',this)"><span class="slink-icon">⚙️</span>Settings</div>
+  <div class="slink" data-panel="categories" onclick="showPanel('categories',this)"><span class="slink-icon">🏷️</span><span class="slink-label">Categories</span></div>
+  <div class="slink" data-panel="banners" onclick="showPanel('banners',this)"><span class="slink-icon">📣</span><span class="slink-label">Banner Ads</span></div>
+  <div class="slink" data-panel="notify" onclick="showPanel('notify',this)"><span class="slink-icon">🔔</span><span class="slink-label">Notifications</span></div>
+  <div class="slink" data-panel="settings" onclick="showPanel('settings',this)"><span class="slink-icon">⚙️</span><span class="slink-label">Settings</span></div>
   <div class="side-bottom">
-    <div class="slink" onclick="doLogout()"><span class="slink-icon">🚪</span>Sign Out</div>
+    <div class="slink" onclick="doLogout()"><span class="slink-icon">🚪</span><span class="slink-label">Sign Out</span></div>
   </div>
 </div>
 <div id="main" style="display:none;">
@@ -996,11 +985,7 @@ function showPanelByName(name){
 }
 function toggleSidebar(){
   var s = document.getElementById('sidebar');
-  var collapsed = s.classList.toggle('collapsed');
-  var btn = document.getElementById('sideToggle');
-  if(btn) btn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
-  var logoText = document.getElementById('sideLogoText');
-  if(logoText) logoText.style.display = collapsed ? 'none' : 'block';
+  s.classList.toggle('collapsed');
 }
 
 tryAutoLogin();

@@ -1,4 +1,4 @@
-const CACHE = 'tasksa-v25';
+const CACHE = 'tasksa-v28';
 const STATIC = ['/','index.html','/manifest.json','/icon-192.png','/icon-512.png'];
 
 self.addEventListener('install', e => {
