@@ -1357,13 +1357,14 @@ function toggleFaq(i){
           <input id="editListingPrice" type="number" min="0" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">CITY *</label>
-          <select id="editListingCity" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;"><option value="">Select city...</option></select>
+          <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">PRICE TYPE</label>
+          <select id="editListingPriceType" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+            <option value="PER_JOB">Per Job</option>
+            <option value="HOURLY">Per Hour</option>
+            <option value="DAILY">Per Day</option>
+            <option value="FIXED">Fixed Price</option>
+          </select>
         </div>
-      </div>
-      <div>
-        <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">AREA / SUBURB *</label>
-        <input id="editListingLocation" type="text" placeholder="e.g. Sea Point, Sandton" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
       </div>
       <div>
         <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">PROVINCE *</label>
@@ -1373,6 +1374,16 @@ function toggleFaq(i){
           <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
           <option>North West</option><option>Free State</option><option>Northern Cape</option>
         </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">CITY *</label>
+          <select id="editListingCity" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;"><option value="">Select province first...</option></select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">AREA / SUBURB</label>
+          <input id="editListingLocation" type="text" placeholder="e.g. Sea Point, Sandton" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+        </div>
       </div>
       <div style="display:flex;gap:10px;margin-top:4px;">
         <button onclick="submitEditListing()" class="btn-primary" style="flex:1;padding:13px;font-size:14px;font-weight:700;">Save Changes</button>
@@ -1402,13 +1413,14 @@ function toggleFaq(i){
           <input id="newListingPrice" type="number" placeholder="350" min="0" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">CITY *</label>
-          <select id="newListingCity" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;"><option value="">Select province first...</option></select>
+          <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">PRICE TYPE</label>
+          <select id="newListingPriceType" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+            <option value="PER_JOB">Per Job</option>
+            <option value="HOURLY">Per Hour</option>
+            <option value="DAILY">Per Day</option>
+            <option value="FIXED">Fixed Price</option>
+          </select>
         </div>
-      </div>
-      <div>
-        <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">AREA / SUBURB *</label>
-        <input id="newListingLocation" type="text" placeholder="e.g. Sea Point, Sandton, Umhlanga" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
       </div>
       <div>
         <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">PROVINCE *</label>
@@ -1418,6 +1430,16 @@ function toggleFaq(i){
           <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
           <option>North West</option><option>Free State</option><option>Northern Cape</option>
         </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">CITY *</label>
+          <select id="newListingCity" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;"><option value="">Select province first...</option></select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">AREA / SUBURB</label>
+          <input id="newListingLocation" type="text" placeholder="e.g. Sea Point, Sandton" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+        </div>
       </div>
       <div>
         <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">CATEGORY *</label>
@@ -1520,6 +1542,21 @@ function toggleFaq(i){
     </div>
     <div class="field"><label>Email *</label><input type="email" id="regEmail" placeholder="you@example.co.za"></div>
     <div class="field"><label>Password *</label><div style="position:relative;"><input type="password" id="regPass" placeholder="Min 8 characters" style="padding-right:44px;" onkeydown="if(event.key==='Enter')doRegister()"><button type="button" onclick="togglePass('regPass',this)" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t3);cursor:pointer;padding:8px;font-size:16px;">👁️</button></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="field"><label>Province</label>
+        <select id="regProvince" onchange="populateCities('regProvince','regCity')" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:10px 12px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+          <option value="">Select...</option>
+          <option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option>
+          <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
+          <option>North West</option><option>Free State</option><option>Northern Cape</option>
+        </select>
+      </div>
+      <div class="field"><label>City</label>
+        <select id="regCity" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:10px 12px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+          <option value="">Select province first</option>
+        </select>
+      </div>
+    </div>
     <button class="btn-primary" id="regBtn" onclick="doRegister()">Create Account</button>
     <div class="modal-footer-text">Already have an account? <a onclick="switchModal('registerModal','loginModal')">Sign in</a></div>
   </div>
@@ -1811,12 +1848,14 @@ async function doRegister(){
   var email=document.getElementById('regEmail').value.trim();
   var phone=document.getElementById('regPhone').value.trim();
   var pass=document.getElementById('regPass').value;
+  var province=document.getElementById('regProvince')?.value||'';
+  var city=document.getElementById('regCity')?.value||'';
   if(!name||!email||!pass){toast('Name, email and password required','error');return;}
   if(!email.includes('@')||!email.includes('.')){toast('Please enter a valid email address (e.g. you@gmail.com)','error');return;}
   if(pass.length<8){toast('Password must be at least 8 characters','error');return;}
   var btn=document.getElementById('regBtn'); btn.disabled=true; btn.textContent='Creating account...';
   try {
-    var r=await api('/auth/register','POST',{name:name,email:email,phone:phone,password:pass,role:S.selectedRole});
+    var r=await api('/auth/register','POST',{name:name,email:email,phone:phone,password:pass,role:S.selectedRole,province:province||undefined,city:city||undefined});
     S.token=r.token; S.user=r.data;
     localStorage.setItem('tasksa_token',S.token);
     closeModal('registerModal');
@@ -2435,18 +2474,16 @@ async function loadDash(){
 
   if(welcome) welcome.textContent = 'Welcome back, ' + S.user.name + '!';
 
-  if(role === 'PROVIDER' || role === 'HOST'){
-    if(title) title.textContent = role === 'HOST' ? 'Host Dashboard' : 'Provider Dashboard';
+  if(role === 'PROVIDER' || role === 'HOST' || role === 'SHOP_OWNER'){
+    var dashLabel = role === 'HOST' ? 'Host Dashboard' : role === 'SHOP_OWNER' ? 'Business Dashboard' : 'Provider Dashboard';
+    if(title) title.textContent = dashLabel;
     var avatarHtml = S.user && S.user.avatar
       ? '<img src="'+S.user.avatar+'" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;">'
       : '📷 ';
-    if(actions) actions.innerHTML = '<button class="btn-primary" style="padding:9px 18px;font-size:13px;" onclick="openAddListingModal()">+ Add Listing</button>'
+    if(actions) actions.innerHTML =
+      '<button class="btn-primary" style="padding:9px 18px;font-size:13px;" onclick="openAddListingModal()">+ Add Listing</button>'
       +'<button onclick="uploadProfilePhoto()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:50px;color:var(--t2);font-size:13px;padding:9px 16px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;">'+avatarHtml+'Profile Photo</button>';
     await loadProviderDash(stats, main, role);
-  } else if(role === 'SHOP_OWNER'){
-    if(title) title.textContent = 'Shop Dashboard';
-    if(actions) actions.innerHTML = '<button class="btn-primary" style="padding:9px 18px;font-size:13px;" onclick="goPage(\'shop\')">View My Shop</button>';
-    await loadShopDash(stats, main);
   } else if(role === 'ADMIN'){
     if(title) title.textContent = 'Admin';
     if(main) main.innerHTML = '<div class="empty"><div class="empty-icon">⚙️</div><h3>Admin Panel</h3><p>Use the dedicated admin panel to manage the platform</p><a href="/admin.html"><button class="btn-primary" style="margin-top:16px;max-width:220px;">Open Admin Panel</button></a></div>';
@@ -2569,7 +2606,8 @@ async function loadProviderDash(stats, main, role){
   if(!main) return;
   main.innerHTML =
     '<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-size:14px;font-weight:800;">My Listings</div></div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-size:14px;font-weight:800;">My Listings</div></div>'
+      +'<div style="background:rgba(26,143,255,.07);border:1px solid rgba(26,143,255,.2);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:12px;color:var(--blue3);line-height:1.5;">💡 You can offer multiple services by adding more than one listing. Each listing can be a different category, price or location.</div>'
       +'<div id="provListings"></div>'
     +'</div>'
     +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
@@ -2582,6 +2620,13 @@ async function loadProviderDash(stats, main, role){
         +'<button onclick="goPage(\'messages\')" style="background:rgba(26,143,255,.12);border:none;border-radius:8px;color:var(--blue3);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">View All</button>'
       +'</div>'
       +'<div id="provMessages"><div style="font-size:13px;color:var(--t3);padding:12px 0;">Loading messages...</div></div>'
+    +'</div>'
+    +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
+        +'<div style="font-size:14px;font-weight:800;">🛒 My Shop Products</div>'
+        +'<button onclick="goPage(\'shop\')" style="background:rgba(26,143,255,.12);border:none;border-radius:8px;color:var(--blue3);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">View Shop</button>'
+      +'</div>'
+      +'<div id="provShopProducts"><div style="font-size:13px;color:var(--t3);padding:12px 0;">Loading...</div></div>'
     +'</div>'
     +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;">'
       +'<div style="font-size:14px;font-weight:800;margin-bottom:14px;">🔒 Change Password</div>'
@@ -2673,6 +2718,28 @@ async function loadProviderDash(stats, main, role){
       }
     }
   } catch(e){ console.error('provider messages:', e.message); }
+  // Load shop products if provider has any
+  try {
+    var sp = document.getElementById('provShopProducts');
+    if(sp){
+      var pr = await api('/products/mine').catch(()=>({data:[]}));
+      var products = pr.data || [];
+      if(products.length){
+        sp.innerHTML = products.slice(0,4).map(function(p){
+          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);">'
+            +'<div style="width:36px;height:36px;border-radius:8px;background:var(--bg3);overflow:hidden;flex-shrink:0;">'
+              +(p.images&&p.images[0]?'<img src="'+p.images[0]+'" style="width:100%;height:100%;object-fit:cover;">':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;">📦</div>')
+            +'</div>'
+            +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+p.name+'</div>'
+            +'<div style="font-size:11px;color:var(--t3);">R'+p.price+' · Stock: '+p.stock+'</div></div>'
+          +'</div>';
+        }).join('')
+        +(products.length > 4 ? '<div style="font-size:12px;color:var(--t3);padding:8px 0;">+'+( products.length-4)+' more products</div>' : '');
+      } else {
+        sp.innerHTML = '<div style="font-size:13px;color:var(--t3);padding:12px 0;">No shop products yet. <a onclick="goPage(\'shop\')" style="color:var(--blue3);cursor:pointer;">Set up your shop →</a></div>';
+      }
+    }
+  } catch(e){ console.error('provider shop:', e.message); }
 } // end loadProviderDash
 
 // ── SHOP OWNER DASHBOARD ──────────────────────────────────────────
@@ -3787,7 +3854,7 @@ async function sendMessage(){
   var input = document.getElementById('msgInput');
   if(!input||!input.value.trim()||!_currentConvPartner) return;
   var sendBtn = document.querySelector('.msg-send-btn');
-  if(sendBtn && sendBtn.disabled) return; // Prevent double send
+  if(sendBtn && sendBtn.disabled) return;
   var content = input.value.trim();
   input.value = '';
   input.focus();
@@ -3797,8 +3864,26 @@ async function sendMessage(){
     await refreshThreadMessages(_currentConvPartner.id, true);
     loadConversations();
   } catch(e){
-    input.value = content;
-    toast('Failed to send message','error');
+    // On mobile, message may have sent even if we got a network error
+    // Wait 2 seconds then check if it actually arrived before showing failed
+    setTimeout(async function(){
+      try {
+        await refreshThreadMessages(_currentConvPartner.id, true);
+        // Check if our message is now in the thread
+        var thread = document.getElementById('msgThread');
+        var msgs = thread ? thread.querySelectorAll('.msg-bubble') : [];
+        var found = false;
+        msgs.forEach(function(m){ if(m.textContent.trim() === content) found = true; });
+        if(!found){
+          // Message truly didn't send — restore so user can retry
+          input.value = content;
+          toast('Message failed — please try again','error');
+        }
+      } catch(e2){
+        input.value = content;
+        toast('Message failed — check your connection','error');
+      }
+    }, 2000);
   } finally {
     if(sendBtn){ sendBtn.disabled=false; sendBtn.style.opacity='1'; }
   }
