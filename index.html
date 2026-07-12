@@ -901,8 +901,8 @@ function toggleFaq(i){
         <div class="footer-links">
           <a onclick="goPage('about')">About Us</a>
           <a href="#">Careers</a>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
+          <a onclick="goPage('privacy')" style="cursor:pointer;">Privacy Policy</a>
+          <a onclick="goPage('terms')" style="cursor:pointer;">Terms of Service</a>
           <a href="mailto:hello@tasksa.co.za">hello@tasksa.co.za</a>
         </div>
       </div>
@@ -1001,6 +1001,155 @@ function toggleFaq(i){
       <button onclick="goPage('services')" style="background:var(--surf);border:1px solid var(--bd2);border-radius:50px;color:var(--t2);padding:13px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Browse Services</button>
     </div>
     <div style="margin-top:28px;font-size:13px;color:var(--t3);">📧 hello@tasksa.co.za</div>
+  </div>
+</div>
+
+<!-- PRIVACY POLICY PAGE -->
+<div class="page" id="page-privacy">
+  <div style="max-width:800px;margin:0 auto;padding:40px 20px 80px;">
+    <button onclick="goPage('home')" style="background:var(--surf);border:1px solid var(--bd);border-radius:50px;padding:8px 18px;font-size:13px;color:var(--t2);cursor:pointer;margin-bottom:24px;">← Back to Home</button>
+    <h1 style="font-size:28px;font-weight:800;margin-bottom:8px;">Privacy Policy</h1>
+    <p style="color:var(--t3);font-size:13px;margin-bottom:32px;">Last updated: 12 July 2026</p>
+
+    <div style="color:var(--t2);font-size:14px;line-height:1.8;">
+      <p style="margin-bottom:20px;">TaskSA (Pty) Ltd ("TaskSA", "we", "us", "our") is committed to protecting your personal information in accordance with the Protection of Personal Information Act 4 of 2013 ("POPIA"). This Privacy Policy explains what personal information we collect, why we collect it, how we use it, and your rights regarding that information.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">1. Information We Collect</h2>
+      <p style="margin-bottom:12px;">When you register, book a service, list a service, or use TaskSA, we may collect:</p>
+      <ul style="margin:0 0 20px 20px;">
+        <li style="margin-bottom:6px;">Your name, email address, and phone number</li>
+        <li style="margin-bottom:6px;">Your physical address or service area (province, city, suburb)</li>
+        <li style="margin-bottom:6px;">Profile photos and listing photos you upload</li>
+        <li style="margin-bottom:6px;">Booking details, messages sent through the platform, and reviews</li>
+        <li style="margin-bottom:6px;">Payment information processed through our payment provider (we do not store your card details)</li>
+        <li style="margin-bottom:6px;">Device information and push notification tokens if you enable notifications</li>
+      </ul>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">2. Why We Collect This Information</h2>
+      <p style="margin-bottom:12px;">We use your personal information to:</p>
+      <ul style="margin:0 0 20px 20px;">
+        <li style="margin-bottom:6px;">Create and manage your account</li>
+        <li style="margin-bottom:6px;">Connect clients with service providers, shops, and accommodation hosts</li>
+        <li style="margin-bottom:6px;">Process bookings, orders, and payments</li>
+        <li style="margin-bottom:6px;">Send booking confirmations, updates, and notifications via email, push notification, or SMS</li>
+        <li style="margin-bottom:6px;">Enable communication between clients and providers</li>
+        <li style="margin-bottom:6px;">Improve our platform and respond to support queries</li>
+        <li style="margin-bottom:6px;">Comply with legal obligations</li>
+      </ul>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">3. Who We Share Your Information With</h2>
+      <p style="margin-bottom:12px;">We share limited information as follows:</p>
+      <ul style="margin:0 0 20px 20px;">
+        <li style="margin-bottom:6px;"><strong>Other users:</strong> when you book a service or message a provider, they see your name, contact details, and message content necessary to fulfil the booking</li>
+        <li style="margin-bottom:6px;"><strong>Payment processors:</strong> PayFast processes card payments on our behalf; we do not have access to your full card details</li>
+        <li style="margin-bottom:6px;"><strong>Service providers:</strong> we use SendGrid for email delivery, Twilio for SMS, and Cloudinary for image hosting</li>
+        <li style="margin-bottom:6px;">We do not sell your personal information to third parties</li>
+      </ul>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">4. Data Security</h2>
+      <p style="margin-bottom:20px;">We use industry-standard security measures including encrypted password storage, secure HTTPS connections, and access controls to protect your personal information. However, no method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">5. Your Rights Under POPIA</h2>
+      <p style="margin-bottom:12px;">You have the right to:</p>
+      <ul style="margin:0 0 20px 20px;">
+        <li style="margin-bottom:6px;">Access the personal information we hold about you</li>
+        <li style="margin-bottom:6px;">Request correction of inaccurate information</li>
+        <li style="margin-bottom:6px;">Request deletion of your personal information, subject to legal retention requirements</li>
+        <li style="margin-bottom:6px;">Object to the processing of your personal information</li>
+        <li style="margin-bottom:6px;">Lodge a complaint with the Information Regulator of South Africa</li>
+      </ul>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">6. Data Retention</h2>
+      <p style="margin-bottom:20px;">We retain your personal information for as long as your account is active, and for a reasonable period afterward to comply with legal, accounting, and dispute-resolution requirements.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">7. Cookies and Tracking</h2>
+      <p style="margin-bottom:20px;">TaskSA uses local browser storage to keep you logged in and remember your preferences. We do not use third-party advertising trackers.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">8. Changes to This Policy</h2>
+      <p style="margin-bottom:20px;">We may update this Privacy Policy from time to time. Material changes will be communicated via email or a notice on the platform.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">9. Contact Us</h2>
+      <p style="margin-bottom:20px;">For any questions about this Privacy Policy or to exercise your rights under POPIA, contact us at <a href="mailto:hello@tasksa.co.za" style="color:var(--blue3);">hello@tasksa.co.za</a>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- TERMS OF SERVICE PAGE -->
+<div class="page" id="page-terms">
+  <div style="max-width:800px;margin:0 auto;padding:40px 20px 80px;">
+    <button onclick="goPage('home')" style="background:var(--surf);border:1px solid var(--bd);border-radius:50px;padding:8px 18px;font-size:13px;color:var(--t2);cursor:pointer;margin-bottom:24px;">← Back to Home</button>
+    <h1 style="font-size:28px;font-weight:800;margin-bottom:8px;">Terms of Service</h1>
+    <p style="color:var(--t3);font-size:13px;margin-bottom:32px;">Last updated: 12 July 2026</p>
+
+    <div style="color:var(--t2);font-size:14px;line-height:1.8;">
+      <p style="margin-bottom:20px;">These Terms of Service ("Terms") govern your use of the TaskSA platform, operated by TaskSA (Pty) Ltd. By registering for or using TaskSA, you agree to be bound by these Terms.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">1. What TaskSA Is</h2>
+      <p style="margin-bottom:20px;">TaskSA is an online marketplace that connects clients with independent service providers, local shops, and holiday accommodation hosts across South Africa. TaskSA is a facilitator of these connections — we are not a party to the service agreement between a client and a provider, shop, or host, and we do not employ, supervise, or guarantee the work of any provider listed on the platform.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">2. Account Registration</h2>
+      <p style="margin-bottom:12px;">To use TaskSA, you must:</p>
+      <ul style="margin:0 0 20px 20px;">
+        <li style="margin-bottom:6px;">Provide accurate, current, and complete information during registration</li>
+        <li style="margin-bottom:6px;">Be at least 18 years old</li>
+        <li style="margin-bottom:6px;">Keep your login credentials confidential and notify us of any unauthorised use</li>
+        <li style="margin-bottom:6px;">Be responsible for all activity that occurs under your account</li>
+      </ul>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">3. Bookings and Orders</h2>
+      <p style="margin-bottom:12px;">When a client books a service, orders from a shop, or reserves accommodation through TaskSA:</p>
+      <ul style="margin:0 0 20px 20px;">
+        <li style="margin-bottom:6px;">A contract for that service, product, or stay is formed directly between the client and the provider, shop, or host</li>
+        <li style="margin-bottom:6px;">TaskSA facilitates the booking and, where applicable, payment processing, but is not responsible for the quality, safety, legality, or delivery of the service, product, or accommodation</li>
+        <li style="margin-bottom:6px;">Prices displayed are set by the provider, shop, or host, and may be quotes subject to final confirmation for certain services</li>
+        <li style="margin-bottom:6px;">Cancellation terms may vary and should be discussed directly with the provider where not otherwise specified</li>
+      </ul>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">4. Payments</h2>
+      <p style="margin-bottom:12px;">TaskSA supports the following payment methods:</p>
+      <ul style="margin:0 0 20px 20px;">
+        <li style="margin-bottom:6px;"><strong>Cash:</strong> paid directly to the provider, shop, or host upon completion of service, collection of goods, or check-in</li>
+        <li style="margin-bottom:6px;"><strong>Card:</strong> processed securely through our payment partner PayFast; a platform commission applies to card transactions as disclosed at checkout</li>
+      </ul>
+      <p style="margin-bottom:20px;">TaskSA reserves the right to change accepted payment methods and applicable commission rates with reasonable notice.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">5. Provider, Shop, and Host Responsibilities</h2>
+      <p style="margin-bottom:12px;">If you list a service, shop, or accommodation on TaskSA, you agree to:</p>
+      <ul style="margin:0 0 20px 20px;">
+        <li style="margin-bottom:6px;">Provide accurate descriptions, pricing, and photos of your services or products</li>
+        <li style="margin-bottom:6px;">Hold any licences, permits, insurance, or qualifications required by law to offer your service</li>
+        <li style="margin-bottom:6px;">Respond to booking requests and client communication in a timely manner</li>
+        <li style="margin-bottom:6px;">Deliver the service, product, or accommodation as described</li>
+        <li style="margin-bottom:6px;">Comply with all applicable South African laws and regulations</li>
+      </ul>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">6. Reviews</h2>
+      <p style="margin-bottom:20px;">Only clients who have completed a booking with a provider may leave a review for that provider. Reviews must be honest and based on genuine experience. TaskSA reserves the right to remove reviews that are fraudulent, abusive, or violate these Terms.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">7. Prohibited Conduct</h2>
+      <p style="margin-bottom:12px;">You may not use TaskSA to:</p>
+      <ul style="margin:0 0 20px 20px;">
+        <li style="margin-bottom:6px;">Post false, misleading, or fraudulent listings or reviews</li>
+        <li style="margin-bottom:6px;">Harass, threaten, or abuse other users</li>
+        <li style="margin-bottom:6px;">Circumvent TaskSA's payment system to avoid applicable commissions where card payment was intended</li>
+        <li style="margin-bottom:6px;">Use the platform for any unlawful purpose</li>
+      </ul>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">8. Limitation of Liability</h2>
+      <p style="margin-bottom:20px;">TaskSA is provided on an "as is" basis. To the maximum extent permitted by South African law, TaskSA (Pty) Ltd shall not be liable for any indirect, incidental, or consequential damages arising from your use of the platform, or from the acts or omissions of any provider, shop, or host listed on TaskSA. TaskSA does not guarantee the availability, quality, safety, or legality of any listed service, product, or accommodation.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">9. Account Suspension and Termination</h2>
+      <p style="margin-bottom:20px;">TaskSA reserves the right to suspend or terminate any account that violates these Terms, engages in fraudulent activity, or poses a risk to other users, at our sole discretion and without prior notice where necessary.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">10. Changes to These Terms</h2>
+      <p style="margin-bottom:20px;">We may update these Terms from time to time. Continued use of TaskSA after changes take effect constitutes acceptance of the updated Terms.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">11. Governing Law</h2>
+      <p style="margin-bottom:20px;">These Terms are governed by the laws of the Republic of South Africa. Any disputes shall be subject to the jurisdiction of the South African courts.</p>
+
+      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">12. Contact Us</h2>
+      <p style="margin-bottom:20px;">For questions about these Terms, contact us at <a href="mailto:hello@tasksa.co.za" style="color:var(--blue3);">hello@tasksa.co.za</a>.</p>
+    </div>
   </div>
 </div>
 
@@ -1597,6 +1746,10 @@ function toggleFaq(i){
         </select>
       </div>
     </div>
+    <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:14px;">
+      <input type="checkbox" id="regAgreeTerms" style="margin-top:3px;flex-shrink:0;">
+      <label for="regAgreeTerms" style="font-size:12px;color:var(--t3);line-height:1.5;cursor:pointer;">I agree to TaskSA's <a onclick="event.preventDefault();goPage('terms')" style="color:var(--blue3);cursor:pointer;">Terms of Service</a> and <a onclick="event.preventDefault();goPage('privacy')" style="color:var(--blue3);cursor:pointer;">Privacy Policy</a></label>
+    </div>
     <button class="btn-primary" id="regBtn" onclick="doRegister()">Create Account</button>
     <div class="modal-footer-text">Already have an account? <a onclick="switchModal('registerModal','loginModal')">Sign in</a></div>
   </div>
@@ -1891,6 +2044,8 @@ async function doRegister(){
   var province=document.getElementById('regProvince')?.value||'';
   var city=document.getElementById('regCity')?.value||'';
   if(!name||!email||!pass){toast('Name, email and password required','error');return;}
+  var agreedTerms = document.getElementById('regAgreeTerms');
+  if(agreedTerms && !agreedTerms.checked){toast('Please agree to the Terms of Service and Privacy Policy','error');return;}
   if(!email.includes('@')||!email.includes('.')){toast('Please enter a valid email address (e.g. you@gmail.com)','error');return;}
   if(pass.length<8){toast('Password must be at least 8 characters','error');return;}
   var btn=document.getElementById('regBtn'); btn.disabled=true; btn.textContent='Creating account...';
