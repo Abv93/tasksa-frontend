@@ -394,7 +394,7 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
             <tbody id="bookingsTable"></tbody>
           </table>
         </div>
-        <div class="table-foot"><span id="bookingsCount">Loading...</span></div>
+        <div class="table-foot"><span id="bookingsCount">Loading...</span><div class="pagination" id="bookingsPag"></div></div>
       </div>
     </div>
     <div class="panel" id="panel-orders">
@@ -680,6 +680,24 @@ async function loadRevenue(){
       <div class="rev-row"><span class="rev-label">Total Orders</span><span class="rev-val">${d.orders.count}</span></div>`;
   } catch(e){ toast('Failed to load revenue','error'); }
 }
+function renderPagination(containerId, currentPage, total, perPage, loadFn){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const totalPages = Math.ceil(total / perPage);
+  if(totalPages <= 1){ el.innerHTML=''; return; }
+  let html = '';
+  if(currentPage > 1) html += `<button class="pag-btn" onclick="(${loadFn.name})(${currentPage-1})">‹</button>`;
+  const start = Math.max(1, currentPage-2);
+  const end = Math.min(totalPages, currentPage+2);
+  if(start > 1) html += `<button class="pag-btn" onclick="(${loadFn.name})(1)">1</button>` + (start>2?'<span style="padding:0 4px;color:var(--t3);">…</span>':'');
+  for(let p=start; p<=end; p++){
+    html += `<button class="pag-btn ${p===currentPage?'active':''}" onclick="(${loadFn.name})(${p})">${p}</button>`;
+  }
+  if(end < totalPages) html += (end<totalPages-1?'<span style="padding:0 4px;color:var(--t3);">…</span>':'') + `<button class="pag-btn" onclick="(${loadFn.name})(${totalPages})">${totalPages}</button>`;
+  if(currentPage < totalPages) html += `<button class="pag-btn" onclick="(${loadFn.name})(${currentPage+1})">›</button>`;
+  el.innerHTML = html;
+}
+
 async function loadUsers(page=1){
   const search=document.getElementById('userSearch')?.value||'';
   const role=document.getElementById('userRoleFilter')?.value||'';
@@ -703,6 +721,7 @@ async function loadUsers(page=1){
         ${u.role!=='ADMIN'?`<button class="act-btn ab-red" onclick="hardDeleteUser('${u.id}','${u.name}')" style="opacity:.8;" title="Permanently delete user">🗑️</button>`:''}  
       </div></td>
     </tr>`).join('') || '<tr class="empty-row"><td colspan="7">No users found</td></tr>';
+    renderPagination('usersPag', page, r.total, 15, loadUsers);
   } catch(e){ toast('Failed to load users','error'); }
 }
 function searchUsers(){ loadUsers(1); }
@@ -778,16 +797,17 @@ async function loadListings(page=1){
         <button class="act-btn ${l.isActive?'ab-red':'ab-green'}" onclick="toggleListing('${l.id}',${l.isActive})">${l.isActive?'Disable':'Enable'}</button>
       </div></td>
     </tr>`).join('')||'<tr class="empty-row"><td colspan="7">No listings found</td></tr>';
+    renderPagination('listingsPag', page, r.total, 15, loadListings);
   } catch(e){ toast('Failed to load listings','error'); }
 }
 function searchListings(){ loadListings(1); }
 async function verifyListing(id,isVerified){ try{ await api(`/admin/listings/${id}`,'PUT',{isVerified:!isVerified}); loadListings(); toast(isVerified?'Verification removed':'Listing verified!',isVerified?'error':'success'); }catch(e){ toast(e.message,'error'); }}
 async function featureListing(id,isFeatured){ try{ await api(`/admin/listings/${id}`,'PUT',{isFeatured:!isFeatured}); loadListings(); toast(isFeatured?'Removed from featured':'Listing featured!','success'); }catch(e){ toast(e.message,'error'); }}
 async function toggleListing(id,isActive){ try{ await api(`/admin/listings/${id}`,'PUT',{isActive:!isActive}); loadListings(); toast(isActive?'Listing disabled':'Listing enabled','success'); }catch(e){ toast(e.message,'error'); }}
-async function loadBookings(){
+async function loadBookings(page=1){
   const status=document.getElementById('bkStatusFilter')?.value||'';
   try {
-    const r=await api(`/admin/bookings?limit=20${status?'&status='+status:''}`);
+    const r=await api(`/admin/bookings?page=${page}&limit=20${status?'&status='+status:''}`);
     document.getElementById('bookingsCount').textContent=`${r.total} bookings`;
     document.getElementById('bookingsTable').innerHTML=r.data.map(b=>`<tr>
       <td><div class="td-name">${b.client?.name||'—'}</div><div class="td-sub">${b.client?.email||''}</div></td>
@@ -803,6 +823,7 @@ async function loadBookings(){
         ${b.status==='CONFIRMED'?`<button class="act-btn ab-blue" onclick="updateBooking('${b.id}','COMPLETED')">Complete</button>`:''}
       </div></td>
     </tr>`).join('')||'<tr class="empty-row"><td colspan="8">No bookings found</td></tr>';
+    renderPagination('bookingsPag', page, r.total, 20, loadBookings);
   } catch(e){ toast('Failed to load bookings','error'); }
 }
 async function updateBooking(id,status){ try{ await api(`/admin/bookings/${id}`,'PUT',{status}); loadBookings(); toast('Booking updated','success'); }catch(e){ toast(e.message,'error'); }}

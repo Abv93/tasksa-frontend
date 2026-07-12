@@ -1426,6 +1426,20 @@ function toggleFaq(i){
     <h2 style="font-size:18px;font-weight:800;margin-bottom:20px;">➕ Add New Listing</h2>
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div>
+        <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">LISTING TYPE *</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="listingTypePicker">
+          <div onclick="selectListingType('SERVICE')" data-ltype="SERVICE" style="border:2px solid var(--blue2);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:rgba(26,143,255,.08);">
+            <div style="font-size:20px;">🔧</div>
+            <div style="font-size:12px;font-weight:700;margin-top:4px;">Service</div>
+          </div>
+          <div onclick="selectListingType('SHOP')" data-ltype="SHOP" style="border:2px solid var(--bd);border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
+            <div style="font-size:20px;">🛒</div>
+            <div style="font-size:12px;font-weight:700;margin-top:4px;">Shop</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--t3);margin-top:6px;">Choose Shop if you'll be selling physical products (you'll add products to it afterwards)</div>
+      </div>
+      <div>
         <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">LISTING NAME *</label>
         <input id="newListingName" type="text" placeholder="e.g. Professional Plumbing Service" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
       </div>
@@ -2557,7 +2571,10 @@ async function loadClientDash(stats, main){
     // Bookings + Orders stacked vertically
     +'<div style="display:flex;flex-direction:column;gap:16px;" id="clientGrid">'
       +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;">'
-        +'<div style="font-size:14px;font-weight:800;margin-bottom:14px;">📅 My Bookings</div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
+          +'<div style="font-size:14px;font-weight:800;">📅 My Bookings</div>'
+          +'<button onclick="toggleArchivedBookings()" id="archiveToggleBtn" style="background:var(--bg3);border:1px solid var(--bd);border-radius:8px;color:var(--t3);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">🗄️ View Archived</button>'
+        +'</div>'
         +'<div id="clientBookings"></div>'
         +'<button onclick="goPage(\'services\')" style="width:100%;margin-top:12px;background:transparent;border:1px solid var(--bd);border-radius:50px;padding:9px;font-size:12px;font-weight:700;color:var(--t3);cursor:pointer;">+ Book a Service</button>'
       +'</div>'
@@ -2581,30 +2598,8 @@ async function loadClientDash(stats, main){
     var bk = await api('/bookings/mine');
     var cb = document.getElementById('clientBookings');
     if(cb){
-      var hiddenIds = JSON.parse(localStorage.getItem('tasksa_hidden_bookings')||'[]');
-      var visibleBookings = (bk.data||[]).filter(function(b){ return hiddenIds.indexOf(b.id) === -1; });
-      if(visibleBookings.length){
-        cb.innerHTML = visibleBookings.map(function(b){
-          var statusColor = b.status==='CONFIRMED'?'var(--green2)':b.status==='COMPLETED'?'var(--blue3)':b.status==='CANCELLED'?'#f87171':'var(--amber)';
-          var statusLabel = b.status==='CONFIRMED'?'✓ Confirmed':b.status==='COMPLETED'?'✓ Completed':b.status==='CANCELLED'?'✕ Cancelled':'⏳ Pending';
-          var canDelete = b.status === 'CANCELLED';
-          var actionBtn = canDelete
-            ? '<button onclick="deleteBooking(\''+b.id+'\')" style="background:none;border:none;color:#f87171;font-size:11px;cursor:pointer;padding:2px 0;">🗑️ Delete</button>'
-            : '<button onclick="hideBooking(\''+b.id+'\')" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer;padding:2px 0;">Archive</button>';
-          return '<div style="padding:14px 0;border-bottom:1px solid var(--bd);">'
-            +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
-              +'<div style="font-weight:700;font-size:13px;">'+(b.listing?b.listing.name:'Booking')+'</div>'
-              +'<span style="font-size:11px;font-weight:700;color:'+statusColor+';">'+statusLabel+'</span>'
-            +'</div>'
-            +'<div style="font-size:12px;color:var(--t3);margin-top:4px;">📅 '+fDate(b.scheduledAt)+'</div>'
-            +(b.notes?'<div style="font-size:12px;color:var(--t2);margin-top:4px;padding:8px;background:var(--bg3);border-radius:8px;">📝 '+b.notes+'</div>':'')
-            +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">'
-              +'<div style="font-size:12px;color:var(--blue3);">'+R(b.totalAmount)+'</div>'
-              +actionBtn
-            +'</div>'
-            +'</div>';
-        }).join('');
-      } else { cb.innerHTML = '<div class="empty" style="padding:24px 0;"><div class="empty-icon" style="font-size:32px;">📅</div><p style="font-size:13px;">No bookings yet</p></div>'; }
+      S._allClientBookings = bk.data || []; // cache for toggle
+      renderClientBookingsList();
     }
   } catch(e){}
 
@@ -3265,12 +3260,67 @@ async function saveProduct(){
   btn.disabled = false; btn.textContent = 'Add Product';
 }
 
+var _showingArchived = false;
+
+function toggleArchivedBookings(){
+  _showingArchived = !_showingArchived;
+  var btn = document.getElementById('archiveToggleBtn');
+  if(btn) btn.textContent = _showingArchived ? '📅 View Active' : '🗄️ View Archived';
+  renderClientBookingsList();
+}
+
+function renderClientBookingsList(){
+  var cb = document.getElementById('clientBookings');
+  if(!cb || !S._allClientBookings) return;
+  var hiddenIds = JSON.parse(localStorage.getItem('tasksa_hidden_bookings')||'[]');
+  var list = S._allClientBookings.filter(function(b){
+    var isHidden = hiddenIds.indexOf(b.id) !== -1;
+    return _showingArchived ? isHidden : !isHidden;
+  });
+  if(!list.length){
+    cb.innerHTML = '<div class="empty" style="padding:24px 0;"><div class="empty-icon" style="font-size:32px;">'+(_showingArchived?'🗄️':'📅')+'</div><p style="font-size:13px;">'+(_showingArchived?'No archived bookings':'No bookings yet')+'</p></div>';
+    return;
+  }
+  cb.innerHTML = list.map(function(b){
+    var statusColor = b.status==='CONFIRMED'?'var(--green2)':b.status==='COMPLETED'?'var(--blue3)':b.status==='CANCELLED'?'#f87171':'var(--amber)';
+    var statusLabel = b.status==='CONFIRMED'?'✓ Confirmed':b.status==='COMPLETED'?'✓ Completed':b.status==='CANCELLED'?'✕ Cancelled':'⏳ Pending';
+    var actionBtn;
+    if(_showingArchived){
+      actionBtn = '<button onclick="unhideBooking(\''+b.id+'\')" style="background:none;border:none;color:var(--blue3);font-size:11px;cursor:pointer;padding:2px 0;">↩️ Restore</button>';
+    } else {
+      actionBtn = b.status === 'CANCELLED'
+        ? '<button onclick="deleteBooking(\''+b.id+'\')" style="background:none;border:none;color:#f87171;font-size:11px;cursor:pointer;padding:2px 0;">🗑️ Delete</button>'
+        : '<button onclick="hideBooking(\''+b.id+'\')" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer;padding:2px 0;">Archive</button>';
+    }
+    return '<div style="padding:14px 0;border-bottom:1px solid var(--bd);">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+        +'<div style="font-weight:700;font-size:13px;">'+(b.listing?b.listing.name:'Booking')+'</div>'
+        +'<span style="font-size:11px;font-weight:700;color:'+statusColor+';">'+statusLabel+'</span>'
+      +'</div>'
+      +'<div style="font-size:12px;color:var(--t3);margin-top:4px;">📅 '+fDate(b.scheduledAt)+'</div>'
+      +(b.notes?'<div style="font-size:12px;color:var(--t2);margin-top:4px;padding:8px;background:var(--bg3);border-radius:8px;">📝 '+b.notes+'</div>':'')
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">'
+        +'<div style="font-size:12px;color:var(--blue3);">'+R(b.totalAmount)+'</div>'
+        +actionBtn
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function unhideBooking(id){
+  var hidden = JSON.parse(localStorage.getItem('tasksa_hidden_bookings')||'[]');
+  hidden = hidden.filter(function(h){ return h !== id; });
+  localStorage.setItem('tasksa_hidden_bookings', JSON.stringify(hidden));
+  toast('Booking restored','success');
+  renderClientBookingsList();
+}
+
 function hideBooking(id){
   var hidden = JSON.parse(localStorage.getItem('tasksa_hidden_bookings')||'[]');
   if(hidden.indexOf(id) === -1) hidden.push(id);
   localStorage.setItem('tasksa_hidden_bookings', JSON.stringify(hidden));
   toast('Booking archived','success');
-  loadDash();
+  renderClientBookingsList();
 }
 
 async function deleteBooking(id){
@@ -3518,17 +3568,23 @@ async function deleteListing(id){
 }
 
 // ── ADD LISTING ───────────────────────────────────────────────────
-async function openAddListingModal(){
-  openModal('addListingModal');
-  // Show amenities section only for HOST role
-  var amenSec = document.getElementById('amenitiesSection');
-  var isHost = S.user && S.user.role === 'HOST';
-  if(amenSec) amenSec.style.display = isHost ? 'block' : 'none';
+var _selectedListingType = 'SERVICE';
+
+function selectListingType(type){
+  _selectedListingType = type;
+  document.querySelectorAll('#listingTypePicker > div').forEach(function(el){
+    var isSelected = el.dataset.ltype === type;
+    el.style.borderColor = isSelected ? 'var(--blue2)' : 'var(--bd)';
+    el.style.background = isSelected ? 'rgba(26,143,255,.08)' : 'transparent';
+  });
+  loadCategoriesForType(type);
+}
+
+async function loadCategoriesForType(type){
   var sel = document.getElementById('newListingCat');
   if(!sel) return;
   sel.innerHTML = '<option value="">Loading categories...</option>';
   try {
-    var type = isHost ? 'ACCOMMODATION' : 'SERVICE';
     var r = await publicApi('/categories?type=' + type);
     var cats = r.data || [];
     if(cats.length){
@@ -3537,11 +3593,25 @@ async function openAddListingModal(){
         sel.innerHTML += '<option value="'+c.id+'">'+(c.icon||'')+' '+c.name+'</option>';
       });
     } else {
-      sel.innerHTML = '<option value="">No categories found</option>';
+      sel.innerHTML = '<option value="">No categories found for this type</option>';
     }
   } catch(e){
     sel.innerHTML = '<option value="">Could not load categories</option>';
   }
+}
+
+async function openAddListingModal(){
+  openModal('addListingModal');
+  // Show amenities section only for HOST role
+  var amenSec = document.getElementById('amenitiesSection');
+  var isHost = S.user && S.user.role === 'HOST';
+  if(amenSec) amenSec.style.display = isHost ? 'block' : 'none';
+  var picker = document.getElementById('listingTypePicker');
+  if(picker) picker.style.display = isHost ? 'none' : 'grid';
+  var typeToLoad = isHost ? 'ACCOMMODATION' : 'SERVICE';
+  _selectedListingType = typeToLoad;
+  if(!isHost) selectListingType('SERVICE');
+  else loadCategoriesForType('ACCOMMODATION');
 }
 
 async function submitNewListing(){
