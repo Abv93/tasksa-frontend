@@ -3947,8 +3947,8 @@ async function refreshThreadMessages(partnerId, scrollToBottom){
       thread.dataset.lastMsgId = lastId;
       thread.innerHTML = r.data.map(function(m){
         var mine = m.senderId === S.user.id;
-        return '<div style="display:flex;justify-content:'+(mine?'flex-end':'flex-start')+';margin-bottom:4px;">'
-          +'<div style="max-width:75%;background:'+(mine?'var(--blue2)':'var(--surf)')+';color:'+(mine?'#fff':'var(--t)')+';padding:10px 14px;border-radius:'+(mine?'16px 16px 4px 16px':'16px 16px 16px 4px')+';font-size:13px;line-height:1.5;word-break:break-word;">'
+        return '<div class="msg-bubble-row" style="display:flex;justify-content:'+(mine?'flex-end':'flex-start')+';margin-bottom:4px;">'
+          +'<div class="msg-bubble" data-content="'+m.content.replace(/"/g,'&quot;')+'" style="max-width:75%;background:'+(mine?'var(--blue2)':'var(--surf)')+';color:'+(mine?'#fff':'var(--t)')+';padding:10px 14px;border-radius:'+(mine?'16px 16px 4px 16px':'16px 16px 16px 4px')+';font-size:13px;line-height:1.5;word-break:break-word;">'
             +m.content
             +'<div style="font-size:10px;opacity:.6;margin-top:4px;text-align:right;">'+new Date(m.createdAt).toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'})+'</div>'
           +'</div></div>';
@@ -3967,31 +3967,64 @@ async function sendMessage(){
   input.value = '';
   input.focus();
   if(sendBtn){ sendBtn.disabled=true; sendBtn.style.opacity='0.5'; }
+
+  // Optimistic UI — show the message immediately with a "sending" indicator.
+  // This matches how real chat apps behave and avoids all the false-failure
+  // problems caused by trying to guess network state on flaky mobile connections.
+  var thread = document.getElementById('msgThread');
+  var tempId = 'temp-'+Date.now();
+  if(thread){
+    var noMsgsEl = thread.querySelector('div[style*="No messages yet"]');
+    if(noMsgsEl) thread.innerHTML = '';
+    var row = document.createElement('div');
+    row.className = 'msg-bubble-row';
+    row.id = tempId;
+    row.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:4px;';
+    row.innerHTML = '<div class="msg-bubble" data-content="'+content.replace(/"/g,'&quot;')+'" style="max-width:75%;background:var(--blue2);color:#fff;padding:10px 14px;border-radius:16px 16px 4px 16px;font-size:13px;line-height:1.5;word-break:break-word;opacity:0.6;">'
+      +content
+      +'<div style="font-size:10px;opacity:.8;margin-top:4px;text-align:right;">Sending...</div>'
+    +'</div>';
+    thread.appendChild(row);
+    thread.scrollTop = thread.scrollHeight;
+  }
+
   try {
     await api('/messages','POST',{receiverId:_currentConvPartner.id,content:content});
+    // Success — refresh to show the real message with correct timestamp
     await refreshThreadMessages(_currentConvPartner.id, true);
     loadConversations();
   } catch(e){
-    // On mobile, message may have sent even if we got a network error
-    // Wait 2 seconds then check if it actually arrived before showing failed
-    setTimeout(async function(){
+    // Network hiccup — the message may have actually reached the server even
+    // though this request errored. Check a few times before deciding.
+    var found = false;
+    for(var attempt = 0; attempt < 4 && !found; attempt++){
+      await new Promise(function(resolve){ setTimeout(resolve, 1500); });
       try {
-        await refreshThreadMessages(_currentConvPartner.id, true);
-        // Check if our message is now in the thread
-        var thread = document.getElementById('msgThread');
-        var msgs = thread ? thread.querySelectorAll('.msg-bubble') : [];
-        var found = false;
-        msgs.forEach(function(m){ if(m.textContent.trim() === content) found = true; });
-        if(!found){
-          // Message truly didn't send — restore so user can retry
+        var r = await api('/messages/'+_currentConvPartner.id);
+        found = r.data.some(function(m){ return m.content === content && m.senderId === S.user.id; });
+      } catch(e2){ /* keep retrying */ }
+    }
+    if(found){
+      // It actually sent — just refresh to replace the temp bubble with the real one
+      await refreshThreadMessages(_currentConvPartner.id, true);
+      loadConversations();
+    } else {
+      // Genuinely failed — mark the temp bubble as failed, don't auto-restore text
+      // (auto-restoring invites the user to resend and creates real duplicates)
+      var tempRow = document.getElementById(tempId);
+      if(tempRow){
+        tempRow.querySelector('.msg-bubble').style.opacity = '1';
+        tempRow.querySelector('.msg-bubble').style.background = 'rgba(239,68,68,.25)';
+        tempRow.querySelector('div[style*="Sending"]').textContent = '⚠️ Failed — tap to retry';
+        tempRow.querySelector('div[style*="Sending"]').style.cursor = 'pointer';
+        tempRow.onclick = function(){
           input.value = content;
-          toast('Message failed — please try again','error');
-        }
-      } catch(e2){
-        input.value = content;
-        toast('Message failed — check your connection','error');
+          tempRow.remove();
+          input.focus();
+        };
       }
-    }, 2000);
+      toast('Message could not be sent — tap it to retry','error');
+    }
   } finally {
     if(sendBtn){ sendBtn.disabled=false; sendBtn.style.opacity='1'; }
   }
