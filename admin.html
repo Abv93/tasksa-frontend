@@ -277,6 +277,7 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
   <div class="slink" data-panel="categories" onclick="showPanel('categories',this)"><span class="slink-icon">🏷️</span><span class="slink-label">Categories</span></div>
   <div class="slink" data-panel="banners" onclick="showPanel('banners',this)"><span class="slink-icon">📣</span><span class="slink-label">Banner Ads</span></div>
   <div class="slink" data-panel="notify" onclick="showPanel('notify',this)"><span class="slink-icon">🔔</span><span class="slink-label">Notifications</span></div>
+  <div class="slink" data-panel="payouts" onclick="showPanel('payouts',this)"><span class="slink-icon">💰</span><span class="slink-label">Payouts</span></div>
   <div class="slink" data-panel="settings" onclick="showPanel('settings',this)"><span class="slink-icon">⚙️</span><span class="slink-label">Settings</span></div>
   <div class="side-bottom">
     <div class="slink" onclick="doLogout()"><span class="slink-icon">🚪</span><span class="slink-label">Sign Out</span></div>
@@ -477,6 +478,21 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         <button class="btn btn-p" id="n2Btn" onclick="sendNotification2()" style="margin-top:4px;">Send Notification</button>
       </div>
     </div>
+    <div class="panel" id="panel-payouts">
+      <div class="table-wrap">
+        <div class="table-hdr">
+          <h3>Provider Payouts</h3>
+          <div style="font-size:12px;color:var(--t3);">Money owed to providers from card payments — cash bookings are settled directly between client and provider</div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Provider</th><th>Banking</th><th>Total Earned</th><th>Paid Out</th><th>Owed</th><th>Actions</th></tr></thead>
+            <tbody id="payoutsTable"></tbody>
+          </table>
+        </div>
+        <div class="table-foot"><span id="payoutsCount">Loading...</span></div>
+      </div>
+    </div>
     <div class="panel" id="panel-settings">
       <div class="grid2">
         <div class="card">
@@ -616,12 +632,14 @@ const PANEL_CONFIG = {
   categories:{title:'Categories',action:'+ Add Category'},
   banners:{title:'Banner Ads',action:'+ Create Banner'},
   notify:{title:'Send Notifications',action:''},
+  payouts:{title:'Provider Payouts',action:''},
   settings:{title:'Settings',action:''},
 };
 const PANEL_LOADERS = {
   dashboard:loadDashboard, revenue:loadRevenue, users:loadUsers,
   listings:loadListings, bookings:loadBookings, orders:loadOrders,
   reviews:loadReviews, categories:loadCategories, banners:loadBanners,
+  payouts:loadPayouts,
   settings:loadSettings
 };
 function showPanel(name, el){
@@ -966,6 +984,48 @@ async function sendNotification2(){
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Send Notification';
 }
+async function loadPayouts(){
+  try {
+    const r = await api('/payouts/admin/overview');
+    document.getElementById('payoutsCount').textContent = `${r.data.length} providers with activity`;
+    document.getElementById('payoutsTable').innerHTML = r.data.map(p => `<tr>
+      <td><div class="td-name">${p.name}</div><div class="td-sub">${p.email}${p.phone?' · '+p.phone:''}</div></td>
+      <td>
+        ${p.hasBankingDetails
+          ? `<div style="font-size:11px;">${p.bankName}<br>${p.accountHolder}<br>${p.accountNumber}</div>${p.bankingVerified?'<span class="badge b-green" style="margin-top:4px;">✓ Verified</span>':`<span class="badge b-amber" style="margin-top:4px;">Unverified</span> <button class="act-btn ab-blue" style="margin-top:4px;" onclick="verifyBanking('${p.userId}')">Verify</button>`}`
+          : '<span class="badge b-red">No banking details</span>'}
+      </td>
+      <td style="font-size:12px;font-weight:700;">${R(p.totalEarned)}</td>
+      <td style="font-size:12px;color:var(--blue3);">${R(p.totalPaidOut)}</td>
+      <td style="font-size:13px;font-weight:800;color:${p.owed>0?'var(--green2)':'var(--t3)'};">${R(p.owed)}</td>
+      <td>${p.owed>0?`<button class="act-btn ab-green" onclick="openRecordPayout('${p.userId}','${p.name}',${p.owed})">Mark as Paid</button>`:'—'}</td>
+    </tr>`).join('') || '<tr class="empty-row"><td colspan="6">No providers with earnings yet</td></tr>';
+  } catch(e){ toast('Failed to load payouts','error'); }
+}
+
+async function verifyBanking(userId){
+  try {
+    await api(`/payouts/admin/verify-banking/${userId}`,'PUT');
+    toast('Banking details verified','success');
+    loadPayouts();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+function openRecordPayout(userId, name, owed){
+  const amount = prompt(`Record payout for ${name}\n\nAmount owed: R${owed}\n\nEnter the amount you actually paid (EFT reference optional after):`, owed.toFixed(2));
+  if(!amount || isNaN(amount) || parseFloat(amount) <= 0){ if(amount!==null) toast('Invalid amount','error'); return; }
+  const reference = prompt('EFT reference number (optional):') || '';
+  recordPayout(userId, parseFloat(amount), reference);
+}
+
+async function recordPayout(userId, amount, reference){
+  try {
+    await api('/payouts/admin/record','POST',{userId, amount, reference});
+    toast('Payout recorded — provider has been notified','success');
+    loadPayouts();
+  } catch(e){ toast(e.message,'error'); }
+}
+
 async function loadSettings(){
   try {
     const r=await api('/admin/settings');
