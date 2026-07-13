@@ -2785,7 +2785,7 @@ async function loadProviderDash(stats, main, role){
       '<div class="dash-stat"><div class="dash-stat-label">My Listings</div><div class="dash-stat-val">'+d.totalListings+'</div></div>'
       +'<div class="dash-stat"><div class="dash-stat-label">Total Bookings</div><div class="dash-stat-val">'+d.totalBookings+'</div></div>'
       +'<div class="dash-stat"><div class="dash-stat-label">Pending</div><div class="dash-stat-val" style="color:var(--amber);">'+d.pendingBookings+'</div><div class="dash-stat-sub">Needs action</div></div>'
-      +'<div class="dash-stat"><div class="dash-stat-label">Earnings</div><div class="dash-stat-val" style="font-size:20px;color:var(--green2);">'+R(d.totalEarnings)+'</div><div class="dash-stat-sub">After commission</div></div>';
+      +'<div class="dash-stat"><div class="dash-stat-label">Earnings</div><div class="dash-stat-val" style="font-size:20px;color:var(--green2);">'+R(d.totalEarnings)+'</div><div class="dash-stat-sub">Cash + card, before payout</div></div>';
   } catch(e){ console.error('provider stats:', e.message); }
 
   if(!main) return;
@@ -2821,11 +2821,11 @@ async function loadProviderDash(stats, main, role){
       +'<div style="font-size:14px;font-weight:800;margin-bottom:6px;">🏦 Banking Details</div>'
       +'<div style="font-size:12px;color:var(--t3);margin-bottom:14px;">Required so we can pay out your card payment earnings. Cash bookings are paid to you directly by the client and don\'t need this.</div>'
       +'<div style="display:flex;flex-direction:column;gap:10px;max-width:420px;">'
-        +'<input id="bankName" placeholder="Bank name (e.g. FNB, Capitec, Standard Bank)" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;width:100%;">'
-        +'<input id="accountHolder" placeholder="Account holder full name" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;width:100%;">'
-        +'<input id="accountNumber" placeholder="Account number" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;width:100%;">'
+        +'<input id="bankName" name="tasksa-bank-name" autocomplete="off" placeholder="Bank name (e.g. FNB, Capitec, Standard Bank)" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;width:100%;">'
+        +'<input id="accountHolder" name="tasksa-acc-holder" autocomplete="off" placeholder="Account holder full name" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;width:100%;">'
+        +'<input id="accountNumber" name="tasksa-acc-number" autocomplete="off" inputmode="numeric" placeholder="Account number" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;width:100%;">'
         +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
-          +'<input id="branchCode" placeholder="Branch code" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;">'
+          +'<input id="branchCode" name="tasksa-branch-code" autocomplete="off" inputmode="numeric" placeholder="Branch code" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;">'
           +'<select id="accountType" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;">'
             +'<option>Cheque/Current</option><option>Savings</option>'
           +'</select>'
@@ -2958,7 +2958,7 @@ async function loadShopDash(stats, main){
     if(stats) stats.innerHTML =
       '<div class="dash-stat"><div class="dash-stat-label">My Listings</div><div class="dash-stat-val">'+d.totalListings+'</div></div>'
       +'<div class="dash-stat"><div class="dash-stat-label">Total Orders</div><div class="dash-stat-val">'+d.totalOrders+'</div></div>'
-      +'<div class="dash-stat"><div class="dash-stat-label">Earnings</div><div class="dash-stat-val" style="font-size:20px;color:var(--green2);">'+R(d.totalEarnings)+'</div><div class="dash-stat-sub">After commission</div></div>';
+      +'<div class="dash-stat"><div class="dash-stat-label">Earnings</div><div class="dash-stat-val" style="font-size:20px;color:var(--green2);">'+R(d.totalEarnings)+'</div><div class="dash-stat-sub">Cash + card, before payout</div></div>';
   } catch(e){}
 
   if(!main) return;
@@ -3511,7 +3511,7 @@ async function loadProviderEarnings(){
     el.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
       +'<div style="background:var(--bg3);border-radius:10px;padding:12px;text-align:center;">'
         +'<div style="font-size:20px;font-weight:800;color:var(--green2);">'+R(d.owed)+'</div>'
-        +'<div style="font-size:11px;color:var(--t3);">Owed to you</div>'
+        +'<div style="font-size:11px;color:var(--t3);">Owed to you (card payments)</div>'
       +'</div>'
       +'<div style="background:var(--bg3);border-radius:10px;padding:12px;text-align:center;">'
         +'<div style="font-size:20px;font-weight:800;color:var(--blue3);">'+R(d.totalPaidOut)+'</div>'
