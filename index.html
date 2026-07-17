@@ -2779,21 +2779,26 @@ async function loadClientDash(stats, main){
   } catch(e){}
 
   try {
-    var ord = await api('/orders?limit=5');
+    var ord = await api('/orders/mine');
     var co = document.getElementById('clientOrders');
     if(co){
       if(ord.data && ord.data.length){
-        co.innerHTML = ord.data.map(function(o){
-          var statusColor = o.status==='COLLECTED'?'var(--blue3)':o.status==='READY_FOR_COLLECTION'?'var(--green2)':'var(--amber)';
+        co.innerHTML = ord.data.slice(0,5).map(function(o){
+          var statusColor = o.status==='COLLECTED'?'var(--blue3)':o.status==='READY_FOR_COLLECTION'?'var(--green2)':o.status==='CANCELLED'?'#f87171':'var(--amber)';
+          var statusLabel = o.status==='COLLECTED'?'✓ Collected':o.status==='READY_FOR_COLLECTION'?'📦 Ready for Collection':o.status==='CONFIRMED'?'✓ Confirmed':o.status==='CANCELLED'?'✕ Cancelled':'⏳ Pending';
+          var itemsList = (o.items||[]).map(function(it){ return it.product ? it.product.name : 'Item'; }).join(', ');
           return '<div style="padding:11px 0;border-bottom:1px solid var(--bd);">'
-            +'<div style="font-weight:700;font-size:13px;">Order #'+(o.collectionCode||o.id.slice(-6))+'</div>'
-            +'<div style="font-size:11px;color:var(--t3);margin-top:2px;">'+fDate(o.createdAt)+' · R'+(o.totalAmount||0)+'</div>'
-            +'<div style="font-size:11px;margin-top:3px;font-weight:700;color:'+statusColor+';">'+o.status.replace(/_/g,' ')+'</div>'
-            +'</div>';
+            +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+              +'<div style="font-weight:700;font-size:13px;">Order #'+(o.collectionCode||o.id.slice(-6))+'</div>'
+              +'<span style="font-size:11px;font-weight:700;color:'+statusColor+';">'+statusLabel+'</span>'
+            +'</div>'
+            +(itemsList?'<div style="font-size:12px;color:var(--t2);margin-top:2px;">'+itemsList+'</div>':'')
+            +'<div style="font-size:11px;color:var(--t3);margin-top:3px;">'+fDate(o.createdAt)+' · R'+(o.totalAmount||0)+'</div>'
+          +'</div>';
         }).join('');
       } else { co.innerHTML = '<div class="empty" style="padding:24px 0;"><div class="empty-icon" style="font-size:32px;">🛒</div><p style="font-size:13px;">No orders yet</p></div>'; }
     }
-  } catch(e){}
+  } catch(e){ console.error('client orders:', e.message); }
 }
 
 // ── PROVIDER / HOST DASHBOARD ─────────────────────────────────────
@@ -2832,6 +2837,10 @@ async function loadProviderDash(stats, main, role){
         +'<button onclick="openAddProductModal()" style="background:rgba(34,197,94,.12);border:none;border-radius:8px;color:var(--green2);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">+ Add Product</button>'
       +'</div>'
       +'<div id="provShopProducts"><div style="font-size:13px;color:var(--t3);padding:12px 0;">Loading...</div></div>'
+    +'</div>'
+    +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
+      +'<div style="font-size:14px;font-weight:800;margin-bottom:14px;">🧾 Shop Orders</div>'
+      +'<div id="provShopOrders"><div style="font-size:13px;color:var(--t3);padding:12px 0;">Loading...</div></div>'
     +'</div>'
     +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
       +'<div style="font-size:14px;font-weight:800;margin-bottom:14px;">💰 Earnings & Payouts</div>'
@@ -2968,7 +2977,50 @@ async function loadProviderDash(stats, main, role){
   } catch(e){ console.error('provider shop:', e.message); }
   loadProviderEarnings();
   loadBankingDetails();
+  loadProviderShopOrders();
 } // end loadProviderDash
+
+async function loadProviderShopOrders(){
+  var el = document.getElementById('provShopOrders');
+  if(!el) return;
+  try {
+    var r = await api('/orders/selling');
+    var orders = r.data || [];
+    if(!orders.length){
+      el.innerHTML = '<div style="font-size:13px;color:var(--t3);padding:8px 0;">No orders yet — orders for your shop products will appear here.</div>';
+      return;
+    }
+    el.innerHTML = orders.slice(0,10).map(function(o){
+      var statusColor = o.status==='COLLECTED'?'var(--blue3)':o.status==='READY_FOR_COLLECTION'?'var(--green2)':o.status==='CANCELLED'?'#f87171':'var(--amber)';
+      var statusLabel = o.status==='COLLECTED'?'✓ Collected':o.status==='READY_FOR_COLLECTION'?'📦 Ready for Collection':o.status==='CONFIRMED'?'✓ Confirmed':o.status==='CANCELLED'?'✕ Cancelled':'⏳ Pending';
+      var itemsList = (o.items||[]).map(function(it){ return it.product ? it.product.name+' x'+it.quantity : 'Item'; }).join(', ');
+      var nextBtn = '';
+      if(o.status === 'PENDING') nextBtn = '<button onclick="updateShopOrderStatus(\''+o.id+'\',\'CONFIRMED\')" style="background:rgba(34,197,94,.12);border:none;border-radius:8px;color:var(--green2);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Confirm Order</button>';
+      else if(o.status === 'CONFIRMED') nextBtn = '<button onclick="updateShopOrderStatus(\''+o.id+'\',\'READY_FOR_COLLECTION\')" style="background:rgba(26,143,255,.12);border:none;border-radius:8px;color:var(--blue3);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Mark Ready</button>';
+      else if(o.status === 'READY_FOR_COLLECTION') nextBtn = '<button onclick="updateShopOrderStatus(\''+o.id+'\',\'COLLECTED\')" style="background:rgba(139,92,246,.12);border:none;border-radius:8px;color:#c4b5fd;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Mark Collected</button>';
+      return '<div style="padding:12px 0;border-bottom:1px solid var(--bd);">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+          +'<div><div style="font-weight:700;font-size:13px;">#'+(o.collectionCode||o.id.slice(-6))+' — '+(o.client?o.client.name:'Client')+'</div>'
+          +'<div style="font-size:12px;color:var(--t2);margin-top:2px;">'+itemsList+'</div></div>'
+          +'<span style="font-size:11px;font-weight:700;color:'+statusColor+';white-space:nowrap;margin-left:8px;">'+statusLabel+'</span>'
+        +'</div>'
+        +(o.notes?'<div style="font-size:12px;color:var(--t3);margin-top:4px;padding:6px 8px;background:var(--bg3);border-radius:6px;">📝 '+o.notes+'</div>':'')
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">'
+          +'<div style="font-size:12px;color:var(--blue3);font-weight:700;">'+R(o.totalAmount)+'</div>'
+          +nextBtn
+        +'</div>'
+      +'</div>';
+    }).join('');
+  } catch(e){ el.innerHTML = '<div style="font-size:12px;color:var(--t3);">Could not load orders</div>'; console.error('shop orders:', e.message); }
+}
+
+async function updateShopOrderStatus(orderId, status){
+  try {
+    await api('/orders/'+orderId+'/status','PATCH',{status:status});
+    toast('Order updated','success');
+    loadProviderShopOrders();
+  } catch(e){ toast(e.message||'Failed to update order','error'); }
+}
 
 // ── SHOP OWNER DASHBOARD ──────────────────────────────────────────
 async function loadShopDash(stats, main){
