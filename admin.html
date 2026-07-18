@@ -278,6 +278,7 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
   <div class="slink" data-panel="banners" onclick="showPanel('banners',this)"><span class="slink-icon">📣</span><span class="slink-label">Banner Ads</span></div>
   <div class="slink" data-panel="notify" onclick="showPanel('notify',this)"><span class="slink-icon">🔔</span><span class="slink-label">Notifications</span></div>
   <div class="slink" data-panel="payouts" onclick="showPanel('payouts',this)"><span class="slink-icon">💰</span><span class="slink-label">Payouts</span></div>
+  <div class="slink" data-panel="verification" onclick="showPanel('verification',this)"><span class="slink-icon">🆔</span><span class="slink-label">Verification</span><span class="sbadge" id="sbVerify" style="display:none">!</span></div>
   <div class="slink" data-panel="settings" onclick="showPanel('settings',this)"><span class="slink-icon">⚙️</span><span class="slink-label">Settings</span></div>
   <div class="side-bottom">
     <div class="slink" onclick="doLogout()"><span class="slink-icon">🚪</span><span class="slink-label">Sign Out</span></div>
@@ -493,6 +494,23 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         <div class="table-foot"><span id="payoutsCount">Loading...</span></div>
       </div>
     </div>
+    <div class="panel" id="panel-verification">
+      <div class="table-wrap">
+        <div class="table-hdr">
+          <h3>Verification Queue</h3>
+          <div class="table-tools">
+            <select class="sel-filter" id="verifyStatusFilter" onchange="loadVerifyQueue()">
+              <option value="PENDING">Pending Review</option>
+              <option value="VERIFIED">Verified</option>
+              <option value="REJECTED">Rejected</option>
+              <option value="NOT_SUBMITTED">Not Submitted</option>
+            </select>
+          </div>
+        </div>
+        <div id="verifyQueueList" style="padding:16px;"></div>
+        <div class="table-foot"><span id="verifyQueueCount">Loading...</span></div>
+      </div>
+    </div>
     <div class="panel" id="panel-settings">
       <div class="grid2">
         <div class="card">
@@ -633,6 +651,7 @@ const PANEL_CONFIG = {
   banners:{title:'Banner Ads',action:'+ Create Banner'},
   notify:{title:'Send Notifications',action:''},
   payouts:{title:'Provider Payouts',action:''},
+  verification:{title:'Verification Queue',action:''},
   settings:{title:'Settings',action:''},
 };
 const PANEL_LOADERS = {
@@ -640,6 +659,7 @@ const PANEL_LOADERS = {
   listings:loadListings, bookings:loadBookings, orders:loadOrders,
   reviews:loadReviews, categories:loadCategories, banners:loadBanners,
   payouts:loadPayouts,
+  verification:loadVerifyQueue,
   settings:loadSettings
 };
 function showPanel(name, el){
@@ -1023,6 +1043,78 @@ async function recordPayout(userId, amount, reference){
     await api('/payouts/admin/record','POST',{userId, amount, reference});
     toast('Payout recorded — provider has been notified','success');
     loadPayouts();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+async function loadVerifyQueue(){
+  const status = document.getElementById('verifyStatusFilter')?.value || 'PENDING';
+  try {
+    const r = await api(`/verification/admin/queue?status=${status}`);
+    document.getElementById('verifyQueueCount').textContent = `${r.data.length} ${status.toLowerCase().replace('_',' ')}`;
+    const b = document.getElementById('sbVerify');
+    if(status === 'PENDING'){
+      if(r.data.length > 0){ b.style.display='inline'; b.textContent=r.data.length; } else { b.style.display='none'; }
+    }
+    document.getElementById('verifyQueueList').innerHTML = r.data.map(u => `
+      <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+          <div>
+            <div style="font-weight:700;font-size:14px;">${u.name}</div>
+            <div style="font-size:12px;color:var(--t3);">${u.email} · ${u.phone||'—'} · ${u.role}</div>
+            <div style="font-size:11px;color:var(--t3);">${u.city||'—'}, ${u.province||'—'}</div>
+          </div>
+          <span class="badge ${u.providerType==='BUSINESS'?'b-purple':'b-blue'}">${u.providerType==='BUSINESS'?'🏢 Business':'🧍 Individual'}</span>
+        </div>
+        ${u.providerType==='INDIVIDUAL' ? `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div>
+              <div style="font-size:10px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;font-weight:700;">ID Document</div>
+              ${u.idDocumentUrl ? `<a href="${u.idDocumentUrl}" target="_blank"><img src="${u.idDocumentUrl}" style="width:100%;border-radius:8px;border:1px solid var(--bd);max-height:160px;object-fit:cover;"></a>` : '<div style="font-size:12px;color:var(--t3);">Not uploaded</div>'}
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;font-weight:700;">Selfie with ID</div>
+              ${u.selfieWithIdUrl ? `<a href="${u.selfieWithIdUrl}" target="_blank"><img src="${u.selfieWithIdUrl}" style="width:100%;border-radius:8px;border:1px solid var(--bd);max-height:160px;object-fit:cover;"></a>` : '<div style="font-size:12px;color:var(--t3);">Not uploaded</div>'}
+            </div>
+          </div>
+        ` : `
+          <div style="margin-bottom:12px;">
+            <div style="font-size:10px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;font-weight:700;">CIPC Number</div>
+            <div style="font-size:14px;font-weight:700;color:var(--blue3);">${u.cipcNumber || '—'}</div>
+            ${u.cipcDocumentUrl ? `<a href="${u.cipcDocumentUrl}" target="_blank" style="font-size:12px;color:var(--blue3);">📄 View uploaded certificate</a>` : '<div style="font-size:11px;color:var(--t3);">No certificate uploaded — verify number manually on cipc.co.za</div>'}
+          </div>
+        `}
+        ${u.verificationNotes ? `<div style="font-size:12px;color:#f87171;background:rgba(239,68,68,.08);padding:8px;border-radius:8px;margin-bottom:12px;">Previous rejection reason: ${u.verificationNotes}</div>` : ''}
+        ${status === 'PENDING' ? `
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-s" style="flex:1;" onclick="approveVerification('${u.id}','${u.name}')">✓ Approve</button>
+            <button class="btn btn-d" style="flex:1;" onclick="rejectVerification('${u.id}','${u.name}')">✕ Reject</button>
+          </div>
+        ` : ''}
+      </div>
+    `).join('') || '<div style="text-align:center;padding:32px;color:var(--t3);">No requests in this category</div>';
+  } catch(e){ toast('Failed to load verification queue','error'); }
+}
+
+async function approveVerification(userId, name){
+  if(!confirm(`Approve ${name}'s verification? They'll get a ✓ Verified badge on all their listings immediately.`)) return;
+  try {
+    await api(`/verification/admin/approve/${userId}`,'PUT');
+    toast(`${name} verified successfully`,'success');
+    loadVerifyQueue();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+function rejectVerification(userId, name){
+  const reason = prompt(`Why is ${name}'s verification being rejected?\n\nThis message will be sent to them so they know what to fix.`);
+  if(!reason || !reason.trim()) return;
+  doRejectVerification(userId, reason.trim());
+}
+
+async function doRejectVerification(userId, reason){
+  try {
+    await api(`/verification/admin/reject/${userId}`,'PUT',{reason});
+    toast('Verification rejected — provider has been notified','success');
+    loadVerifyQueue();
   } catch(e){ toast(e.message,'error'); }
 }
 

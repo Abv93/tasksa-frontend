@@ -1023,7 +1023,9 @@ function toggleFaq(i){
         <li style="margin-bottom:6px;">Booking details, messages sent through the platform, and reviews</li>
         <li style="margin-bottom:6px;">Payment information processed through our payment provider (we do not store your card details)</li>
         <li style="margin-bottom:6px;">Device information and push notification tokens if you enable notifications</li>
+        <li style="margin-bottom:6px;">If you register as a service provider, your identity verification documents — either a copy of your South African ID or passport plus a verification selfie (for individual providers), or your CIPC business registration number and certificate (for registered businesses)</li>
       </ul>
+      <p style="margin-bottom:20px;"><strong>Identity verification documents are treated as special personal information under POPIA and are handled with additional care:</strong> they are stored in a private, access-restricted location, are visible only to authorised TaskSA administrators for the sole purpose of verifying your identity or business registration, are never displayed publicly on the platform or shared with other users, and are never sold or shared with third parties except where required by law.</p>
 
       <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--t);">2. Why We Collect This Information</h2>
       <p style="margin-bottom:12px;">We use your personal information to:</p>
@@ -2235,9 +2237,10 @@ async function openProviderProfile(lid){
 
     // Reviews
     var reviewsHtml = '';
+    S._currentProfileListing = l; // cache for safe button lookups below
     if(reviews.length){
       var writeReviewBtn = (S.user && S.user.role==='CLIENT')
-        ? '<button onclick="openLeaveReview(\''+l.id+'\',\''+encodeURIComponent(l.name)+'\',\''+encodeURIComponent((l.owner&&l.owner.name)||'')+'\')" style="background:rgba(245,166,35,.12);border:none;border-radius:8px;color:var(--gold);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">+ Write Review</button>'
+        ? '<button data-action="write-review" style="background:rgba(245,166,35,.12);border:none;border-radius:8px;color:var(--gold);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">+ Write Review</button>'
         : '';
       reviewsHtml = '<div style="padding:0 20px 20px;">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'
@@ -2258,7 +2261,7 @@ async function openProviderProfile(lid){
     } else {
       var canReview = S.user && S.user.role === 'CLIENT';
       var reviewCta = canReview
-        ? '<button onclick="openLeaveReview(\''+l.id+'\',\''+encodeURIComponent(l.name)+'\',\''+encodeURIComponent(l.owner&&l.owner.name||'')+'\')" style="margin-top:12px;background:linear-gradient(135deg,var(--gold),#e89a1e);border:none;border-radius:50px;color:#000;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;">⭐ Leave a Review</button>'
+        ? '<button data-action="write-review" style="margin-top:12px;background:linear-gradient(135deg,var(--gold),#e89a1e);border:none;border-radius:50px;color:#000;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;">⭐ Leave a Review</button>'
         : '';
       reviewsHtml = '<div style="padding:0 20px 20px;"><div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--t);">⭐ Reviews</div><div style="padding:16px;background:var(--bg3);border-radius:10px;text-align:center;"><div style="color:var(--t3);font-size:13px;margin-bottom:10px;">No reviews yet — be the first!</div>'+reviewCta+'</div></div>';
     }
@@ -2301,8 +2304,8 @@ async function openProviderProfile(lid){
       + reviewsHtml
       // Book button
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px 24px;">'
-        +'<button onclick="closeModal(\'providerProfileModal\');openBookModal(\''+l.id+'\',\''+encodeURIComponent(l.name)+'\',\''+(l.owner&&l.owner.id||'')+'\',\''+l.priceFrom+'\')" class="btn-primary" style="padding:14px;font-size:14px;font-weight:700;">📅 Book</button>'
-        +'<button onclick="closeModal(\'providerProfileModal\');messageUser(\''+( l.owner&&l.owner.id||'')+'\',\''+encodeURIComponent(l.owner&&l.owner.name||l.name)+'\')" style="background:var(--surf);border:1px solid var(--bd2);border-radius:50px;color:var(--t);padding:14px;font-size:14px;font-weight:700;cursor:pointer;">💬 Message</button>'
+        +'<button data-action="profile-book" class="btn-primary" style="padding:14px;font-size:14px;font-weight:700;">📅 Book</button>'
+        +'<button data-action="profile-message" style="background:var(--surf);border:1px solid var(--bd2);border-radius:50px;color:var(--t);padding:14px;font-size:14px;font-weight:700;cursor:pointer;">💬 Message</button>'
       +'</div>';
   } catch(e){
     content.innerHTML = '<div class="empty" style="padding:40px;"><div class="empty-icon">⚠️</div><h3>Could not load profile</h3><p>'+e.message+'</p></div>';
@@ -2846,6 +2849,11 @@ async function loadProviderDash(stats, main, role){
       +'<div id="provShopOrders"><div style="font-size:13px;color:var(--t3);padding:12px 0;">Loading...</div></div>'
     +'</div>'
     +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
+      +'<div style="font-size:14px;font-weight:800;margin-bottom:6px;">🆔 Get Verified</div>'
+      +'<div style="font-size:12px;color:var(--t3);margin-bottom:14px;">Verified providers get a ✓ badge on all listings, which builds client trust. Choose how you want to verify below.</div>'
+      +'<div id="verificationSection"><div style="font-size:13px;color:var(--t3);padding:12px 0;">Loading...</div></div>'
+    +'</div>'
+    +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
       +'<div style="font-size:14px;font-weight:800;margin-bottom:14px;">💰 Earnings & Payouts</div>'
       +'<div id="provEarnings"><div style="font-size:13px;color:var(--t3);padding:12px 0;">Loading...</div></div>'
     +'</div>'
@@ -2881,19 +2889,20 @@ async function loadProviderDash(stats, main, role){
     var pl = document.getElementById('provListings');
     if(pl){
       if(listings.data && listings.data.length){
+        S._myListingsCache = listings.data; // cache for safe lookup, avoids apostrophe/quote bugs in onclick
         pl.innerHTML = listings.data.map(function(l){
           return '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--bd);">'
             +'<div style="width:44px;height:44px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">'+(l.category&&l.category.icon?l.category.icon:'📋')+'</div>'
             +'<div style="flex:1;">'
-              +'<div style="font-weight:700;font-size:13px;">'+l.name+'</div>'
-              +'<div style="font-size:11px;color:var(--t3);">'+(l.category?l.category.name:'')+' · '+(l.city||'')+' · From R'+(l.priceFrom||0)+'</div>'
+              +'<div style="font-weight:700;font-size:13px;">'+escapeHtml(l.name)+'</div>'
+              +'<div style="font-size:11px;color:var(--t3);">'+(l.category?escapeHtml(l.category.name):'')+' · '+escapeHtml(l.city||'')+' · From R'+(l.priceFrom||0)+'</div>'
               +'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:50px;background:'+(l.isActive?'rgba(34,197,94,.1)':'rgba(239,68,68,.1)')+';color:'+(l.isActive?'var(--green2)':'#f87171')+'">'+(l.isActive?'Active':'Inactive')+'</span>'
               +(l.isVerified?' <span style="font-size:10px;color:var(--green2);">✓ Verified</span>':'')
             +'</div>'
             +'<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">'
-              +'<button onclick="openEditListing(\''+l.id+'\',\''+encodeURIComponent(l.name)+'\',\''+encodeURIComponent(l.description||'')+'\',\''+l.priceFrom+'\',\''+encodeURIComponent(l.city||'')+'\',\''+encodeURIComponent(l.location||'')+'\',\''+encodeURIComponent(l.province||'')+'\')" style="background:rgba(26,143,255,.12);border:none;border-radius:8px;color:var(--blue3);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">✏️ Edit</button>'
-              +'<button onclick="openPhotoManager(\''+l.id+'\')" style="background:rgba(245,166,35,.12);border:none;border-radius:8px;color:var(--gold);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">📸 Photos ('+(l.images&&l.images.length||0)+')</button>'
-              +'<button onclick="deleteListing(\''+l.id+'\')" style="background:rgba(239,68,68,.12);border:none;border-radius:8px;color:#f87171;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">🗑️ Delete</button>'
+              +'<button data-listing-id="'+l.id+'" data-action="edit-listing" style="background:rgba(26,143,255,.12);border:none;border-radius:8px;color:var(--blue3);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">✏️ Edit</button>'
+              +'<button data-listing-id="'+l.id+'" data-action="photo-manager" style="background:rgba(245,166,35,.12);border:none;border-radius:8px;color:var(--gold);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">📸 Photos ('+(l.images&&l.images.length||0)+')</button>'
+              +'<button data-listing-id="'+l.id+'" data-action="delete-listing" style="background:rgba(239,68,68,.12);border:none;border-radius:8px;color:#f87171;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">🗑️ Delete</button>'
             +'</div>'
             +'</div>';
         }).join('');
@@ -2908,16 +2917,17 @@ async function loadProviderDash(stats, main, role){
     var pb = document.getElementById('provBookings');
     if(pb){
       if(bk.data && bk.data.length){
+        S._myProvBookingsCache = bk.data; // cache for safe lookup in event delegation
         pb.innerHTML = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
           +'<thead><tr style="border-bottom:1px solid var(--bd);"><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Client</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Date</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Details</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Amount</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Status</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Action</th></tr></thead>'
           +'<tbody>'+bk.data.map(function(b){
             var sc = b.status==='CONFIRMED'?'var(--green2)':b.status==='COMPLETED'?'var(--blue3)':b.status==='CANCELLED'?'#f87171':'var(--amber)';
             var notes = b.notes||'No notes';
             var actionBtns = b.status==='PENDING'
-              ? '<button onclick="updateBookingStatus(\''+b.id+'\',\'CONFIRMED\')" style="background:rgba(34,197,94,.15);border:none;border-radius:6px;color:var(--green2);padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">✓ Accept</button>'
-                +'<button onclick="updateBookingStatus(\''+b.id+'\',\'CANCELLED\')" style="background:rgba(239,68,68,.15);border:none;border-radius:6px;color:#f87171;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✕ Decline</button>'
+              ? '<button data-booking-id="'+b.id+'" data-action="accept-booking" style="background:rgba(34,197,94,.15);border:none;border-radius:6px;color:var(--green2);padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">✓ Accept</button>'
+                +'<button data-booking-id="'+b.id+'" data-action="decline-booking" style="background:rgba(239,68,68,.15);border:none;border-radius:6px;color:#f87171;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✕ Decline</button>'
               : b.status==='CONFIRMED'
-              ? '<button onclick="confirmComplete(\''+b.id+'\',\''+encodeURIComponent(b.listing?b.listing.name:'booking')+'\',\''+fDate(b.scheduledAt)+'\')" style="background:rgba(26,143,255,.15);border:none;border-radius:6px;color:var(--blue3);padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✓ Complete</button>'
+              ? '<button data-booking-id="'+b.id+'" data-action="complete-booking" style="background:rgba(26,143,255,.15);border:none;border-radius:6px;color:var(--blue3);padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✓ Complete</button>'
               : '—';
             return '<tr style="border-bottom:1px solid var(--bd);">'
               +'<td style="padding:10px 8px;font-weight:700;">'+(b.client?b.client.name:'Client')+'<br><span style="font-size:10px;color:var(--t3);font-weight:400;">'+(b.client&&b.client.phone||'')+'</span></td>'
@@ -2962,15 +2972,16 @@ async function loadProviderDash(stats, main, role){
     if(sp){
       var pr = await api('/products/mine').catch(()=>({data:[]}));
       var products = pr.data || [];
+      S._myProductsCache = products; // cache for safe lookup in event delegation
       if(products.length){
         sp.innerHTML = products.slice(0,6).map(function(p){
           return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);">'
             +'<div style="width:36px;height:36px;border-radius:8px;background:var(--bg3);overflow:hidden;flex-shrink:0;">'
               +(p.images&&p.images[0]?'<img src="'+p.images[0]+'" style="width:100%;height:100%;object-fit:cover;">':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;">📦</div>')
             +'</div>'
-            +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+p.name+'</div>'
+            +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+escapeHtml(p.name)+'</div>'
             +'<div style="font-size:11px;color:var(--t3);">R'+p.price+' · Stock: '+p.stock+'</div></div>'
-            +'<button onclick="deleteShopProduct(\''+p.id+'\',\''+encodeURIComponent(p.name)+'\')" style="background:rgba(239,68,68,.1);border:none;border-radius:6px;color:#f87171;padding:5px 8px;font-size:11px;cursor:pointer;flex-shrink:0;">🗑️</button>'
+            +'<button data-prod-id="'+p.id+'" data-prod-name="'+escapeHtml(p.name)+'" data-action="delete-product" style="background:rgba(239,68,68,.1);border:none;border-radius:6px;color:#f87171;padding:5px 8px;font-size:11px;cursor:pointer;flex-shrink:0;">🗑️</button>'
           +'</div>';
         }).join('')
         +(products.length > 6 ? '<div style="font-size:12px;color:var(--t3);padding:8px 0;">+'+( products.length-6)+' more products</div>' : '');
@@ -2982,6 +2993,7 @@ async function loadProviderDash(stats, main, role){
   loadProviderEarnings();
   loadBankingDetails();
   loadProviderShopOrders();
+  loadVerificationStatus();
 } // end loadProviderDash
 
 async function loadProviderShopOrders(){
@@ -3093,12 +3105,11 @@ async function openBookModal(listingId, listingName, providerId, priceFrom){
   S.bookingListingId = listingId;
   S.bookingProviderId = providerId || null;
   S.bookingPrice = priceFrom || null;
-  // Decode URL-encoded name (fixes %20 showing as spaces issue)
-  var decodedName = listingName ? decodeURIComponent(listingName) : 'Service';
-  S.bookingTitle = decodedName;
+  var name = listingName || 'Service';
+  S.bookingTitle = name;
   var t=document.getElementById('bookTitle');
   var s=document.getElementById('bookSub');
-  if(t) t.textContent='Book '+decodedName;
+  if(t) t.textContent='Book '+name;
   if(s) s.textContent='Fill in the details for your booking';
   var d=document.getElementById('bookDate');
   if(d) d.min=new Date().toISOString().split('T')[0];
@@ -3190,8 +3201,7 @@ async function messageUser(partnerId, partnerName){
 }
 
 function confirmComplete(bookingId, listingName, scheduledDate){
-  var name = decodeURIComponent(listingName);
-  if(confirm('Mark "'+name+'" as COMPLETE?\n\nScheduled date: '+scheduledDate+'\n\nOnly mark complete when the job is actually done.')){
+  if(confirm('Mark "'+listingName+'" as COMPLETE?\n\nScheduled date: '+scheduledDate+'\n\nOnly mark complete when the job is actually done.')){
     updateBookingStatus(bookingId, 'COMPLETED');
   }
 }
@@ -3460,7 +3470,7 @@ function doSearch(){
 
 // ── PRODUCT MANAGEMENT ────────────────────────────────────────────
 async function deleteShopProduct(id, name){
-  if(!confirm('Remove "'+decodeURIComponent(name)+'" from your shop?')) return;
+  if(!confirm('Remove "'+name+'" from your shop?')) return;
   try {
     await api('/products/'+id,'DELETE');
     toast('Product removed','success');
@@ -3578,6 +3588,156 @@ function unhideBooking(id){
   renderClientBookingsList();
 }
 
+// ── VERIFICATION ─────────────────────────────────────────────────
+var _verifyType = null; // 'INDIVIDUAL' or 'BUSINESS' — selected in the UI before submit
+
+async function loadVerificationStatus(){
+  var el = document.getElementById('verificationSection');
+  if(!el) return;
+  try {
+    var r = await api('/verification/status');
+    var d = r.data;
+    renderVerificationUI(d);
+  } catch(e){ el.innerHTML = '<div style="font-size:12px;color:var(--t3);">Could not load verification status</div>'; }
+}
+
+function renderVerificationUI(d){
+  var el = document.getElementById('verificationSection');
+  if(!el) return;
+
+  // Already verified
+  if(d.verificationStatus === 'VERIFIED'){
+    el.innerHTML = '<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:10px;padding:14px;text-align:center;">'
+      +'<div style="font-size:24px;margin-bottom:6px;">✅</div>'
+      +'<div style="font-weight:700;color:var(--green2);font-size:14px;">You\'re Verified!</div>'
+      +'<div style="font-size:12px;color:var(--t3);margin-top:4px;">Verified as '+(d.providerType==='BUSINESS'?'a registered business':'an individual provider')+'</div>'
+    +'</div>';
+    return;
+  }
+
+  // Pending review
+  if(d.verificationStatus === 'PENDING'){
+    el.innerHTML = '<div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);border-radius:10px;padding:14px;text-align:center;">'
+      +'<div style="font-size:24px;margin-bottom:6px;">⏳</div>'
+      +'<div style="font-weight:700;color:var(--amber2);font-size:14px;">Under Review</div>'
+      +'<div style="font-size:12px;color:var(--t3);margin-top:4px;">Our team is reviewing your '+(d.providerType==='BUSINESS'?'CIPC details':'ID documents')+'. This usually takes 1-2 business days.</div>'
+    +'</div>';
+    return;
+  }
+
+  // Rejected — show reason and allow resubmit
+  var rejectedNotice = d.verificationStatus === 'REJECTED'
+    ? '<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#f87171;"><strong>Not approved:</strong> '+(d.verificationNotes||'Please resubmit with corrected documents.')+'</div>'
+    : '';
+
+  // Not submitted or rejected — show type picker
+  el.innerHTML = rejectedNotice
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">'
+      +'<div id="typeIndividual" onclick="selectVerifyType(\'INDIVIDUAL\')" style="border:2px solid var(--bd);border-radius:10px;padding:14px;text-align:center;cursor:pointer;">'
+        +'<div style="font-size:22px;">🧍</div><div style="font-size:12px;font-weight:700;margin-top:4px;">Individual</div>'
+        +'<div style="font-size:10px;color:var(--t3);margin-top:2px;">I do this work myself</div>'
+      +'</div>'
+      +'<div id="typeBusiness" onclick="selectVerifyType(\'BUSINESS\')" style="border:2px solid var(--bd);border-radius:10px;padding:14px;text-align:center;cursor:pointer;">'
+        +'<div style="font-size:22px;">🏢</div><div style="font-size:12px;font-weight:700;margin-top:4px;">Registered Business</div>'
+        +'<div style="font-size:10px;color:var(--t3);margin-top:2px;">I have a CIPC number</div>'
+      +'</div>'
+    +'</div>'
+    +'<div id="verifyFormArea"></div>';
+}
+
+function selectVerifyType(type){
+  _verifyType = type;
+  var ind = document.getElementById('typeIndividual');
+  var biz = document.getElementById('typeBusiness');
+  if(ind) ind.style.borderColor = type==='INDIVIDUAL' ? 'var(--blue2)' : 'var(--bd)';
+  if(biz) biz.style.borderColor = type==='BUSINESS' ? 'var(--blue2)' : 'var(--bd)';
+
+  var area = document.getElementById('verifyFormArea');
+  if(!area) return;
+
+  if(type === 'INDIVIDUAL'){
+    area.innerHTML = '<div style="font-size:11px;color:var(--t3);margin-bottom:10px;">Upload a clear photo of your SA ID or passport, plus a selfie of you holding it next to your face. This confirms it\'s really you.</div>'
+      +'<div style="display:flex;flex-direction:column;gap:10px;">'
+        +'<button id="uploadIdBtn" onclick="uploadVerifyDoc(\'id\')" style="background:var(--bg3);border:1px dashed var(--bd2);border-radius:8px;padding:14px;color:var(--t2);font-size:12px;cursor:pointer;">📄 <span id="idDocLabel">Upload ID Document</span></button>'
+        +'<button id="uploadSelfieBtn" onclick="uploadVerifyDoc(\'selfie\')" style="background:var(--bg3);border:1px dashed var(--bd2);border-radius:8px;padding:14px;color:var(--t2);font-size:12px;cursor:pointer;">🤳 <span id="selfieDocLabel">Upload Selfie With ID</span></button>'
+        +'<button id="submitVerifyBtn" onclick="submitVerification()" class="btn-primary" style="padding:11px;margin-top:4px;">Submit for Verification</button>'
+      +'</div>';
+  } else {
+    area.innerHTML = '<div style="font-size:11px;color:var(--t3);margin-bottom:10px;">Enter your CIPC registration number. Our team will confirm it against the CIPC register.</div>'
+      +'<div style="display:flex;flex-direction:column;gap:10px;">'
+        +'<input id="cipcNumberInput" placeholder="e.g. 2021/123456/07" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;">'
+        +'<button id="uploadCipcBtn" onclick="uploadVerifyDoc(\'cipc\')" style="background:var(--bg3);border:1px dashed var(--bd2);border-radius:8px;padding:14px;color:var(--t2);font-size:12px;cursor:pointer;">📄 <span id="cipcDocLabel">Upload CIPC Certificate (optional)</span></button>'
+        +'<button id="submitVerifyBtn" onclick="submitVerification()" class="btn-primary" style="padding:11px;margin-top:4px;">Submit for Verification</button>'
+      +'</div>';
+  }
+}
+
+var _verifyUploads = {};
+
+function uploadVerifyDoc(type){
+  if(typeof cloudinary === 'undefined'){
+    toast('Loading uploader...','info');
+    var s = document.createElement('script');
+    s.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
+    s.onload = function(){ launchVerifyUploadWidget(type); };
+    document.head.appendChild(s);
+  } else {
+    launchVerifyUploadWidget(type);
+  }
+}
+
+function launchVerifyUploadWidget(type){
+  var widget = cloudinary.createUploadWidget({
+    cloudName: CLOUDINARY_CLOUD,
+    uploadPreset: CLOUDINARY_PRESET,
+    folder: 'tasksa/verification-private', // kept out of public listing folders
+    multiple: false,
+    maxFiles: 1,
+    maxFileSize: 8000000,
+    clientAllowedFormats: ['jpg','jpeg','png','pdf'],
+    sources: ['local','camera'],
+    styles:{ palette:{ window:'#020b1a', windowBorder:'#1a8fff', tabIcon:'#1a8fff', menuIcons:'#93b8d8', textDark:'#020b1a', textLight:'#ffffff', link:'#1a8fff', action:'#0a6edb', inactiveTabIcon:'#4a7aa0', error:'#ef4444', inProgress:'#1a8fff', complete:'#22c55e', sourceBg:'#041020' } }
+  }, function(error, result){
+    if(error){ toast('Upload failed: '+error.message,'error'); return; }
+    if(result.event === 'success'){
+      _verifyUploads[type] = result.info.secure_url;
+      var labelMap = { id:'idDocLabel', selfie:'selfieDocLabel', cipc:'cipcDocLabel' };
+      var label = document.getElementById(labelMap[type]);
+      if(label) label.textContent = '✓ Uploaded — tap to replace';
+      toast('Document uploaded','success');
+    }
+  });
+  widget.open();
+}
+
+async function submitVerification(){
+  if(!_verifyType){ toast('Please choose Individual or Business first','error'); return; }
+  var btn = document.getElementById('submitVerifyBtn');
+  var payload = { providerType: _verifyType };
+
+  if(_verifyType === 'INDIVIDUAL'){
+    if(!_verifyUploads.id || !_verifyUploads.selfie){
+      toast('Please upload both your ID document and a selfie with your ID','error'); return;
+    }
+    payload.idDocumentUrl = _verifyUploads.id;
+    payload.selfieWithIdUrl = _verifyUploads.selfie;
+  } else {
+    var cipcNum = (document.getElementById('cipcNumberInput')||{}).value?.trim();
+    if(!cipcNum){ toast('Please enter your CIPC registration number','error'); return; }
+    payload.cipcNumber = cipcNum;
+    if(_verifyUploads.cipc) payload.cipcDocumentUrl = _verifyUploads.cipc;
+  }
+
+  if(btn){ btn.disabled = true; btn.textContent = 'Submitting...'; }
+  try {
+    await api('/verification/submit','PUT',payload);
+    toast('Submitted! Our team will review within 1-2 business days.','success');
+    _verifyUploads = {};
+    loadVerificationStatus();
+  } catch(e){ toast(e.message||'Failed to submit','error'); }
+  if(btn){ btn.disabled = false; btn.textContent = 'Submit for Verification'; }
+}
+
 // ── EARNINGS & BANKING ────────────────────────────────────────────
 async function loadProviderEarnings(){
   var el = document.getElementById('provEarnings');
@@ -3671,8 +3831,8 @@ function openLeaveReview(listingId, listingName, providerName){
   if(!S.user){ openModal('loginModal'); return; }
   _reviewListingId = listingId;
   _reviewRating = 0;
-  document.getElementById('reviewTitle').textContent = 'Review ' + decodeURIComponent(listingName);
-  document.getElementById('reviewSub').textContent = 'How was your experience with ' + decodeURIComponent(providerName) + '?';
+  document.getElementById('reviewTitle').textContent = 'Review ' + listingName;
+  document.getElementById('reviewSub').textContent = 'How was your experience with ' + providerName + '?';
   document.getElementById('reviewComment').value = '';
   setReviewRating(0);
   openModal('reviewModal');
@@ -3859,16 +4019,16 @@ function launchUploadWidget(){
 // ── EDIT / DELETE LISTING ─────────────────────────────────────────
 function openEditListing(id, name, desc, price, city, location, province){
   document.getElementById('editListingId').value = id;
-  document.getElementById('editListingName').value = decodeURIComponent(name);
-  document.getElementById('editListingDesc').value = decodeURIComponent(desc);
+  document.getElementById('editListingName').value = name;
+  document.getElementById('editListingDesc').value = desc;
   document.getElementById('editListingPrice').value = price;
-  document.getElementById('editListingCity').value = decodeURIComponent(city);
-  document.getElementById('editListingLocation').value = decodeURIComponent(location||'');
+  document.getElementById('editListingCity').value = city;
+  document.getElementById('editListingLocation').value = location||'';
   var provSel = document.getElementById('editListingProvince');
-  if(provSel) provSel.value = decodeURIComponent(province||'');
+  if(provSel) provSel.value = province||'';
   populateCities('editListingProvince','editListingCity');
   var citySel = document.getElementById('editListingCity');
-  if(citySel) citySel.value = decodeURIComponent(city||'');
+  if(citySel) citySel.value = city||'';
   openModal('editListingModal');
 }
 
@@ -4054,6 +4214,64 @@ async function openShopCheckout(){
     updateCartBadge();
   } catch(e){ toast(e.message||'Order failed','error'); }
 }
+
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// Event delegation for listing action buttons — avoids fragile inline onclick
+// which breaks silently when listing names/descriptions contain quotes or apostrophes
+document.addEventListener('click', function(e){
+  var btn = e.target.closest('[data-action]');
+  if(!btn) return;
+  var action = btn.dataset.action;
+
+  // Listing actions
+  if(btn.dataset.listingId){
+    var listing = (S._myListingsCache||[]).find(function(l){ return l.id === btn.dataset.listingId; });
+    if(listing){
+      if(action === 'edit-listing') openEditListing(listing.id, listing.name, listing.description||'', listing.priceFrom, listing.city||'', listing.location||'', listing.province||'');
+      else if(action === 'photo-manager') openPhotoManager(listing.id);
+      else if(action === 'delete-listing') deleteListing(listing.id);
+    }
+    return;
+  }
+
+  // Booking actions
+  if(btn.dataset.bookingId){
+    var booking = (S._myProvBookingsCache||[]).find(function(b){ return b.id === btn.dataset.bookingId; });
+    if(booking){
+      if(action === 'accept-booking') updateBookingStatus(booking.id, 'CONFIRMED');
+      else if(action === 'decline-booking') updateBookingStatus(booking.id, 'CANCELLED');
+      else if(action === 'complete-booking') confirmComplete(booking.id, booking.listing?booking.listing.name:'booking', fDate(booking.scheduledAt));
+    }
+    return;
+  }
+
+  // Product actions
+  if(btn.dataset.prodId){
+    var product = (S._myProductsCache||[]).find(function(p){ return p.id === btn.dataset.prodId; });
+    if(product && action === 'delete-product') deleteShopProduct(product.id, product.name);
+    return;
+  }
+
+  // Provider profile modal actions (review / book / message) — use cached current listing
+  if(action === 'write-review' || action === 'profile-book' || action === 'profile-message'){
+    var pl = S._currentProfileListing;
+    if(!pl) return;
+    if(action === 'write-review'){
+      openLeaveReview(pl.id, pl.name, (pl.owner&&pl.owner.name)||'');
+    } else if(action === 'profile-book'){
+      closeModal('providerProfileModal');
+      openBookModal(pl.id, pl.name, (pl.owner&&pl.owner.id)||'', pl.priceFrom);
+    } else if(action === 'profile-message'){
+      closeModal('providerProfileModal');
+      messageUser((pl.owner&&pl.owner.id)||'', (pl.owner&&pl.owner.name)||pl.name);
+    }
+    return;
+  }
+});
 
 // ── EVENT DELEGATION ──────────────────────────────────────────────
 document.addEventListener('click',function(e){
