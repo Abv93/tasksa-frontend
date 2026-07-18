@@ -378,6 +378,9 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:48px 5% 0;}
     </div>
   </div>
 
+  <!-- FEATURED BANNER CAROUSEL -->
+  <div id="bannerCarousel" style="display:none;max-width:1200px;margin:24px auto 0;padding:0 20px;"></div>
+
   <!-- BROWSE BY CATEGORY -->
   <div class="section">
     <div class="sec-hdr"><div><div class="sec-title">Browse by Category</div><div class="sec-sub">Everything you need in one platform</div></div></div>
@@ -2575,7 +2578,10 @@ async function filterServices(){
     if(sort==='price_asc') data.sort(function(a,b){return (a.priceFrom||0)-(b.priceFrom||0);});
     if(sort==='price_desc') data.sort(function(a,b){return (b.priceFrom||0)-(a.priceFrom||0);});
     renderSvcGrid(data);
-  } catch(e){}
+  } catch(e){
+    console.error('filterServices failed:', e.message);
+    toast('Could not load results — please try again','error');
+  }
 }
 async function loadShop(){
   document.getElementById('shopDirectory').style.display='block';
@@ -2608,7 +2614,10 @@ async function filterShops(){
     if(search) q+='&search='+encodeURIComponent(search);
     var r=await api(q);
     g.innerHTML=r.data.map(function(s,i){return renderShopCard(s,i);}).join('')||emptyState('🛒','No shops found','Try a different search');
-  } catch(e){}
+  } catch(e){
+    console.error('filterShops failed:', e.message);
+    toast('Could not load shops — please try again','error');
+  }
 }
 async function viewShop(id){
   document.getElementById('shopDirectory').style.display='none';
@@ -2670,7 +2679,10 @@ async function filterAccom(){
     if(sort==='price_desc') data.sort(function(a,b){return (b.priceFrom||0)-(a.priceFrom||0);});
     var g=document.getElementById('accomGrid');
     if(g) g.innerHTML=data.map(function(l,i){return renderAccomCard(l,i);}).join('')||emptyState('🏡','No stays found','');
-  } catch(e){}
+  } catch(e){
+    console.error('filterAccom failed:', e.message);
+    toast('Could not load stays — please try again','error');
+  }
 }
 async function loadDash(){
   var out = document.getElementById('dashSignedOut');
@@ -3418,6 +3430,53 @@ navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', f
   }
 });
 
+// ── FEATURED BANNER CAROUSEL ────────────────────────────────────────
+var _bannerIdx = 0;
+var _bannerTimer = null;
+
+async function loadBannerCarousel(){
+  var el = document.getElementById('bannerCarousel');
+  if(!el) return;
+  try {
+    var r = await publicApi('/banners');
+    var banners = r.data || [];
+    if(!banners.length){ el.style.display='none'; return; }
+
+    el.style.display = 'block';
+    el.innerHTML = '<div style="position:relative;border-radius:16px;overflow:hidden;min-height:120px;">'
+      + banners.map(function(b, i){
+          return '<a href="javascript:void(0)" onclick="goPage(\''+b.ctaLink+'\')" class="banner-slide" data-idx="'+i+'" style="display:'+(i===0?'flex':'none')+';align-items:center;justify-content:space-between;padding:24px 32px;background:'+b.background+';min-height:120px;text-decoration:none;box-sizing:border-box;">'
+            +'<div>'
+              +'<div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:4px;">'+escapeHtml(b.title)+'</div>'
+              +(b.subtitle?'<div style="font-size:13px;color:rgba(255,255,255,.85);">'+escapeHtml(b.subtitle)+'</div>':'')
+            +'</div>'
+            +'<div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:50px;padding:10px 22px;color:#fff;font-size:13px;font-weight:700;white-space:nowrap;flex-shrink:0;">'+escapeHtml(b.ctaText||'Learn More')+' →</div>'
+          +'</a>';
+        }).join('')
+      + (banners.length > 1 ? '<div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;">'
+          + banners.map(function(b,i){ return '<div class="banner-dot" data-idx="'+i+'" style="width:6px;height:6px;border-radius:50%;background:'+(i===0?'#fff':'rgba(255,255,255,.4)')+';"></div>'; }).join('')
+        +'</div>' : '')
+    +'</div>';
+
+    _bannerIdx = 0;
+    if(_bannerTimer) clearInterval(_bannerTimer);
+    if(banners.length > 1){
+      _bannerTimer = setInterval(function(){
+        var slides = el.querySelectorAll('.banner-slide');
+        var dots = el.querySelectorAll('.banner-dot');
+        slides[_bannerIdx].style.display = 'none';
+        if(dots[_bannerIdx]) dots[_bannerIdx].style.background = 'rgba(255,255,255,.4)';
+        _bannerIdx = (_bannerIdx + 1) % slides.length;
+        slides[_bannerIdx].style.display = 'flex';
+        if(dots[_bannerIdx]) dots[_bannerIdx].style.background = '#fff';
+      }, 5000);
+    }
+  } catch(e){
+    console.error('loadBannerCarousel failed:', e.message);
+    el.style.display = 'none';
+  }
+}
+
 // ── PAYFAST RETURN HANDLER ────────────────────────────────────────
 (function(){
   var hash = window.location.hash;
@@ -3462,10 +3521,12 @@ function populateCities(provinceId, cityId){
 }
 
 function doSearch(){
-  var q=(document.getElementById('heroSearch')&&document.getElementById('heroSearch').value)||'';
+  var heroInput=document.getElementById('heroSearch');
+  var q=(heroInput&&heroInput.value)||'';
   goPage('services');
   var si=document.getElementById('svcSearch');
   if(si&&q){ si.value=q; filterServices(); }
+  if(heroInput) heroInput.value=''; // clear so it doesn't silently re-apply next time
 }
 
 // ── PRODUCT MANAGEMENT ────────────────────────────────────────────
@@ -4421,6 +4482,7 @@ async function init(){
   applyLang();
   var hs = document.getElementById('heroSearch');
   if(hs){ hs.value = ''; setTimeout(function(){ hs.value = ''; }, 100); }
+  loadBannerCarousel();
   await tryAutoLogin();
   // Register service worker for PWA install
   if('serviceWorker' in navigator){
