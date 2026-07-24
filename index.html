@@ -2795,7 +2795,11 @@ async function loadClientDash(stats, main){
       S._allClientBookings = bk.data || []; // cache for toggle
       renderClientBookingsList();
     }
-  } catch(e){}
+  } catch(e){
+    console.error('client bookings failed:', e.message);
+    var cbErr = document.getElementById('clientBookings');
+    if(cbErr) cbErr.innerHTML = '<div style="font-size:12px;color:var(--t3);padding:12px 0;">Could not load bookings — please refresh</div>';
+  }
 
   try {
     var ord = await api('/orders/mine');
@@ -3060,7 +3064,7 @@ async function loadShopDash(stats, main){
       '<div class="dash-stat"><div class="dash-stat-label">My Listings</div><div class="dash-stat-val">'+d.totalListings+'</div></div>'
       +'<div class="dash-stat"><div class="dash-stat-label">Total Orders</div><div class="dash-stat-val">'+d.totalOrders+'</div></div>'
       +'<div class="dash-stat"><div class="dash-stat-label">Earnings</div><div class="dash-stat-val" style="font-size:20px;color:var(--green2);">'+R(d.totalEarnings)+'</div><div class="dash-stat-sub">Cash + card, before payout</div></div>';
-  } catch(e){}
+  } catch(e){ console.error('loadShopDash stats failed:', e.message); }
 
   if(!main) return;
   main.innerHTML =
@@ -3090,7 +3094,7 @@ async function loadShopDash(stats, main){
         }).join('');
       } else { sl.innerHTML = '<div class="empty" style="padding:24px 0;"><div class="empty-icon" style="font-size:32px;">🛒</div><p style="font-size:13px;">No shop listings yet</p></div>'; }
     }
-  } catch(e){}
+  } catch(e){ console.error('loadShopDash listings failed:', e.message); }
 
   try {
     var ord = await api('/orders/mine?limit=8');
@@ -3110,7 +3114,7 @@ async function loadShopDash(stats, main){
           }).join('')+'</tbody></table></div>';
       } else { so.innerHTML = '<div class="empty" style="padding:24px 0;"><div class="empty-icon" style="font-size:32px;">📦</div><p style="font-size:13px;">No orders yet</p></div>'; }
     }
-  } catch(e){}
+  } catch(e){ console.error('loadShopDash orders failed:', e.message); }
 }
 
 
