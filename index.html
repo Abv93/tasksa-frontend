@@ -2485,18 +2485,21 @@ function renderAccomCard(l,i){
 function renderShopCard(s,i){
   var catName=(s.category&&s.category.name)?s.category.name:'Shop';
   var prodCount=(s._count&&s._count.products)?s._count.products:0;
+  var isEmpty = prodCount === 0;
   var realPhoto=(s.images&&s.images.length)?s.images[0]:null;
   var imgUrl=realPhoto||SHOP_IMGS[catName]||'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&q=70';
-  var bgStyle='background-image:url('+imgUrl+');background-size:cover;background-position:center;';
-  return '<div class="shop-card" data-shopid="'+s.id+'">'
-    +'<div class="shop-img" style="'+bgStyle+'"><span class="shop-type-badge">'+catName+'</span></div>'
+  var bgStyle='background-image:url('+imgUrl+');background-size:cover;background-position:center;'+(isEmpty?'filter:grayscale(40%);opacity:.75;':'');
+  return '<div class="shop-card" data-shopid="'+s.id+'" style="'+(isEmpty?'opacity:.8;':'')+'">'
+    +'<div class="shop-img" style="'+bgStyle+'"><span class="shop-type-badge">'+catName+'</span>'
+      +(isEmpty?'<span style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:50px;">🕐 Coming Soon</span>':'')
+    +'</div>'
     +'<div class="shop-body">'
       +'<div class="shop-name">'+s.name+'</div>'
       +'<div class="shop-loc">📍 '+s.location+'</div>'
       +'<div class="shop-desc">'+(s.description||'').slice(0,90)+'</div>'
-      +'<div class="shop-stats">★★★★☆ · '+(s._count&&s._count.reviews||0)+' reviews · '+prodCount+' products</div>'
+      +'<div class="shop-stats">★★★★☆ · '+(s._count&&s._count.reviews||0)+' reviews · '+(isEmpty?'<span style="color:var(--amber2);">No products yet</span>':prodCount+' products')+'</div>'
       +(s.isVerified?'<span class="vbadge" style="margin-bottom:8px;display:inline-block;">✓ Verified</span>':'')
-      +'<button class="shop-browse-btn">Browse Shop →</button>'
+      +'<button class="shop-browse-btn">'+(isEmpty?'View Shop':'Browse Shop →')+'</button>'
     +'</div></div>';
 }
 function renderProductCard(p,i){
@@ -2599,7 +2602,11 @@ async function loadShop(){
       sel.innerHTML='<option value="">All Shops</option>';
       S.shopCats.forEach(function(c){ sel.innerHTML+='<option value="'+c.id+'">'+(c.icon||'')+' '+c.name+'</option>'; });
     }
-    g.innerHTML=r.data.map(function(s,i){return renderShopCard(s,i);}).join('')||emptyState('🛒','No shops yet','');
+    var sortedShops = r.data.slice().sort(function(a,b){
+      var aCount=(a._count&&a._count.products)||0, bCount=(b._count&&b._count.products)||0;
+      return (bCount>0?1:0) - (aCount>0?1:0);
+    });
+    g.innerHTML=sortedShops.map(function(s,i){return renderShopCard(s,i);}).join('')||emptyState('🛒','No shops yet','');
   } catch(e){
     g.innerHTML=emptyState('⚠️','Could not load shops',e.message);
   }
@@ -2614,7 +2621,11 @@ async function filterShops(){
     if(catId) q+='&categoryId='+catId;
     if(search) q+='&search='+encodeURIComponent(search);
     var r=await api(q);
-    g.innerHTML=r.data.map(function(s,i){return renderShopCard(s,i);}).join('')||emptyState('🛒','No shops found','Try a different search');
+    var sortedFiltered = r.data.slice().sort(function(a,b){
+      var aCount=(a._count&&a._count.products)||0, bCount=(b._count&&b._count.products)||0;
+      return (bCount>0?1:0) - (aCount>0?1:0);
+    });
+    g.innerHTML=sortedFiltered.map(function(s,i){return renderShopCard(s,i);}).join('')||emptyState('🛒','No shops found','Try a different search');
   } catch(e){
     console.error('filterShops failed:', e.message);
     toast('Could not load shops — please try again','error');
@@ -4181,7 +4192,7 @@ async function submitNewListing(){
   var catId    = (document.getElementById('newListingCat')||{}).value||'';
   if(!name||!price||!city||!location||!province||!catId){ toast('Please fill in all required fields','error'); return; }
   var isHost = S.user && S.user.role === 'HOST';
-  var type = isHost ? 'ACCOMMODATION' : 'SERVICE';
+  var type = isHost ? 'ACCOMMODATION' : _selectedListingType;
   var finalDesc = desc;
   if(isHost){
     var amenities = {
@@ -4197,13 +4208,21 @@ async function submitNewListing(){
     finalDesc = desc + '||AMENITIES||' + JSON.stringify(amenities);
   }
   try {
-    await api('/listings','POST',{name:name,description:finalDesc,priceFrom:parseFloat(price),city:city,location:location,province:province,categoryId:catId,type:type});
+    var newListing = await api('/listings','POST',{name:name,description:finalDesc,priceFrom:parseFloat(price),city:city,location:location,province:province,categoryId:catId,type:type});
     closeModal('addListingModal');
-    toast('Listing created! It will be reviewed shortly.','success');
     ['newListingName','newListingDesc','newListingPrice','newListingCity'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.value='';
     });
     loadDash();
+
+    // If this was a SHOP listing, nudge the owner to add products right away —
+    // a shop with zero products shows "Coming Soon" to clients, so this closes that gap
+    if(_selectedListingType === 'SHOP'){
+      toast('Shop created! Now add your first product.','success');
+      setTimeout(function(){ openAddProductModal(); }, 900);
+    } else {
+      toast('Listing created! It will be reviewed shortly.','success');
+    }
   } catch(e){ toast(e.message||'Could not create listing','error'); }
 }
 
