@@ -571,93 +571,6 @@ function openRegisterAsProvider(){
 }
 </script>
 
-<!-- ── Live Activity Strip ────────────────────────────────── -->
-<section style="padding:40px 0;overflow:hidden;background:var(--bg);">
-  <p style="text-align:center;font-size:13px;font-weight:600;color:var(--t3);
-             letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px;">
-    🟢 Recently booked across South Africa
-  </p>
-  <div style="position:relative;overflow:hidden;">
-    <!-- Fade edges -->
-    <div style="position:absolute;left:0;top:0;bottom:0;width:60px;
-                background:linear-gradient(to right,var(--bg),transparent);z-index:2;pointer-events:none;"></div>
-    <div style="position:absolute;right:0;top:0;bottom:0;width:60px;
-                background:linear-gradient(to left,var(--bg),transparent);z-index:2;pointer-events:none;"></div>
-    <!-- Scrolling track -->
-    <div id="activityTrack" style="display:flex;gap:12px;animation:scrollLeft 60s linear infinite;width:max-content;">
-    </div>
-  </div>
-</section>
-
-<style>
-@keyframes scrollLeft {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-#activityTrack:hover { animation-play-state: paused; }
-.activity-card {
-  flex-shrink:0;
-  background:var(--surf);
-  border:1px solid var(--bd);
-  border-radius:14px;
-  padding:14px 18px;
-  min-width:220px;
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-.activity-card .ac-top { display:flex; align-items:center; gap:10px; }
-.activity-card .ac-emoji { font-size:22px; }
-.activity-card .ac-name { font-size:13px; font-weight:700; color:var(--t1); }
-.activity-card .ac-cat  { font-size:11px; color:var(--t3); }
-.activity-card .ac-bottom { display:flex; justify-content:space-between; align-items:center; margin-top:6px; }
-.activity-card .ac-loc  { font-size:11px; color:var(--t3); }
-.activity-card .ac-price{ font-size:13px; font-weight:700; color:var(--blue3); }
-.activity-card .ac-stars{ font-size:11px; color:#f59e0b; }
-</style>
-
-<script>
-(function(){
-  var bookings = [
-    { emoji:'🔧', name:'Sipho M.', cat:'Plumbing',       loc:'Cape Town',    price:'R450', stars:'★★★★★' },
-    { emoji:'⚡', name:'Lerato K.', cat:'Electrical',    loc:'Johannesburg', price:'R380', stars:'★★★★★' },
-    { emoji:'🧹', name:'Nandi Z.', cat:'House Cleaning', loc:'Durban',       price:'R320', stars:'★★★★☆' },
-    { emoji:'🏡', name:'Thabo M.', cat:'Airbnb Cleaning',loc:'Cape Town',    price:'R550', stars:'★★★★★' },
-    { emoji:'🌿', name:'Ayanda B.', cat:'Garden Service', loc:'Pretoria',    price:'R280', stars:'★★★★★' },
-    { emoji:'🎨', name:'Ruan V.',  cat:'Painting',       loc:'Stellenbosch', price:'R650', stars:'★★★★☆' },
-    { emoji:'🚚', name:'Kabelo D.', cat:'Moving Help',   loc:'Sandton',      price:'R800', stars:'★★★★★' },
-    { emoji:'🛠️', name:'Faizel A.', cat:'Handyman',     loc:'Somerset West', price:'R420', stars:'★★★★★' },
-    { emoji:'🏠', name:'Priya N.', cat:'Stays — Beach',  loc:'Blouberg',     price:'R1200', stars:'★★★★★' },
-    { emoji:'🔌', name:'Carlos F.', cat:'Solar Install', loc:'George',       price:'R2400', stars:'★★★★★' },
-    { emoji:'🧺', name:'Zinhle P.', cat:'Laundry',      loc:'Roodepoort',   price:'R190', stars:'★★★★☆' },
-    { emoji:'🐾', name:'Mikael H.', cat:'Pet Grooming',  loc:'Knysna',       price:'R350', stars:'★★★★★' },
-  ];
-
-  var track = document.getElementById('activityTrack');
-  if(!track) return;
-
-  // Double the array for seamless loop
-  var all = bookings.concat(bookings);
-  all.forEach(function(b){
-    var card = document.createElement('div');
-    card.className = 'activity-card';
-    card.innerHTML =
-      '<div class="ac-top">'
-        +'<span class="ac-emoji">'+b.emoji+'</span>'
-        +'<div><div class="ac-name">'+b.name+'</div>'
-        +'<div class="ac-cat">'+b.cat+'</div></div>'
-      +'</div>'
-      +'<div class="ac-bottom">'
-        +'<span class="ac-loc">📍 '+b.loc+'</span>'
-        +'<span class="ac-price">'+b.price+'</span>'
-      +'</div>'
-      +'<div class="ac-stars">'+b.stars+'</div>';
-    track.appendChild(card);
-  });
-})();
-</script>
-
-
 <!-- ── Trust Breakdown Section ───────────────────────────── -->
 <section id="trust-section" style="padding:60px 16px;background:var(--surf);max-width:900px;margin:0 auto;">
   <h2 style="text-align:center;font-size:26px;font-weight:800;color:var(--t1);margin-bottom:8px;">
@@ -906,7 +819,7 @@ function toggleFaq(i){
           <a href="#">Careers</a>
           <a onclick="goPage('privacy')" style="cursor:pointer;">Privacy Policy</a>
           <a onclick="goPage('terms')" style="cursor:pointer;">Terms of Service</a>
-          <a href="mailto:info@tasksa.co.za">info@tasksa.co.za</a>
+          <a href="javascript:void(0)" onclick="openContactForm()">info@tasksa.co.za</a>
         </div>
       </div>
     </div>
@@ -1178,7 +1091,7 @@ function toggleFaq(i){
     <h2>Home &amp; Local Services</h2>
     <p>Book trusted verified professionals anywhere in South Africa</p>
     <div class="filter-row" style="margin-top:14px;">
-      <input class="filter-input" id="svcSearch" placeholder="🔍 Search by name or city..." oninput="filterServices()">
+      <input class="filter-input" id="svcSearch" placeholder="🔍 Search by name or city..." oninput="filterServices()" autocomplete="off" name="tsa_svc_search" readonly onfocus="this.removeAttribute('readonly')">
       <select class="filter-select" id="svcCat" onchange="filterServices()"><option value="">All Services</option></select>
       <select class="filter-select" id="svcProv" onchange="filterServices()">
         <option value="">All Provinces</option>
@@ -1204,7 +1117,7 @@ function toggleFaq(i){
       <h2>Local Shop Marketplace</h2>
       <p>Discover hidden-gem stores across South Africa — from Khayelitsha to Franschhoek</p>
       <div class="filter-row" style="margin-top:14px;">
-        <input class="filter-input" id="shopSearch" placeholder="🔍 Search shops..." oninput="filterShops()" autocomplete="off">
+        <input class="filter-input" id="shopSearch" placeholder="🔍 Search shops..." oninput="filterShops()" autocomplete="off" name="tsa_shop_search" readonly onfocus="this.removeAttribute('readonly')">
         <select class="filter-select" id="shopCatFilter" onchange="filterShops()"><option value="">All Categories</option></select>
       </div>
     </div>
@@ -1226,7 +1139,7 @@ function toggleFaq(i){
     <h2>Holiday Stays</h2>
     <p>Find and book accommodation across South Africa</p>
     <div class="filter-row" style="margin-top:14px;">
-      <input class="filter-input" id="accomSearch" placeholder="🔍 Search destination..." oninput="filterAccom()">
+      <input class="filter-input" id="accomSearch" placeholder="🔍 Search destination..." oninput="filterAccom()" autocomplete="off" name="tsa_accom_search" readonly onfocus="this.removeAttribute('readonly')">
       <select class="filter-select" id="accomCat" onchange="filterAccom()"><option value="">All Stays</option></select>
       <select class="filter-select" id="accomProv" onchange="filterAccom()">
         <option value="">All Provinces</option>
@@ -1348,7 +1261,7 @@ function toggleFaq(i){
     <p style="color:var(--t2);max-width:500px;margin:0 auto 28px;line-height:1.7;">Whether you're a service provider, shop owner or accommodation host — we'd love to have you on the platform.</p>
     <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
       <button class="btn-primary" style="max-width:200px;" onclick="openModal('registerModal')">Register Your Business</button>
-      <a href="mailto:info@tasksa.co.za" style="display:inline-flex;align-items:center;padding:12px 24px;border:1px solid var(--bd2);border-radius:50px;font-size:14px;font-weight:700;color:var(--t2);">info@tasksa.co.za</a>
+      <a href="javascript:void(0)" onclick="openContactForm()" style="display:inline-flex;align-items:center;padding:12px 24px;border:1px solid var(--bd2);border-radius:50px;font-size:14px;font-weight:700;color:var(--t2);cursor:pointer;">info@tasksa.co.za</a>
     </div>
   </div>
 </div>
@@ -1464,6 +1377,28 @@ function toggleFaq(i){
   </div>
 </div>
 
+
+
+<!-- CONTACT US MODAL -->
+<div class="modal-overlay" id="contactModal">
+  <div class="modal" style="max-width:460px;">
+    <button class="modal-close" onclick="closeModal('contactModal')">✕</button>
+    <h3>📧 Contact TaskSA</h3>
+    <div class="modal-sub">Send us a query, suggestion, or complaint — we read every message.</div>
+    <div class="field"><label>Your Name *</label><input id="contactName" placeholder="Your full name"></div>
+    <div class="field"><label>Your Email *</label><input type="email" id="contactEmail" placeholder="you@example.co.za"></div>
+    <div class="field">
+      <label>Type of Message</label>
+      <select id="contactType" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:10px 12px;color:var(--t);font-size:13px;">
+        <option value="query">General Query</option>
+        <option value="suggestion">Suggestion</option>
+        <option value="complaint">Complaint</option>
+      </select>
+    </div>
+    <div class="field"><label>Message *</label><textarea id="contactMessage" placeholder="Tell us what's on your mind..." style="min-height:100px;"></textarea></div>
+    <button class="btn btn-p" id="contactSubmitBtn" onclick="submitContactForm()" style="width:100%;padding:12px;">Send Message</button>
+  </div>
+</div>
 
 <!-- ADD PRODUCT MODAL -->
 <div class="modal-overlay" id="addProductModal">
@@ -3545,6 +3480,42 @@ function doSearch(){
   if(heroInput) heroInput.value=''; // clear so it doesn't silently re-apply next time
 }
 
+// ── CONTACT FORM ──────────────────────────────────────────────────
+function openContactForm(){
+  // Pre-fill name/email if logged in, for convenience
+  if(S.user){
+    var ne = document.getElementById('contactName'); if(ne && !ne.value) ne.value = S.user.name;
+    var ee = document.getElementById('contactEmail'); if(ee && !ee.value) ee.value = S.user.email;
+  }
+  openModal('contactModal');
+}
+
+async function submitContactForm(){
+  var name = document.getElementById('contactName').value.trim();
+  var email = document.getElementById('contactEmail').value.trim();
+  var type = document.getElementById('contactType').value;
+  var message = document.getElementById('contactMessage').value.trim();
+
+  if(!name || !email || !message){ toast('Please fill in your name, email and message','error'); return; }
+  if(!email.includes('@') || !email.includes('.')){ toast('Please enter a valid email address','error'); return; }
+
+  var btn = document.getElementById('contactSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+
+  try {
+    var h = {'Content-Type':'application/json'};
+    var r = await fetch(API + '/contact', { method:'POST', headers:h, body: JSON.stringify({name, email, type, message}) });
+    var d = await r.json();
+    if(!r.ok) throw new Error(d.error || 'Failed to send message');
+    closeModal('contactModal');
+    toast('Message sent! We\'ll get back to you soon.','success');
+    document.getElementById('contactName').value = '';
+    document.getElementById('contactEmail').value = '';
+    document.getElementById('contactMessage').value = '';
+  } catch(e){ toast(e.message||'Failed to send message — please try again','error'); }
+  btn.disabled = false; btn.textContent = 'Send Message';
+}
+
 // ── PRODUCT MANAGEMENT ────────────────────────────────────────────
 async function deleteShopProduct(id, name){
   if(!confirm('Remove "'+name+'" from your shop?')) return;
@@ -4773,16 +4744,16 @@ async function sendMessage(){
 
 
 <!-- Floating WhatsApp Button -->
-<a href="https://wa.me/27697473030" target="_blank" rel="noopener noreferrer"
+<a href="javascript:void(0)" onclick="toast('WhatsApp support coming soon! For now, email us at info@tasksa.co.za','info')"
    id="waFloatBtn"
-   aria-label="Chat with TaskSA on WhatsApp"
+   aria-label="WhatsApp support coming soon"
    style="position:fixed;bottom:24px;right:20px;z-index:300;
           width:56px;height:56px;border-radius:50%;
-          background:#25d366;display:flex;align-items:center;justify-content:center;
-          box-shadow:0 4px 20px rgba(37,211,102,.45);
+          background:#25d366;opacity:.6;display:flex;align-items:center;justify-content:center;
+          box-shadow:0 4px 20px rgba(37,211,102,.3);
           transition:transform .2s,box-shadow .2s;text-decoration:none;"
-   onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 28px rgba(37,211,102,.6)'"
-   onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(37,211,102,.45)'">
+   onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 28px rgba(37,211,102,.4)'"
+   onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(37,211,102,.3)'">
   <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
     <path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.555 4.122 1.526 5.855L.057 23.882a.5.5 0 00.609.61l6.098-1.596A11.947 11.947 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.657-.522-5.162-1.426l-.361-.214-3.741.98.999-3.648-.235-.374A10 10 0 0112 2c5.514 0 10 4.486 10 10s-4.486 10-10 10z"/>

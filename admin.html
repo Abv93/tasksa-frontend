@@ -1084,12 +1084,15 @@ async function loadVerifyQueue(){
           </div>
         `}
         ${u.verificationNotes ? `<div style="font-size:12px;color:#f87171;background:rgba(239,68,68,.08);padding:8px;border-radius:8px;margin-bottom:12px;">Previous rejection reason: ${u.verificationNotes}</div>` : ''}
-        ${status === 'PENDING' ? `
-          <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:8px;">
+          ${status === 'PENDING' ? `
             <button class="btn btn-s" style="flex:1;" onclick="approveVerification('${u.id}','${u.name}')">✓ Approve</button>
             <button class="btn btn-d" style="flex:1;" onclick="rejectVerification('${u.id}','${u.name}')">✕ Reject</button>
-          </div>
-        ` : ''}
+          ` : ''}
+          ${status === 'NOT_SUBMITTED' ? `
+            <button class="btn btn-g" style="flex:1;" onclick="sendVerificationReminder('${u.id}','${u.name}')">🔔 Send Reminder</button>
+          ` : ''}
+        </div>
       </div>
     `).join('') || '<div style="text-align:center;padding:32px;color:var(--t3);">No requests in this category</div>';
   } catch(e){ toast('Failed to load verification queue','error'); }
@@ -1116,6 +1119,18 @@ async function doRejectVerification(userId, reason){
     toast('Verification rejected — provider has been notified','success');
     loadVerifyQueue();
   } catch(e){ toast(e.message,'error'); }
+}
+
+async function sendVerificationReminder(userId, name){
+  const customNote = prompt(`Send a verification reminder to ${name}?\n\nYou can add a personal note below, or leave blank to send the default reminder.`, '');
+  if(customNote === null) return; // cancelled
+  const message = customNote.trim()
+    ? customNote.trim()
+    : `Hi! Just a reminder that your TaskSA account isn't verified yet. Getting verified adds a ✓ badge to your listings and helps clients trust you faster. Head to your dashboard's "Get Verified" section to submit your ID or CIPC details — it only takes a few minutes.`;
+  try {
+    await api('/admin/notify','POST',{ userIds: userId, title: '🆔 Verification Reminder', message });
+    toast(`Reminder sent to ${name}`,'success');
+  } catch(e){ toast(e.message||'Failed to send reminder','error'); }
 }
 
 async function loadSettings(){
