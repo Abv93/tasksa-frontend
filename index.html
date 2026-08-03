@@ -2821,6 +2821,11 @@ async function loadProviderDash(stats, main, role){
       +'<div id="provEarnings"><div style="font-size:13px;color:var(--t3);padding:12px 0;">Loading...</div></div>'
     +'</div>'
     +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
+      +'<div style="font-size:14px;font-weight:800;margin-bottom:6px;">💳 Card Payment Setup</div>'
+      +'<div style="font-size:12px;color:var(--t3);margin-bottom:14px;">Set this up to automatically receive your share of card payments — no manual payouts needed. Money splits instantly when a client pays by card.</div>'
+      +'<div id="paystackSection"><div style="font-size:13px;color:var(--t3);padding:12px 0;">Loading...</div></div>'
+    +'</div>'
+    +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
       +'<div style="font-size:14px;font-weight:800;margin-bottom:6px;">🏦 Banking Details</div>'
       +'<div style="font-size:12px;color:var(--t3);margin-bottom:14px;">Required so we can pay out your card payment earnings. Cash bookings are paid to you directly by the client and don\'t need this.</div>'
       +'<div style="display:flex;flex-direction:column;gap:10px;max-width:420px;">'
@@ -2957,6 +2962,7 @@ async function loadProviderDash(stats, main, role){
   loadBankingDetails();
   loadProviderShopOrders();
   loadVerificationStatus();
+  loadPaystackSection();
 } // end loadProviderDash
 
 async function loadProviderShopOrders(){
@@ -3784,6 +3790,63 @@ async function submitVerification(){
     loadVerificationStatus();
   } catch(e){ toast(e.message||'Failed to submit','error'); }
   if(btn){ btn.disabled = false; btn.textContent = 'Submit for Verification'; }
+}
+
+// ── PAYSTACK PAYOUT SETUP ────────────────────────────────────────
+async function loadPaystackSection(){
+  var el = document.getElementById('paystackSection');
+  if(!el) return;
+  try {
+    var r = await api('/paystack/my-subaccount');
+    var d = r.data;
+    if(d.paystackSubaccountCode){
+      el.innerHTML = '<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:10px;padding:14px;text-align:center;">'
+        +'<div style="font-size:22px;margin-bottom:4px;">✅</div>'
+        +'<div style="font-weight:700;color:var(--green2);font-size:13px;">Set up and active</div>'
+        +'<div style="font-size:11px;color:var(--t3);margin-top:4px;">Card payments will split to you automatically</div>'
+      +'</div>';
+    } else {
+      renderPaystackForm();
+    }
+  } catch(e){
+    console.error('paystack section failed:', e.message);
+    el.innerHTML = '<div style="font-size:12px;color:var(--t3);">Could not load — please refresh</div>';
+  }
+}
+
+async function renderPaystackForm(){
+  var el = document.getElementById('paystackSection');
+  if(!el) return;
+  el.innerHTML = '<div style="font-size:13px;color:var(--t3);padding:8px 0;">Loading banks...</div>';
+  try {
+    var r = await api('/paystack/banks');
+    var banks = r.data || [];
+    el.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;max-width:420px;">'
+      +'<select id="paystackBank" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;">'
+        +'<option value="">Select your bank...</option>'
+        +banks.map(function(b){ return '<option value="'+b.code+'">'+b.name+'</option>'; }).join('')
+      +'</select>'
+      +'<input id="paystackAccNum" placeholder="Account number" inputmode="numeric" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;">'
+      +'<button id="paystackSetupBtn" onclick="setupPaystackAccount()" class="btn-primary" style="padding:11px;">Set Up Card Payouts</button>'
+    +'</div>';
+  } catch(e){
+    el.innerHTML = '<div style="font-size:12px;color:#f87171;">Could not load bank list — please try again later</div>';
+  }
+}
+
+async function setupPaystackAccount(){
+  var bankCode = (document.getElementById('paystackBank')||{}).value;
+  var accNum = (document.getElementById('paystackAccNum')||{}).value?.trim();
+  if(!bankCode){ toast('Please select your bank','error'); return; }
+  if(!accNum){ toast('Please enter your account number','error'); return; }
+  var btn = document.getElementById('paystackSetupBtn');
+  btn.disabled = true; btn.textContent = 'Setting up...';
+  try {
+    await api('/paystack/subaccount','POST',{ bankCode, accountNumber: accNum, businessName: S.user.name });
+    toast('Card payouts set up! You\'ll receive your share automatically.','success');
+    loadPaystackSection();
+  } catch(e){ toast(e.message||'Failed to set up — check your account number','error'); }
+  btn.disabled = false; btn.textContent = 'Set Up Card Payouts';
 }
 
 // ── EARNINGS & BANKING ────────────────────────────────────────────
