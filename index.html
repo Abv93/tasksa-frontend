@@ -2374,17 +2374,11 @@ async function submitStayBooking(lid){
     });
     document.getElementById('stayDetailModal').classList.remove('open');
     if(payMethod === 'CARD' && booking.data && booking.data.id){
-      var pf = await api('/payments/initiate','POST',{bookingId: booking.data.id});
-      if(pf.data && pf.data.paymentUrl){
+      var ps = await api('/paystack/initiate','POST',{bookingId: booking.data.id});
+      if(ps.data && ps.data.authorizationUrl){
         toast('Redirecting to payment...','success');
-        var form = document.createElement('form');
-        form.method = 'POST'; form.action = pf.data.paymentUrl;
-        Object.keys(pf.data.params).forEach(function(key){
-          var input = document.createElement('input');
-          input.type='hidden'; input.name=key; input.value=pf.data.params[key];
-          form.appendChild(input);
-        });
-        document.body.appendChild(form); form.submit(); return;
+        window.location.href = ps.data.authorizationUrl;
+        return;
       }
     }
     toast('Stay booked! The host will confirm shortly.','success');
@@ -3121,25 +3115,14 @@ async function submitBooking(){
     });
 
     if(_selectedPayment === 'CARD' && booking.data && booking.data.id){
-      // Redirect to PayFast for card payment
+      // Redirect to Paystack for card payment
       btn.textContent = 'Redirecting to payment...';
-      var pf = await api('/payments/initiate','POST',{bookingId: booking.data.id});
-      if(pf.data && pf.data.paymentUrl){
+      var ps = await api('/paystack/initiate','POST',{bookingId: booking.data.id});
+      if(ps.data && ps.data.authorizationUrl){
         closeModal('bookingModal');
-        toast('Redirecting to secure payment...','success');
-        // Build and submit PayFast form
-        var form = document.createElement('form');
-        form.method = 'POST';
-        form.action = pf.data.paymentUrl;
-        Object.keys(pf.data.params).forEach(function(key){
-          var input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = pf.data.params[key];
-          form.appendChild(input);
-        });
-        document.body.appendChild(form);
-        form.submit();
+        var feeNote = ps.data.platformFee ? ' (R'+ps.data.providerPrice.toFixed(2)+' + R'+ps.data.platformFee.toFixed(2)+' platform fee = R'+ps.data.totalCharge.toFixed(2)+')' : '';
+        toast('Redirecting to secure payment...'+feeNote,'success');
+        window.location.href = ps.data.authorizationUrl;
         return;
       }
     }
@@ -4325,19 +4308,15 @@ async function openShopCheckout(){
   });
   var method = _selectedPayment || 'CASH';
   var deliveryNote = (document.getElementById('cartDeliveryNote')||{}).value || '';
-  if(!confirm('Total: R'+total.toFixed(2)+'\n\nPayment: '+(method==='CARD'?'Card (you\'ll be redirected to PayFast)':'Cash on Collection')+'\n\nPlace order?')) return;
+  if(!confirm('Total: R'+total.toFixed(2)+'\n\nPayment: '+(method==='CARD'?'Card (you\'ll be redirected to a secure payment page)':'Cash on Collection')+'\n\nPlace order?')) return;
   try {
     var order = await api('/orders','POST',{items, paymentMethod: method, totalAmount: total, notes: deliveryNote||undefined});
     if(method === 'CARD' && order.data && order.data.id){
-      var pf = await api('/payments/initiate','POST',{orderId: order.data.id});
-      if(pf.data && pf.data.paymentUrl){
+      var ps = await api('/paystack/initiate','POST',{orderId: order.data.id});
+      if(ps.data && ps.data.authorizationUrl){
         toast('Redirecting to payment...','success');
-        var form = document.createElement('form');
-        form.method='POST'; form.action=pf.data.paymentUrl;
-        Object.keys(pf.data.params).forEach(function(key){
-          var inp=document.createElement('input'); inp.type='hidden'; inp.name=key; inp.value=pf.data.params[key]; form.appendChild(inp);
-        });
-        document.body.appendChild(form); form.submit(); return;
+        window.location.href = ps.data.authorizationUrl;
+        return;
       }
     }
     S.cart=[];
