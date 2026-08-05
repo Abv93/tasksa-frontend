@@ -1092,6 +1092,9 @@ async function loadVerifyQueue(){
           ${status === 'NOT_SUBMITTED' ? `
             <button class="btn btn-g" style="flex:1;" onclick="sendVerificationReminder('${u.id}','${u.name}')">🔔 Send Reminder</button>
           ` : ''}
+          ${(status === 'PENDING' || status === 'VERIFIED' || status === 'REJECTED') ? `
+            <button class="btn btn-g" style="flex:0;padding:9px 14px;" onclick="resetVerification('${u.id}','${u.name}')" title="Wipe all documents and start fresh">🗑️ Reset</button>
+          ` : ''}
         </div>
       </div>
     `).join('') || '<div style="text-align:center;padding:32px;color:var(--t3);">No requests in this category</div>';
@@ -1117,6 +1120,15 @@ async function doRejectVerification(userId, reason){
   try {
     await api(`/verification/admin/reject/${userId}`,'PUT',{reason});
     toast('Verification rejected — provider has been notified','success');
+    loadVerifyQueue();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+async function resetVerification(userId, name){
+  if(!confirm(`Fully reset ${name}'s verification?\n\nThis permanently deletes all their uploaded documents and CIPC details. It will look like they never submitted anything. This cannot be undone.\n\nUse this for genuine mistakes only — for a normal correction, use Reject instead so they know what to fix.`)) return;
+  try {
+    await api(`/verification/admin/reset/${userId}`,'DELETE');
+    toast(`${name}'s verification has been fully reset`,'success');
     loadVerifyQueue();
   } catch(e){ toast(e.message,'error'); }
 }
