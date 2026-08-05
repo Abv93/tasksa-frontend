@@ -825,7 +825,10 @@ function toggleFaq(i){
     </div>
     <div class="footer-bottom">
       <span>© 2026 TaskSA (Pty) Ltd · info@tasksa.co.za</span>
-      <span>Built for South Africa 🇿🇦</span>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <img src="/Tasksa_Paystack badge 1.png" alt="Secured by Paystack" style="height:24px;width:auto;opacity:.9;">
+        <span>Built for South Africa 🇿🇦</span>
+      </div>
     </div>
   </footer>
 </div>
@@ -1733,6 +1736,9 @@ function toggleFaq(i){
           <div style="font-size:10px;color:var(--t3);">Secure online payment</div>
         </div>
       </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;">
+        <img src="/Tasksa_Paystack badge 2.png" alt="Secured by Paystack" style="height:18px;width:auto;opacity:.85;">
+      </div>
     </div>
     <button class="btn-primary" id="bookBtn" onclick="submitBooking()">Confirm Booking</button>
   </div>
@@ -1757,6 +1763,9 @@ function toggleFaq(i){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
       <div onclick="selectPayment('CASH');this.style.borderColor='var(--blue2)';this.nextElementSibling.style.borderColor='var(--bd)';" style="border:2px solid var(--blue2);border-radius:8px;padding:8px;text-align:center;cursor:pointer;background:rgba(26,143,255,.08);font-size:12px;font-weight:700;">💵 Cash</div>
       <div onclick="selectPayment('CARD');this.style.borderColor='var(--gold)';this.previousElementSibling.style.borderColor='var(--bd)';" style="border:2px solid var(--bd);border-radius:8px;padding:8px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;">💳 Card</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;">
+      <img src="/Tasksa_Paystack badge 2.png" alt="Secured by Paystack" style="height:18px;width:auto;opacity:.85;">
     </div>
     <button class="btn-primary" onclick="openCheckout()">Checkout</button>
   </div>
