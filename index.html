@@ -3417,7 +3417,7 @@ async function loadBannerCarousel(){
   }
 }
 
-// ── PAYFAST RETURN HANDLER ────────────────────────────────────────
+// ── PAYMENT RETURN HANDLER (works for both PayFast & Paystack redirects) ──
 (function(){
   var hash = window.location.hash;
   if(hash.indexOf('payment=') === -1) return;
