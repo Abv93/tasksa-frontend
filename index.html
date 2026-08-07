@@ -325,7 +325,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:48px 5% 0;}
   <div class="nav-links">
     <a onclick="goPage('services')" id="nav-services">Services</a>
     <a onclick="goPage('shop')" id="nav-shop">Shop</a>
-    <a onclick="goPage('accommodation')" id="nav-accommodation">Holiday Stays</a>
+    <a onclick="goPage('accommodation')" id="nav-accommodation">Holiday Stays <span style="font-size:9px;background:rgba(245,166,35,.2);color:var(--gold);padding:2px 6px;border-radius:8px;font-weight:700;margin-left:2px;">SOON</span></a>
     <a onclick="goPage('messages')" id="nav-messages" class="nav-auth-only" style="display:none;">Messages</a>
     <a onclick="goPage('dashboard')" id="nav-dashboard" class="nav-auth-only" style="display:none;">Dashboard</a>
   </div>
@@ -1829,6 +1829,14 @@ async function publicApi(path){
 
 // ── NAVIGATION ────────────────────────────────────────────────────
 function goPage(id, fromPop){
+  // Holiday Stays is temporarily closed while we focus on Services first —
+  // no real hosts have registered yet, so this section is not ready for
+  // real bookings. Intercept here so every link/button pointing to it is
+  // covered in one place.
+  if(id === 'accommodation'){
+    toast('Holiday Stays is coming soon! We\'re focused on Services first.','info');
+    return;
+  }
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   var pg=document.getElementById('page-'+id);
   if(pg){ pg.classList.add('active'); window.scrollTo(0,0); }
