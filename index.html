@@ -1739,6 +1739,17 @@ function toggleFaq(i){
       <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;">
         <img src="/Tasksa_Paystack badge 2.png" alt="Secured by Paystack" style="height:100px;width:100px;object-fit:contain;">
       </div>
+      <div id="cardPriceBreakdown" style="display:none;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-top:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:4px;">
+          <span>Service price</span><span id="bpProviderPrice">R0.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:8px;">
+          <span>Platform fee</span><span id="bpPlatformFee">R0.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;color:var(--t);padding-top:8px;border-top:1px solid var(--bd);">
+          <span>Total to pay</span><span id="bpTotal" style="color:var(--gold);">R0.00</span>
+        </div>
+      </div>
     </div>
     <button class="btn-primary" id="bookBtn" onclick="submitBooking()">Confirm Booking</button>
   </div>
@@ -3078,6 +3089,16 @@ async function openBookModal(listingId, listingName, providerId, priceFrom){
   openModal('bookingModal');
 }
 var _selectedPayment = 'CASH';
+var _cachedCommissionRate = null;
+
+async function getCommissionRate(){
+  if(_cachedCommissionRate !== null) return _cachedCommissionRate;
+  try {
+    var r = await publicApi('/paystack/commission-rate');
+    _cachedCommissionRate = r.data.rate;
+  } catch(e){ _cachedCommissionRate = 0.08; } // sensible fallback if the call fails
+  return _cachedCommissionRate;
+}
 
 function selectPayment(method){
   _selectedPayment = method;
@@ -3091,6 +3112,24 @@ function selectPayment(method){
     : 'border:2px solid var(--bd);border-radius:10px;padding:12px;text-align:center;cursor:pointer;';
   var btn = document.getElementById('bookBtn');
   if(btn) btn.textContent = method==='CARD' ? 'Pay by Card →' : 'Confirm Booking';
+
+  // Show/hide the price breakdown box for the booking modal specifically
+  var breakdown = document.getElementById('cardPriceBreakdown');
+  if(breakdown){
+    if(method === 'CARD' && S.bookingPrice){
+      breakdown.style.display = 'block';
+      getCommissionRate().then(function(rate){
+        var providerPrice = parseFloat(S.bookingPrice) || 0;
+        var platformFee = providerPrice * rate;
+        var total = providerPrice + platformFee;
+        document.getElementById('bpProviderPrice').textContent = 'R'+providerPrice.toFixed(2);
+        document.getElementById('bpPlatformFee').textContent = 'R'+platformFee.toFixed(2);
+        document.getElementById('bpTotal').textContent = 'R'+total.toFixed(2);
+      });
+    } else {
+      breakdown.style.display = 'none';
+    }
+  }
 }
 
 async function submitBooking(){
