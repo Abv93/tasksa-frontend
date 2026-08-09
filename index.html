@@ -302,7 +302,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:48px 5% 0;}
 .conv-avatar{width:38px;height:38px;border-radius:50%;background:rgba(26,143,255,.15);color:var(--blue3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
 .msg-area{display:flex;flex-direction:column;background:var(--bg3);}
 .msg-input-row{padding:14px;border-top:1px solid var(--bd);display:flex;gap:10px;}
-.msg-input{flex:1;background:var(--surf);border:1px solid var(--bd2);border-radius:50px;padding:10px 18px;color:var(--t);font-size:13px;outline:none;font-family:'DM Sans',sans-serif;}
+.msg-input{flex:1;background:var(--surf);border:1px solid var(--bd2);border-radius:20px;padding:10px 18px;color:var(--t);font-size:13px;outline:none;font-family:'DM Sans',sans-serif;line-height:1.4;}
 .msg-send-btn{background:var(--blue2);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;}
 
 /* UTILS */
@@ -1797,6 +1797,27 @@ var S = {user:null,token:localStorage.getItem('tasksa_token')||null,cart:[],allS
 
 // ── UTILS ─────────────────────────────────────────────────────────
 function R(n){ return 'R'+(Math.round(n||0)).toLocaleString('en-ZA'); }
+
+// Bookings store address+notes as one combined string ("Address: X | Notes: Y")
+// to avoid a schema change. This parses it back apart for clearer display —
+// two separate labeled lines instead of one long confusing blob.
+function renderBookingNotes(rawNotes){
+  if(!rawNotes) return '';
+  var addrMatch = rawNotes.match(/^Address:\s*(.+?)(\s*\|\s*Notes:\s*(.+))?$/s);
+  if(!addrMatch){
+    // Doesn't match the expected pattern — just show it plainly
+    return '<div style="font-size:12px;color:var(--t2);margin-top:6px;padding:8px;background:var(--bg3);border-radius:8px;">📝 '+escapeHtml(rawNotes)+'</div>';
+  }
+  var address = addrMatch[1];
+  var notes = addrMatch[3];
+  var html = '<div style="font-size:12px;color:var(--t2);margin-top:6px;padding:8px;background:var(--bg3);border-radius:8px;">'
+    +'<div style="display:flex;gap:6px;"><span>📍</span><span><strong>Address:</strong> '+escapeHtml(address)+'</span></div>';
+  if(notes){
+    html += '<div style="display:flex;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--bd);"><span>📝</span><span><strong>Notes:</strong> '+escapeHtml(notes)+'</span></div>';
+  }
+  html += '</div>';
+  return html;
+}
 function ini(name){ return (name||'?').split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2); }
 function fDate(d){ return new Date(d).toLocaleDateString('en-ZA'); }
 function toast(msg,type){
@@ -2895,7 +2916,6 @@ async function loadProviderDash(stats, main, role){
           +'<thead><tr style="border-bottom:1px solid var(--bd);"><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Client</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Date</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Details</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Amount</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Status</th><th style="text-align:left;padding:8px;color:var(--t3);font-size:11px;">Action</th></tr></thead>'
           +'<tbody>'+bk.data.map(function(b){
             var sc = b.status==='CONFIRMED'?'var(--green2)':b.status==='COMPLETED'?'var(--blue3)':b.status==='CANCELLED'?'#f87171':'var(--amber)';
-            var notes = b.notes||'No notes';
             var actionBtns = b.status==='PENDING'
               ? '<button data-booking-id="'+b.id+'" data-action="accept-booking" style="background:rgba(34,197,94,.15);border:none;border-radius:6px;color:var(--green2);padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">✓ Accept</button>'
                 +'<button data-booking-id="'+b.id+'" data-action="decline-booking" style="background:rgba(239,68,68,.15);border:none;border-radius:6px;color:#f87171;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✕ Decline</button>'
@@ -2905,7 +2925,7 @@ async function loadProviderDash(stats, main, role){
             return '<tr style="border-bottom:1px solid var(--bd);">'
               +'<td style="padding:10px 8px;font-weight:700;">'+(b.client?b.client.name:'Client')+'<br><span style="font-size:10px;color:var(--t3);font-weight:400;">'+(b.client&&b.client.phone||'')+'</span></td>'
               +'<td style="padding:10px 8px;color:var(--t3);white-space:nowrap;">'+fDate(b.scheduledAt)+'</td>'
-              +'<td style="padding:10px 8px;max-width:200px;"><div style="font-size:11px;color:var(--t2);">'+notes+'</div></td>'
+              +'<td style="padding:10px 8px;max-width:220px;">'+renderBookingNotes(b.notes).replace('margin-top:6px;','margin-top:0;')+'</td>'
               +'<td style="padding:10px 8px;color:var(--blue3);">'+R(b.totalAmount)+'</td>'
               +'<td style="padding:10px 8px;"><span style="font-size:10px;font-weight:700;color:'+sc+';">'+b.status+'</span></td>'
               +'<td style="padding:10px 8px;">'+actionBtns+'</td>'
@@ -3155,12 +3175,26 @@ async function submitBooking(){
     if(_selectedPayment === 'CARD' && booking.data && booking.data.id){
       // Redirect to Paystack for card payment
       btn.textContent = 'Redirecting to payment...';
-      var ps = await api('/paystack/initiate','POST',{bookingId: booking.data.id});
-      if(ps.data && ps.data.authorizationUrl){
+      try {
+        var ps = await api('/paystack/initiate','POST',{bookingId: booking.data.id});
+        if(ps.data && ps.data.authorizationUrl){
+          closeModal('bookingModal');
+          var feeNote = ps.data.platformFee ? ' (R'+ps.data.providerPrice.toFixed(2)+' + R'+ps.data.platformFee.toFixed(2)+' platform fee = R'+ps.data.totalCharge.toFixed(2)+')' : '';
+          toast('Redirecting to secure payment...'+feeNote,'success');
+          window.location.href = ps.data.authorizationUrl;
+          return;
+        }
+      } catch(payErr){
+        // CRITICAL: the booking already exists at this point even though card
+        // payment couldn't start. Don't let the user think nothing happened —
+        // that's exactly what causes accidental duplicate bookings.
         closeModal('bookingModal');
-        var feeNote = ps.data.platformFee ? ' (R'+ps.data.providerPrice.toFixed(2)+' + R'+ps.data.platformFee.toFixed(2)+' platform fee = R'+ps.data.totalCharge.toFixed(2)+')' : '';
-        toast('Redirecting to secure payment...'+feeNote,'success');
-        window.location.href = ps.data.authorizationUrl;
+        toast('Booking saved! However: '+(payErr.message||'card payment could not be started')+'. Your booking is in "My Bookings" — you can arrange cash payment with the provider, or try card again once resolved.','error');
+        setTimeout(function(){ if(document.getElementById('page-dashboard').classList.contains('active')) loadDash(); }, 1500);
+        S.bookingListingId=null;
+        _selectedPayment='CASH';
+        btn.disabled=false;
+        btn.textContent='Confirm Booking';
         return;
       }
     }
@@ -3646,7 +3680,7 @@ function renderClientBookingsList(){
         +'<span style="font-size:11px;font-weight:700;color:'+statusColor+';">'+statusLabel+'</span>'
       +'</div>'
       +'<div style="font-size:12px;color:var(--t3);margin-top:4px;">📅 '+fDate(b.scheduledAt)+'</div>'
-      +(b.notes?'<div style="font-size:12px;color:var(--t2);margin-top:4px;padding:8px;background:var(--bg3);border-radius:8px;">📝 '+b.notes+'</div>':'')
+      +renderBookingNotes(b.notes)
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">'
         +'<div style="font-size:12px;color:var(--blue3);">'+R(b.totalAmount)+'</div>'
         +actionBtn
@@ -4646,7 +4680,7 @@ async function loadThread(partnerId, partnerName, scrollToBottom){
       +'</div>'
       +'<div id="msgThread" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;"></div>'
       +'<div class="msg-input-row">'
-        +'<input class="msg-input" id="msgInput" placeholder="Type a message..." autocomplete="off" autocorrect="off" autocapitalize="off" type="text" name="chat-message">'
+        +'<textarea class="msg-input" id="msgInput" placeholder="Type a message..." autocomplete="off" autocorrect="off" autocapitalize="off" name="chat-message" rows="1" style="resize:none;max-height:120px;overflow-y:auto;" onkeydown="handleMsgInputKeydown(event)" oninput="autoGrowMsgInput(this)"></textarea>'
         +'<button class="msg-send-btn" onclick="sendMessage()">&#x27A4;</button>'
       +'</div>';
   }
@@ -4693,6 +4727,22 @@ async function refreshThreadMessages(partnerId, scrollToBottom){
   } catch(e){ console.error('refreshThread:', e.message); }
 }
 
+function handleMsgInputKeydown(event){
+  // Enter sends the message (like WhatsApp/most chat apps).
+  // Shift+Enter inserts a new line instead, for multi-line messages.
+  if(event.key === 'Enter' && !event.shiftKey){
+    event.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoGrowMsgInput(el){
+  // Grows the textarea as the client types multiple lines, up to max-height
+  // (defined in CSS), then scrolls internally beyond that.
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
 async function sendMessage(){
   var input = document.getElementById('msgInput');
   if(!input||!input.value.trim()||!_currentConvPartner) return;
@@ -4700,6 +4750,7 @@ async function sendMessage(){
   if(sendBtn && sendBtn.disabled) return;
   var content = input.value.trim();
   input.value = '';
+  input.style.height = 'auto'; // reset auto-grow height after clearing text
   input.focus();
   if(sendBtn){ sendBtn.disabled=true; sendBtn.style.opacity='0.5'; }
 
@@ -4754,6 +4805,7 @@ async function sendMessage(){
         tempRow.querySelector('div[style*="Sending"]').style.cursor = 'pointer';
         tempRow.onclick = function(){
           input.value = content;
+          autoGrowMsgInput(input);
           tempRow.remove();
           input.focus();
         };
