@@ -1112,8 +1112,8 @@ async function sendVerificationReminder(userId, name){
     ? customNote.trim()
     : `Hi! Just a reminder that your TaskSA account isn't verified yet. Getting verified adds a ✓ badge to your listings and helps clients trust you faster. Head to your dashboard's "Get Verified" section to submit your ID or CIPC details — it only takes a few minutes.`;
   try {
-    await api('/admin/notify','POST',{ userIds: userId, title: '🆔 Verification Reminder', message });
-    toast(`Reminder sent to ${name}`,'success');
+    await api('/admin/notify','POST',{ userIds: userId, title: '🆔 Verification Reminder', message, sendEmailToo: true, emailType: 'verification-reminder' });
+    toast(`Reminder sent to ${name} (in-app + email)`,'success');
   } catch(e){ toast(e.message||'Failed to send reminder','error'); }
 }
 
