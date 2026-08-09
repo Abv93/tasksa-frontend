@@ -1096,11 +1096,14 @@ function toggleFaq(i){
     <div class="filter-row" style="margin-top:14px;">
       <input class="filter-input" id="svcSearch" placeholder="🔍 Search by name or city..." oninput="filterServices()" autocomplete="off" name="tsa_svc_search" readonly onfocus="this.removeAttribute('readonly')">
       <select class="filter-select" id="svcCat" onchange="filterServices()"><option value="">All Services</option></select>
-      <select class="filter-select" id="svcProv" onchange="filterServices()">
+      <select class="filter-select" id="svcProv" onchange="populateCities('svcProv','svcCity');filterServices()">
         <option value="">All Provinces</option>
         <option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option>
         <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
         <option>North West</option><option>Free State</option><option>Northern Cape</option>
+      </select>
+      <select class="filter-select" id="svcCity" onchange="filterServices()">
+        <option value="">All Cities</option>
       </select>
       <select class="filter-select" id="svcSort" onchange="filterServices()">
         <option value="">Sort: Top Rated</option>
@@ -1122,6 +1125,15 @@ function toggleFaq(i){
       <div class="filter-row" style="margin-top:14px;">
         <input class="filter-input" id="shopSearch" placeholder="🔍 Search shops..." oninput="filterShops()" autocomplete="off" name="tsa_shop_search" readonly onfocus="this.removeAttribute('readonly')">
         <select class="filter-select" id="shopCatFilter" onchange="filterShops()"><option value="">All Categories</option></select>
+        <select class="filter-select" id="shopProv" onchange="populateCities('shopProv','shopCity');filterShops()">
+          <option value="">All Provinces</option>
+          <option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option>
+          <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
+          <option>North West</option><option>Free State</option><option>Northern Cape</option>
+        </select>
+        <select class="filter-select" id="shopCity" onchange="filterShops()">
+          <option value="">All Cities</option>
+        </select>
       </div>
     </div>
     <div class="section"><div id="shopGrid" class="shop-grid"></div></div>
@@ -2549,12 +2561,14 @@ async function filterServices(){
   var search=(document.getElementById('svcSearch')&&document.getElementById('svcSearch').value)||'';
   var catId=(document.getElementById('svcCat')&&document.getElementById('svcCat').value)||'';
   var prov=(document.getElementById('svcProv')&&document.getElementById('svcProv').value)||'';
+  var city=(document.getElementById('svcCity')&&document.getElementById('svcCity').value)||'';
   var sort=(document.getElementById('svcSort')&&document.getElementById('svcSort').value)||'';
   try {
     var q='/listings?type=SERVICE&limit=24';
     if(catId) q+='&categoryId='+catId;
     if(search) q+='&search='+encodeURIComponent(search);
     if(prov) q+='&province='+encodeURIComponent(prov);
+    if(city) q+='&city='+encodeURIComponent(city);
     var r=await api(q);
     var data=r.data.slice();
     if(sort==='price_asc') data.sort(function(a,b){return (a.priceFrom||0)-(b.priceFrom||0);});
@@ -2592,12 +2606,16 @@ async function loadShop(){
 async function filterShops(){
   var catId=(document.getElementById('shopCatFilter')&&document.getElementById('shopCatFilter').value)||'';
   var search=(document.getElementById('shopSearch')&&document.getElementById('shopSearch').value)||'';
+  var prov=(document.getElementById('shopProv')&&document.getElementById('shopProv').value)||'';
+  var city=(document.getElementById('shopCity')&&document.getElementById('shopCity').value)||'';
   var g=document.getElementById('shopGrid');
   if(!g) return;
   try {
     var q='/listings?type=SHOP&limit=40';
     if(catId) q+='&categoryId='+catId;
     if(search) q+='&search='+encodeURIComponent(search);
+    if(prov) q+='&province='+encodeURIComponent(prov);
+    if(city) q+='&city='+encodeURIComponent(city);
     var r=await api(q);
     var sortedFiltered = r.data.slice().sort(function(a,b){
       var aCount=(a._count&&a._count.products)||0, bCount=(b._count&&b._count.products)||0;
