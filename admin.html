@@ -819,7 +819,7 @@ async function loadListings(page=1){
     const r=await api(q);
     document.getElementById('listingsCount').textContent=`${r.total} listings`;
     document.getElementById('listingsTable').innerHTML=r.data.map(l=>`<tr>
-      <td><div class="td-name">${l.name}</div><div class="td-sub">${l._count.bookings} bookings · ${l._count.reviews} reviews</div></td>
+      <td><div class="td-name">${l.name}</div><div class="td-sub">${l._count.bookings} bookings · ${l._count.reviews} reviews · ${l.viewCount||0} views</div></td>
       <td style="font-size:12px">${l.owner?.name||'—'}</td>
       <td><span class="badge b-blue">${l.category?.name||'—'}</span></td>
       <td style="font-size:12px">${l.city}, ${l.province}</td>
