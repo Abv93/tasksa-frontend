@@ -830,9 +830,11 @@ async function loadListings(page=1){
         ${l.isFeatured?'<span class="badge b-amber">Featured</span>':''}
       </div></td>
       <td><div class="act-btns">
+        <button class="act-btn ab-blue" onclick='openFullEditListing(${JSON.stringify(l).replace(/'/g,"&#39;")})'>Edit</button>
         <button class="act-btn ab-green" onclick="verifyListing('${l.id}',${l.isVerified})">${l.isVerified?'Unverify':'Verify'}</button>
         <button class="act-btn ab-gold" onclick="featureListing('${l.id}',${l.isFeatured})">${l.isFeatured?'Unfeature':'Feature'}</button>
         <button class="act-btn ${l.isActive?'ab-red':'ab-green'}" onclick="toggleListing('${l.id}',${l.isActive})">${l.isActive?'Disable':'Enable'}</button>
+        <button class="act-btn ab-red" onclick="deleteListingHard('${l.id}','${(l.name||'').replace(/'/g,"\\'")}',${l._count.bookings},${l._count.reviews})" title="Permanently delete">🗑️</button>
       </div></td>
     </tr>`).join('')||'<tr class="empty-row"><td colspan="7">No listings found</td></tr>';
     renderPagination('listingsPag', page, r.total, 15, loadListings);
@@ -842,6 +844,51 @@ function searchListings(){ loadListings(1); }
 async function verifyListing(id,isVerified){ try{ await api(`/admin/listings/${id}`,'PUT',{isVerified:!isVerified}); loadListings(); toast(isVerified?'Verification removed':'Listing verified!',isVerified?'error':'success'); }catch(e){ toast(e.message,'error'); }}
 async function featureListing(id,isFeatured){ try{ await api(`/admin/listings/${id}`,'PUT',{isFeatured:!isFeatured}); loadListings(); toast(isFeatured?'Removed from featured':'Listing featured!','success'); }catch(e){ toast(e.message,'error'); }}
 async function toggleListing(id,isActive){ try{ await api(`/admin/listings/${id}`,'PUT',{isActive:!isActive}); loadListings(); toast(isActive?'Listing disabled':'Listing enabled','success'); }catch(e){ toast(e.message,'error'); }}
+
+async function deleteListingHard(id, name, bookingCount, reviewCount){
+  if(bookingCount > 0 || reviewCount > 0){
+    toast(`Cannot delete — has ${bookingCount} booking(s) and ${reviewCount} review(s). Use Disable instead.`,'error');
+    return;
+  }
+  if(!confirm(`Permanently delete "${name}"?\n\nThis cannot be undone. Only use this for empty duplicate listings with zero bookings/reviews.`)) return;
+  try{
+    await api(`/admin/listings/${id}`,'DELETE');
+    toast('Listing permanently deleted','success');
+    loadListings();
+  }catch(e){ toast(e.message,'error'); }
+}
+
+var _editingListingId = null;
+function openFullEditListing(l){
+  _editingListingId = l.id;
+  document.getElementById('felName').value = l.name || '';
+  document.getElementById('felDesc').value = l.description || '';
+  document.getElementById('felPrice').value = l.priceFrom || '';
+  document.getElementById('felPriceType').value = l.priceType || 'PER_JOB';
+  document.getElementById('felProvince').value = l.province || '';
+  document.getElementById('felCity').value = l.city || '';
+  document.getElementById('felAreas').value = (l.serviceAreas||[]).join(', ');
+  document.getElementById('fullEditListingModal').classList.add('open');
+}
+function closeFullEditListing(){ document.getElementById('fullEditListingModal').classList.remove('open'); }
+async function saveFullEditListing(){
+  var serviceAreas = document.getElementById('felAreas').value.split(',').map(s=>s.trim()).filter(Boolean);
+  var payload = {
+    name: document.getElementById('felName').value.trim(),
+    description: document.getElementById('felDesc').value.trim(),
+    priceFrom: document.getElementById('felPrice').value,
+    priceType: document.getElementById('felPriceType').value,
+    province: document.getElementById('felProvince').value.trim(),
+    city: document.getElementById('felCity').value.trim(),
+    serviceAreas: serviceAreas
+  };
+  try{
+    await api(`/admin/listings/${_editingListingId}/full-edit`,'PUT',payload);
+    toast('Listing updated','success');
+    closeFullEditListing();
+    loadListings();
+  }catch(e){ toast(e.message,'error'); }
+}
 async function loadBookings(page=1){
   const status=document.getElementById('bkStatusFilter')?.value||'';
   try {
@@ -1162,5 +1209,35 @@ function toggleSidebar(){
 
 tryAutoLogin();
 </script>
+<div class="modal-overlay" id="fullEditListingModal">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeFullEditListing()">✕</button>
+    <h3>Edit Listing</h3>
+    <div class="field"><label>Name</label><input id="felName"></div>
+    <div class="field"><label>Description</label><textarea id="felDesc" style="min-height:70px;"></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>Price (R)</label><input id="felPrice" type="number"></div>
+      <div class="field"><label>Price Type</label>
+        <select id="felPriceType" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:10px 12px;color:var(--t);font-size:13px;">
+          <option value="PER_JOB">Per Job</option><option value="HOURLY">Per Hour</option>
+          <option value="DAILY">Per Day</option><option value="FIXED">Fixed Price</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>Province</label><input id="felProvince"></div>
+      <div class="field"><label>City</label><input id="felCity"></div>
+    </div>
+    <div class="field">
+      <label>Also Service These Areas</label>
+      <input id="felAreas" placeholder="e.g. Kempton Park, Brakpan, Boksburg (comma separated)">
+      <div style="font-size:11px;color:var(--t3);margin-top:4px;">Type additional area names separated by commas — this is how you merge duplicate area-only listings into one.</div>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-g" onclick="closeFullEditListing()">Cancel</button>
+      <button class="btn btn-p" onclick="saveFullEditListing()">Save Changes</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
