@@ -487,7 +487,7 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         </div>
         <div style="overflow-x:auto;">
           <table>
-            <thead><tr><th>Provider</th><th>Paystack Status</th><th>Total Card Earnings</th><th>Transactions</th><th>Last Payment</th></tr></thead>
+            <thead><tr><th>Provider</th><th>Paystack Status</th><th>Total Card Earnings</th><th>TaskSA Commission</th><th>Transactions</th><th>Last Payment</th></tr></thead>
             <tbody id="payoutsTable"></tbody>
           </table>
         </div>
@@ -1115,14 +1115,15 @@ async function sendNotification2(){
 async function loadPayouts(){
   try {
     const r = await api('/payouts/admin/overview');
-    document.getElementById('payoutsCount').textContent = `${r.data.length} providers earning via card`;
+    document.getElementById('payoutsCount').textContent = `${r.data.length} providers earning via card · TaskSA commission total: R${(r.totalCommission||0).toLocaleString('en-ZA')}`;
     document.getElementById('payoutsTable').innerHTML = r.data.map(p => `<tr>
       <td><div class="td-name">${p.name}</div><div class="td-sub">${p.email}${p.phone?' · '+p.phone:''}</div></td>
       <td>${p.paystackSetUp ? '<span class="badge b-green">✓ Paystack active</span>' : '<span class="badge b-red">Not set up</span>'}</td>
       <td style="font-size:13px;font-weight:800;color:var(--green2);">${R(p.totalEarned)}</td>
+      <td style="font-size:13px;font-weight:800;color:var(--gold);">${R(p.taskSaCommission)}</td>
       <td style="font-size:12px;">${p.transactionCount} transaction${p.transactionCount!==1?'s':''}</td>
       <td style="font-size:11px;color:var(--t3);">${p.lastPayment ? fDate(p.lastPayment) : '—'}</td>
-    </tr>`).join('') || '<tr class="empty-row"><td colspan="5">No card earnings yet</td></tr>';
+    </tr>`).join('') || '<tr class="empty-row"><td colspan="6">No card earnings yet</td></tr>';
   } catch(e){ toast('Failed to load earnings','error'); }
 }
 
