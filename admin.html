@@ -681,7 +681,7 @@ async function loadDashboard(){
     document.getElementById('statsGrid').innerHTML=`
       <div class="stat-card sc-blue"><div class="sc-label">Total Users</div><div class="sc-val">${d.totalUsers}</div><div class="sc-sub">Platform accounts</div><div class="sc-icon">👥</div></div>
       <div class="stat-card sc-green"><div class="sc-label">Active Listings</div><div class="sc-val">${d.activeListings}</div><div class="sc-sub">${d.totalListings} total</div><div class="sc-icon">📋</div></div>
-      <div class="stat-card sc-gold"><div class="sc-label">Total Commission</div><div class="sc-val">${R(d.totalCommission)}</div><div class="sc-sub">From paid transactions</div><div class="sc-icon">💰</div></div>
+      <div class="stat-card sc-gold"><div class="sc-label">Total Commission</div><div class="sc-val">R${(d.totalCommission||0).toFixed(2)}</div><div class="sc-sub">From paid transactions</div><div class="sc-icon">💰</div></div>
       <div class="stat-card sc-purple"><div class="sc-label">Pending Bookings</div><div class="sc-val">${d.pendingBookings}</div><div class="sc-sub">${d.totalBookings} total bookings</div><div class="sc-icon">📅</div></div>`;
     if(d.pendingBookings>0){ const b=document.getElementById('sbPending'); b.style.display='inline'; b.textContent=d.pendingBookings; }
     const bkHtml=d.recentBookings.map(b=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--bd)">
@@ -704,17 +704,17 @@ async function loadRevenue(){
     const d=r.data;
     document.getElementById('revStatsGrid').innerHTML=`
       <div class="stat-card sc-blue"><div class="sc-label">Total Revenue</div><div class="sc-val">${R(d.totalRevenue)}</div><div class="sc-sub">All transactions</div><div class="sc-icon">💳</div></div>
-      <div class="stat-card sc-gold"><div class="sc-label">Total Commission</div><div class="sc-val">${R(d.totalCommission)}</div><div class="sc-sub">Platform earnings</div><div class="sc-icon">💰</div></div>
+      <div class="stat-card sc-gold"><div class="sc-label">Total Commission</div><div class="sc-val">R${(d.totalCommission||0).toFixed(2)}</div><div class="sc-sub">Platform earnings</div><div class="sc-icon">💰</div></div>
       <div class="stat-card sc-green"><div class="sc-label">Booking Revenue</div><div class="sc-val">${R(d.bookings.total)}</div><div class="sc-sub">${d.bookings.count} bookings</div><div class="sc-icon">📅</div></div>
       <div class="stat-card sc-purple"><div class="sc-label">Shop Revenue</div><div class="sc-val">${R(d.orders.total)}</div><div class="sc-sub">${d.orders.count} orders</div><div class="sc-icon">🛒</div></div>`;
     document.getElementById('commRate').textContent=s.data.commissionPercent+'%';
     document.getElementById('revBookings').innerHTML=`
       <div class="rev-row"><span class="rev-label">Total Booking Value</span><span class="rev-val">${R(d.bookings.total)}</span></div>
-      <div class="rev-row"><span class="rev-label">Commission Earned</span><span class="rev-val" style="color:var(--green2)">${R(d.bookings.commission)}</span></div>
+      <div class="rev-row"><span class="rev-label">Commission Earned</span><span class="rev-val" style="color:var(--green2)">R${(d.bookings.commission||0).toFixed(2)}</span></div>
       <div class="rev-row"><span class="rev-label">Total Bookings</span><span class="rev-val">${d.bookings.count}</span></div>`;
     document.getElementById('revOrders').innerHTML=`
       <div class="rev-row"><span class="rev-label">Total Order Value</span><span class="rev-val">${R(d.orders.total)}</span></div>
-      <div class="rev-row"><span class="rev-label">Commission Earned</span><span class="rev-val" style="color:var(--green2)">${R(d.orders.commission)}</span></div>
+      <div class="rev-row"><span class="rev-label">Commission Earned</span><span class="rev-val" style="color:var(--green2)">R${(d.orders.commission||0).toFixed(2)}</span></div>
       <div class="rev-row"><span class="rev-label">Total Orders</span><span class="rev-val">${d.orders.count}</span></div>`;
   } catch(e){ toast('Failed to load revenue','error'); }
 }
