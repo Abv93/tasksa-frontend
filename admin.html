@@ -809,6 +809,48 @@ async function resetUserPassword(id,newPass){
     toast('Password reset successfully!','success');
   } catch(e){ toast(e.message,'error'); }
 }
+var SA_CITIES = {
+  'Western Cape': ['Cape Town','Bellville','Brackenfell','Claremont','Durbanville','Fish Hoek','Franschhoek','George','Hermanus','Knysna','Kuilsrivier','Malmesbury','Mossel Bay','Muizenberg','Observatory','Oudtshoorn','Paarl','Plettenberg Bay','Rondebosch','Somerset West','Stellenbosch','Strand','Swellendam','Woodstock','Worcester'],
+  'Gauteng': ['Alberton','Bedfordview','Benoni','Boksburg','Brakpan','Centurion','Edenvale','Fourways','Germiston','Johannesburg','Kempton Park','Krugersdorp','Midrand','Northcliff','Pretoria','Randburg','Roodepoort','Sandton','Soweto','Springs','Vanderbijlpark','Vereeniging'],
+  'KwaZulu-Natal': ['Ballito','Chatsworth','Durban','Margate','Newcastle','Phoenix','Pietermaritzburg','Pinetown','Port Shepstone','Richards Bay','Stanger','Tongaat','Umhlanga','Umlazi'],
+  'Eastern Cape': ['Bhisho','East London','Grahamstown','Gqeberha (Port Elizabeth)','King Williams Town','Mthatha','Queenstown','Uitenhage'],
+  'Limpopo': ['Louis Trichardt','Mokopane','Phalaborwa','Polokwane','Thohoyandou','Tzaneen'],
+  'Mpumalanga': ['Ermelo','Mbombela (Nelspruit)','Middelburg','Secunda','Standerton','Witbank (eMalahleni)'],
+  'North West': ['Brits','Hartbeespoort','Klerksdorp','Lichtenburg','Mafikeng','Potchefstroom','Rustenburg'],
+  'Free State': ['Bloemfontein','Kroonstad','Phuthaditjhaba','Sasolburg','Welkom'],
+  'Northern Cape': ['De Aar','Kimberley','Springbok','Upington']
+};
+
+function felPopulateCities(){
+  var prov = document.getElementById('felProvince').value;
+  var cityEl = document.getElementById('felCity');
+  var current = cityEl.value;
+  var cities = SA_CITIES[prov] || [];
+  cityEl.innerHTML = '<option value="">Select city...</option>' + cities.map(function(c){
+    return '<option value="'+c+'"'+(c===current?' selected':'')+'>'+c+'</option>';
+  }).join('');
+  felPopulateAreasPicker();
+}
+
+var _felSelectedAreas = [];
+function felPopulateAreasPicker(){
+  var prov = document.getElementById('felProvince').value;
+  var primaryCity = document.getElementById('felCity').value;
+  var picker = document.getElementById('felAreasPicker');
+  if(!picker) return;
+  var cities = (SA_CITIES[prov] || []).filter(function(c){ return c !== primaryCity; });
+  _felSelectedAreas = _felSelectedAreas.filter(function(a){ return cities.indexOf(a) !== -1; });
+  picker.innerHTML = cities.map(function(c){
+    var isOn = _felSelectedAreas.indexOf(c) !== -1;
+    return '<div onclick="felToggleArea(\''+c.replace(/'/g,"\\'")+'\')" style="padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid '+(isOn?'var(--blue2)':'var(--bd)')+';background:'+(isOn?'rgba(26,143,255,.12)':'var(--bg3)')+';color:'+(isOn?'var(--blue3)':'var(--t2)')+';">'+(isOn?'✓ ':'')+c+'</div>';
+  }).join('');
+}
+function felToggleArea(city){
+  var idx = _felSelectedAreas.indexOf(city);
+  if(idx === -1) _felSelectedAreas.push(city); else _felSelectedAreas.splice(idx,1);
+  felPopulateAreasPicker();
+}
+
 async function loadListings(page=1){
   const search=document.getElementById('listSearch')?.value||'';
   const type=document.getElementById('listTypeFilter')?.value||'';
@@ -866,13 +908,14 @@ function openFullEditListing(l){
   document.getElementById('felPrice').value = l.priceFrom || '';
   document.getElementById('felPriceType').value = l.priceType || 'PER_JOB';
   document.getElementById('felProvince').value = l.province || '';
+  felPopulateCities();
   document.getElementById('felCity').value = l.city || '';
-  document.getElementById('felAreas').value = (l.serviceAreas||[]).join(', ');
+  _felSelectedAreas = Array.isArray(l.serviceAreas) ? l.serviceAreas.slice() : [];
+  felPopulateAreasPicker();
   document.getElementById('fullEditListingModal').classList.add('open');
 }
 function closeFullEditListing(){ document.getElementById('fullEditListingModal').classList.remove('open'); }
 async function saveFullEditListing(){
-  var serviceAreas = document.getElementById('felAreas').value.split(',').map(s=>s.trim()).filter(Boolean);
   var payload = {
     name: document.getElementById('felName').value.trim(),
     description: document.getElementById('felDesc').value.trim(),
@@ -880,7 +923,7 @@ async function saveFullEditListing(){
     priceType: document.getElementById('felPriceType').value,
     province: document.getElementById('felProvince').value.trim(),
     city: document.getElementById('felCity').value.trim(),
-    serviceAreas: serviceAreas
+    serviceAreas: _felSelectedAreas
   };
   try{
     await api(`/admin/listings/${_editingListingId}/full-edit`,'PUT',payload);
@@ -1225,13 +1268,24 @@ tryAutoLogin();
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="field"><label>Province</label><input id="felProvince"></div>
-      <div class="field"><label>City</label><input id="felCity"></div>
+      <div class="field"><label>Province</label>
+        <select id="felProvince" onchange="felPopulateCities()" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:10px 12px;color:var(--t);font-size:13px;">
+          <option value="">Select province...</option>
+          <option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option>
+          <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
+          <option>North West</option><option>Free State</option><option>Northern Cape</option>
+        </select>
+      </div>
+      <div class="field"><label>City</label>
+        <select id="felCity" onchange="felPopulateAreasPicker()" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:10px 12px;color:var(--t);font-size:13px;">
+          <option value="">Select province first...</option>
+        </select>
+      </div>
     </div>
     <div class="field">
       <label>Also Service These Areas</label>
-      <input id="felAreas" placeholder="e.g. Kempton Park, Brakpan, Boksburg (comma separated)">
-      <div style="font-size:11px;color:var(--t3);margin-top:4px;">Type additional area names separated by commas — this is how you merge duplicate area-only listings into one.</div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:8px;">Tap areas to add or remove — this is how you merge duplicate area-only listings into one.</div>
+      <div id="felAreasPicker" style="display:flex;flex-wrap:wrap;gap:6px;min-height:20px;"></div>
     </div>
     <div class="mfooter">
       <button class="btn btn-g" onclick="closeFullEditListing()">Cancel</button>
