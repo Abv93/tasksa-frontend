@@ -2218,8 +2218,25 @@ function doLogout(){
 function updateNavForUser(){
   var nr=document.getElementById('navRight');
   if(!nr) return;
+  // CRITICAL: preserve the notification bell markup — it lives inside
+  // navRight, so replacing innerHTML here without including it would
+  // permanently destroy the bell from the DOM on every login (this was
+  // a real, confirmed bug: the bell never reappeared no matter how many
+  // times notifications loaded, because the element itself was gone).
+  var notifMarkup = '<div class="notif-wrap">'
+    +'<button class="notif-btn" id="notifBtn" onclick="toggleNotifDropdown()" title="Notifications" style="display:flex;">'
+      +'🔔<span class="notif-badge" id="notifBadge" style="display:none;">0</span>'
+    +'</button>'
+    +'<div class="notif-dropdown" id="notifDropdown">'
+      +'<div class="notif-header">'
+        +'<div style="font-size:13px;font-weight:800;">Notifications</div>'
+        +'<button onclick="markAllRead()" style="background:none;border:none;color:var(--blue3);font-size:11px;font-weight:700;cursor:pointer;">Mark all read</button>'
+      +'</div>'
+      +'<div class="notif-list" id="notifList"><div style="padding:24px;text-align:center;color:var(--t3);font-size:13px;">No notifications yet</div></div>'
+    +'</div>'
+  +'</div>';
   if(S.user){
-    nr.innerHTML='<div class="user-chip">👤 '+S.user.name.split(' ')[0]+'</div><button onclick="doLogout()" style="background:none;border:none;color:var(--t3);font-size:13px;cursor:pointer;">Sign Out</button><button class="cart-btn" onclick="toggleCart()">🛒 <span class="cart-cnt" id="cartCount">'+S.cart.length+'</span></button>';
+    nr.innerHTML=notifMarkup+'<div class="user-chip">👤 '+S.user.name.split(' ')[0]+'</div><button onclick="doLogout()" style="background:none;border:none;color:var(--t3);font-size:13px;cursor:pointer;">Sign Out</button><button class="cart-btn" onclick="toggleCart()">🛒 <span class="cart-cnt" id="cartCount">'+S.cart.length+'</span></button>';
   } else {
     nr.innerHTML='<button class="btn-signin" onclick="openModal(\'loginModal\')">Sign In</button><button class="btn-start" onclick="openModal(\'registerModal\')">Get Started</button><button class="cart-btn" onclick="toggleCart()">🛒 <span class="cart-cnt" id="cartCount">'+S.cart.length+'</span></button>';
   }
