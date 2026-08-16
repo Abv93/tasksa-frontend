@@ -1812,6 +1812,17 @@ function toggleFaq(i){
     <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;">
       <img src="/Tasksa_Paystack badge 2.png" alt="Secured by Paystack" style="height:100px;width:100px;object-fit:contain;">
     </div>
+    <div id="cartPriceBreakdown" style="display:none;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:4px;">
+        <span>Order total</span><span id="cartBpProductPrice">R0.00</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:8px;">
+        <span>Platform fee</span><span id="cartBpPlatformFee">R0.00</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;color:var(--t);padding-top:8px;border-top:1px solid var(--bd);">
+        <span>Total to pay</span><span id="cartBpTotal" style="color:var(--gold);">R0.00</span>
+      </div>
+    </div>
     <button class="btn-primary" onclick="openCheckout()">Checkout</button>
   </div>
 </div>
@@ -3289,6 +3300,25 @@ function selectPayment(method){
       breakdown.style.display = 'none';
     }
   }
+
+  // Show/hide the price breakdown box for the shop cart, same transparency
+  // as the booking modal — client sees the platform fee before checking out.
+  var cartBreakdown = document.getElementById('cartPriceBreakdown');
+  if(cartBreakdown){
+    if(method === 'CARD' && S.cart && S.cart.length){
+      cartBreakdown.style.display = 'block';
+      getCommissionRate().then(function(rate){
+        var orderTotal = S.cart.reduce(function(sum, item){ return sum + (item.price||0); }, 0);
+        var platformFee = orderTotal * rate;
+        var total = orderTotal + platformFee;
+        document.getElementById('cartBpProductPrice').textContent = 'R'+orderTotal.toFixed(2);
+        document.getElementById('cartBpPlatformFee').textContent = 'R'+platformFee.toFixed(2);
+        document.getElementById('cartBpTotal').textContent = 'R'+total.toFixed(2);
+      });
+    } else {
+      cartBreakdown.style.display = 'none';
+    }
+  }
 }
 
 async function submitBooking(){
@@ -4532,6 +4562,7 @@ function renderCart(){
   var footer=document.getElementById('cartFooter');
   var total=document.getElementById('cartTotal');
   if(!items) return;
+  if(_selectedPayment === 'CARD') selectPayment('CARD'); // keep breakdown in sync with cart changes
   if(!S.cart.length){
     items.innerHTML='<div class="cart-empty">🛒<br>Your cart is empty</div>';
     if(footer) footer.style.display='none';
