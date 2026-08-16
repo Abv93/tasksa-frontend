@@ -246,6 +246,10 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
     </div>
     <div class="field"><label>Title *</label><input id="nTitle" placeholder="e.g. New Feature Available"></div>
     <div class="field"><label>Message *</label><textarea id="nMsg" placeholder="Write your notification message..."></textarea></div>
+    <div class="field" style="display:flex;align-items:center;gap:8px;">
+      <input type="checkbox" id="nSendEmail" style="width:16px;height:16px;">
+      <label for="nSendEmail" style="margin:0;font-weight:400;text-transform:none;font-size:13px;">Also send as email (reaches everyone, not just users currently checking notifications)</label>
+    </div>
     <div class="mfooter">
       <button class="btn btn-g" onclick="closeModal('notifyModal')">Cancel</button>
       <button class="btn btn-p" id="notifySendBtn" onclick="sendNotification()">Send Notification</button>
@@ -476,6 +480,10 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
         </div>
         <div class="field"><label>Title *</label><input id="n2Title" placeholder="e.g. Platform Update"></div>
         <div class="field"><label>Message *</label><textarea id="n2Msg" placeholder="Write your message here..." style="min-height:100px;"></textarea></div>
+        <div class="field" style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="n2SendEmail" style="width:16px;height:16px;">
+          <label for="n2SendEmail" style="margin:0;font-weight:400;text-transform:none;font-size:13px;">Also send as email (reaches everyone, not just users currently checking notifications)</label>
+        </div>
         <button class="btn btn-p" id="n2Btn" onclick="sendNotification2()" style="margin-top:4px;">Send Notification</button>
       </div>
     </div>
@@ -1091,24 +1099,26 @@ function setNotifyTarget2(el,val){ notifyTarget2=val; document.querySelectorAll(
 async function sendNotification(){
   const title=document.getElementById('nTitle').value.trim();
   const msg=document.getElementById('nMsg').value.trim();
+  const sendEmailToo=document.getElementById('nSendEmail').checked;
   if(!title||!msg){toast('Title and message required','error');return;}
   const btn=document.getElementById('notifySendBtn'); btn.disabled=true; btn.textContent='Sending…';
   try {
-    const r=await api('/admin/notify','POST',{userIds:notifyTarget,title,message:msg});
-    closeModal('notifyModal'); toast(r.message,'success');
-    document.getElementById('nTitle').value=''; document.getElementById('nMsg').value='';
+    const r=await api('/admin/notify','POST',{userIds:notifyTarget,title,message:msg,sendEmailToo});
+    closeModal('notifyModal'); toast(r.message+(sendEmailToo?' (+ email)':''),'success');
+    document.getElementById('nTitle').value=''; document.getElementById('nMsg').value=''; document.getElementById('nSendEmail').checked=false;
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Send Notification';
 }
 async function sendNotification2(){
   const title=document.getElementById('n2Title').value.trim();
   const msg=document.getElementById('n2Msg').value.trim();
+  const sendEmailToo=document.getElementById('n2SendEmail').checked;
   if(!title||!msg){toast('Title and message required','error');return;}
   const btn=document.getElementById('n2Btn'); btn.disabled=true; btn.textContent='Sending…';
   try {
-    const r=await api('/admin/notify','POST',{userIds:notifyTarget2,title,message:msg});
-    toast(r.message,'success');
-    document.getElementById('n2Title').value=''; document.getElementById('n2Msg').value='';
+    const r=await api('/admin/notify','POST',{userIds:notifyTarget2,title,message:msg,sendEmailToo});
+    toast(r.message+(sendEmailToo?' (+ email)':''),'success');
+    document.getElementById('n2Title').value=''; document.getElementById('n2Msg').value=''; document.getElementById('n2SendEmail').checked=false;
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Send Notification';
 }
