@@ -345,12 +345,13 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
               <option value="HOST">Host</option>
               <option value="ADMIN">Admin</option>
             </select>
+            <button class="btn btn-g btn-sm" onclick="toggleNoListingsFilter(this)" title="Show only providers/shops/hosts who registered but never created a listing">⚠️ No Listings</button>
             <button class="btn btn-p" onclick="openAddUser()" style="padding:7px 14px;font-size:11px;">+ Add User</button>
           </div>
         </div>
         <div style="overflow-x:auto;">
           <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Location</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Listings</th><th>Location</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
             <tbody id="usersTable"></tbody>
           </table>
         </div>
@@ -744,19 +745,29 @@ function renderPagination(containerId, currentPage, total, perPage, loadFn){
   el.innerHTML = html;
 }
 
-async function loadUsers(page=1){
+async function loadUsers(page=1,noListingsFilter){
   const search=document.getElementById('userSearch')?.value||'';
   const role=document.getElementById('userRoleFilter')?.value||'';
+  if(noListingsFilter===undefined) noListingsFilter = window._userNoListingsFilter||false;
+  window._userNoListingsFilter = noListingsFilter;
   try {
     let q=`/admin/users?page=${page}&limit=15`;
     if(search) q+=`&search=${encodeURIComponent(search)}`;
     if(role) q+=`&role=${role}`;
+    if(noListingsFilter) q+=`&noListings=true`;
     const r=await api(q);
-    document.getElementById('usersCount').textContent=`${r.total} users`;
-    document.getElementById('usersTable').innerHTML=r.data.map(u=>`<tr>
+    document.getElementById('usersCount').textContent=`${r.total} users`+(noListingsFilter?' (providers with zero listings)':'');
+    document.getElementById('usersTable').innerHTML=r.data.map(u=>{
+      const listingCount = u._count ? u._count.listings : null;
+      const isBusinessRole = ['PROVIDER','SHOP_OWNER','HOST'].includes(u.role);
+      const listingBadge = isBusinessRole
+        ? (listingCount===0 ? '<span class="badge b-red" title="No listings created yet">0 listings</span>' : `<span class="badge b-gray">${listingCount} listing${listingCount!==1?'s':''}</span>`)
+        : '<span style="color:var(--t3);font-size:11px;">—</span>';
+      return `<tr>
       <td><div class="td-name">${u.name}</div><div class="td-sub">${u.phone||'—'}</div></td>
       <td style="font-size:12px">${u.email}</td>
       <td><span class="badge ${u.role==='ADMIN'?'b-red':u.role==='PROVIDER'?'b-blue':u.role==='SHOP_OWNER'?'b-purple':u.role==='HOST'?'b-amber':'b-gray'}">${u.role.replace('_',' ')}</span></td>
+      <td>${listingBadge}</td>
       <td style="font-size:12px">${u.city||'—'}, ${u.province||'—'}</td>
       <td><span class="badge ${u.isActive?'b-green':'b-red'}">${u.isActive?'Active':'Inactive'}</span></td>
       <td style="font-size:11px;color:var(--t3)">${fDate(u.createdAt)}</td>
@@ -766,9 +777,14 @@ async function loadUsers(page=1){
         <button class="act-btn ${u.isActive?'ab-red':'ab-green'}" onclick="toggleUser('${u.id}',${u.isActive})">${u.isActive?'Deactivate':'Activate'}</button>
         ${u.role!=='ADMIN'?`<button class="act-btn ab-red" onclick="hardDeleteUser('${u.id}','${u.name}')" style="opacity:.8;" title="Permanently delete user">🗑️</button>`:''}  
       </div></td>
-    </tr>`).join('') || '<tr class="empty-row"><td colspan="7">No users found</td></tr>';
+    </tr>`;}).join('') || '<tr class="empty-row"><td colspan="8">No users found</td></tr>';
     renderPagination('usersPag', page, r.total, 15, loadUsers);
   } catch(e){ toast('Failed to load users','error'); }
+}
+function toggleNoListingsFilter(btn){
+  const active = !window._userNoListingsFilter;
+  btn.className = active ? 'btn btn-p btn-sm' : 'btn btn-g btn-sm';
+  loadUsers(1, active);
 }
 function searchUsers(){ loadUsers(1); }
 function openAddUser(){
