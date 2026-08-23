@@ -1440,9 +1440,9 @@ function toggleFaq(i){
       <div class="field"><label>Stock Quantity *</label><input type="number" id="productStock" placeholder="10"></div>
     </div>
     <div class="field">
-      <label>Product Photo</label>
-      <div id="productPhotoPreview" style="display:none;margin-bottom:8px;"><img id="productPhotoImg" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;"></div>
-      <button type="button" onclick="uploadProductPhoto()" style="width:100%;background:var(--bg3);border:1px dashed var(--bd2);border-radius:10px;padding:12px;color:var(--t2);font-size:13px;font-weight:700;cursor:pointer;">📷 <span id="productPhotoLabel">Add a photo (optional)</span></button>
+      <label>Product Photos</label>
+      <div id="productPhotoPreview" style="display:none;margin-bottom:8px;"></div>
+      <button type="button" onclick="uploadProductPhoto()" style="width:100%;background:var(--bg3);border:1px dashed var(--bd2);border-radius:10px;padding:12px;color:var(--t2);font-size:13px;font-weight:700;cursor:pointer;">📷 <span id="productPhotoLabel">Add up to 3 photos (optional)</span></button>
     </div>
     <div class="mfooter">
       <button class="btn btn-g" onclick="closeModal('addProductModal')">Cancel</button>
@@ -1470,6 +1470,17 @@ function toggleFaq(i){
 </div>
 
 <!-- PROVIDER PROFILE MODAL -->
+<div class="modal-overlay" id="productDetailModal">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeModal('productDetailModal')">✕</button>
+    <div id="productDetailGallery" style="display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;"></div>
+    <h3 id="productDetailName" style="margin-bottom:4px;"></h3>
+    <div id="productDetailStore" style="font-size:12px;color:var(--t3);margin-bottom:10px;"></div>
+    <div id="productDetailPrice" style="font-size:22px;font-weight:800;color:var(--gold);margin-bottom:12px;"></div>
+    <div id="productDetailDesc" style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:16px;"></div>
+    <button class="btn-primary" id="productDetailAddBtn" style="width:100%;">Add to Cart</button>
+  </div>
+</div>
 <div class="modal-overlay" id="providerProfileModal">
   <div class="modal" style="max-width:580px;max-height:92vh;padding:0;display:flex;flex-direction:column;overflow:hidden;">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd);flex-shrink:0;">
@@ -2647,18 +2658,42 @@ function renderProductCard(p,i){
   var catIcon=(p.listing&&p.listing.category&&p.listing.category.icon)?p.listing.category.icon:'📦';
   var realPhoto=(p.images&&p.images.length)?p.images[0]:null;
   var store=(p.listing&&p.listing.name)?p.listing.name:'';
+  S._productDetailCache = S._productDetailCache || {};
+  S._productDetailCache[p.id] = p;
   var imgContent=realPhoto
-    ? '<div class="prod-img" style="background-image:url('+realPhoto+');background-size:cover;background-position:center;"></div>'
-    : '<div class="prod-img">'+catIcon+'</div>';
+    ? '<div class="prod-img" data-view-product="'+p.id+'" style="cursor:pointer;background-image:url('+realPhoto+');background-size:cover;background-position:center;"></div>'
+    : '<div class="prod-img" data-view-product="'+p.id+'" style="cursor:pointer;">'+catIcon+'</div>';
   return '<div class="product-card">'
     +imgContent
     +'<div class="prod-body">'
-      +'<div class="prod-name">'+p.name+'</div>'
+      +'<div class="prod-name" data-view-product="'+p.id+'" style="cursor:pointer;">'+p.name+'</div>'
       +'<div class="prod-store">'+store+'</div>'
       +'<div class="prod-stars">★★★★★</div>'
       +'<div class="prod-price">'+R(p.price)+'</div>'
       +'<button class="add-btn" data-pid="'+p.id+'" data-pname="'+encodeURIComponent(p.name)+'" data-pstore="'+encodeURIComponent(store)+'" data-pprice="'+p.price+'" data-pem="'+catIcon+'">Add to Cart</button>'
     +'</div></div>';
+}
+
+function openProductDetail(productId){
+  var p = (S._productDetailCache||{})[productId];
+  if(!p) return;
+  var photos = (p.images && p.images.length) ? p.images : [];
+  var catIcon = (p.listing&&p.listing.category&&p.listing.category.icon)?p.listing.category.icon:'📦';
+  var gallery = document.getElementById('productDetailGallery');
+  gallery.innerHTML = photos.length
+    ? photos.map(function(url){ return '<img src="'+url+'" style="width:140px;height:140px;object-fit:cover;border-radius:10px;flex-shrink:0;">'; }).join('')
+    : '<div style="width:140px;height:140px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:40px;flex-shrink:0;">'+catIcon+'</div>';
+  document.getElementById('productDetailName').textContent = p.name;
+  document.getElementById('productDetailStore').textContent = (p.listing&&p.listing.name) ? p.listing.name : '';
+  document.getElementById('productDetailPrice').textContent = R(p.price);
+  document.getElementById('productDetailDesc').textContent = p.description || 'No description provided.';
+  var store = (p.listing&&p.listing.name) ? p.listing.name : '';
+  var addBtn = document.getElementById('productDetailAddBtn');
+  addBtn.onclick = function(){
+    addToCart(p.id, p.name, store, p.price, catIcon);
+    closeModal('productDetailModal');
+  };
+  openModal('productDetailModal');
 }
 
 // ── PAGE LOADERS ──────────────────────────────────────────────────
@@ -3848,18 +3883,8 @@ async function openEditProductModal(product){
   document.getElementById('productDesc').value = product.description || '';
   document.getElementById('productPrice').value = product.price || '';
   document.getElementById('productStock').value = product.stock != null ? product.stock : '';
-  _productPhotoUrl = (product.images && product.images[0]) ? product.images[0] : '';
-  var preview = document.getElementById('productPhotoPreview');
-  var img = document.getElementById('productPhotoImg');
-  var label = document.getElementById('productPhotoLabel');
-  if(_productPhotoUrl){
-    if(img) img.src = _productPhotoUrl;
-    if(preview) preview.style.display = 'block';
-    if(label) label.textContent = '✓ Photo added — tap to replace';
-  } else {
-    if(preview) preview.style.display = 'none';
-    if(label) label.textContent = 'Add a photo (optional)';
-  }
+  _productPhotoUrls = (product.images && product.images.length) ? product.images.slice(0,3) : [];
+  renderProductPhotoPreviews();
   document.getElementById('addProductTitle').textContent = 'Edit Product';
   document.getElementById('addProductBtn').textContent = 'Save Changes';
   openModal('addProductModal');
@@ -3895,17 +3920,14 @@ async function openAddProductModal(){
   document.getElementById('productDesc').value = '';
   document.getElementById('productPrice').value = '';
   document.getElementById('productStock').value = '';
-  _productPhotoUrl = '';
-  var preview = document.getElementById('productPhotoPreview');
-  if(preview) preview.style.display = 'none';
-  var label = document.getElementById('productPhotoLabel');
-  if(label) label.textContent = 'Add a photo (optional)';
+  _productPhotoUrls = [];
+  renderProductPhotoPreviews();
   document.getElementById('addProductTitle').textContent = 'Add Shop Product';
   document.getElementById('addProductBtn').textContent = 'Add Product';
   openModal('addProductModal');
 }
 
-var _productPhotoUrl = '';
+var _productPhotoUrls = [];
 function uploadProductPhoto(){
   if(typeof cloudinary === 'undefined'){
     toast('Loading uploader...','info');
@@ -3918,12 +3940,14 @@ function uploadProductPhoto(){
   }
 }
 function launchProductPhotoWidget(){
+  var remaining = 3 - _productPhotoUrls.length;
+  if(remaining <= 0){ toast('Maximum 3 photos per product','error'); return; }
   var widget = cloudinary.createUploadWidget({
     cloudName: CLOUDINARY_CLOUD,
     uploadPreset: CLOUDINARY_PRESET,
     folder: 'tasksa/products',
-    multiple: false,
-    maxFiles: 1,
+    multiple: true,
+    maxFiles: remaining,
     maxFileSize: 8000000,
     clientAllowedFormats: ['jpg','jpeg','png','webp'],
     sources: ['local','camera'],
@@ -3931,17 +3955,35 @@ function launchProductPhotoWidget(){
   }, function(error, result){
     if(error){ toast('Upload failed: '+error.message,'error'); return; }
     if(result.event === 'success'){
-      _productPhotoUrl = result.info.secure_url;
-      var preview = document.getElementById('productPhotoPreview');
-      var img = document.getElementById('productPhotoImg');
-      if(img) img.src = _productPhotoUrl;
-      if(preview) preview.style.display = 'block';
-      var label = document.getElementById('productPhotoLabel');
-      if(label) label.textContent = '✓ Photo added — tap to replace';
+      _productPhotoUrls.push(result.info.secure_url);
+      renderProductPhotoPreviews();
       toast('Photo uploaded','success');
     }
   });
   widget.open();
+}
+function renderProductPhotoPreviews(){
+  var preview = document.getElementById('productPhotoPreview');
+  var label = document.getElementById('productPhotoLabel');
+  if(!preview) return;
+  if(_productPhotoUrls.length){
+    preview.style.display = 'flex';
+    preview.style.gap = '8px';
+    preview.innerHTML = _productPhotoUrls.map(function(url, i){
+      return '<div style="position:relative;width:70px;height:70px;flex-shrink:0;">'
+        +'<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">'
+        +'<span onclick="removeProductPhoto('+i+')" style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;">✕</span>'
+      +'</div>';
+    }).join('');
+    if(label) label.textContent = _productPhotoUrls.length >= 3 ? 'Maximum reached (3/3)' : 'Add another photo ('+_productPhotoUrls.length+'/3)';
+  } else {
+    preview.style.display = 'none';
+    if(label) label.textContent = 'Add up to 3 photos (optional)';
+  }
+}
+function removeProductPhoto(idx){
+  _productPhotoUrls.splice(idx, 1);
+  renderProductPhotoPreviews();
 }
 
 async function saveProduct(){
@@ -3960,7 +4002,7 @@ async function saveProduct(){
   try {
     var payload = {
       listingId, name, description: desc||undefined,
-      price, stock, images: _productPhotoUrl ? [_productPhotoUrl] : []
+      price, stock, images: _productPhotoUrls
     };
     if(isEditing){
       await api('/products/'+_editingProductId, 'PUT', payload);
@@ -4815,6 +4857,11 @@ document.addEventListener('click',function(e){
   if(e.target.classList.contains('add-btn')){
     var d=e.target.dataset;
     addToCart(d.pid,d.pname,d.pstore,d.pprice,d.pem);
+    return;
+  }
+  // View product detail (image or name clicked, not the Add to Cart button)
+  if(e.target.dataset.viewProduct){
+    openProductDetail(e.target.dataset.viewProduct);
     return;
   }
   // Cart remove
