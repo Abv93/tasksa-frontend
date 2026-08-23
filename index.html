@@ -1570,6 +1570,9 @@ function toggleFaq(i){
           </div>
         </div>
         <div style="font-size:11px;color:var(--t3);margin-top:6px;">Choose Shop if you'll be selling physical products (you'll add products to it afterwards)</div>
+        <div id="shopTypeExplainer" style="display:none;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:12px 14px;margin-top:10px;font-size:12px;color:var(--gold);line-height:1.5;">
+          <strong>📦 Important:</strong> This creates ONE shop for your business. After creating it, you'll add each individual product (its own name, price, photo) separately in your dashboard — don't create a new listing for every item you sell.
+        </div>
       </div>
       <div>
         <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">LISTING NAME *</label>
@@ -2994,7 +2997,9 @@ async function loadProviderDash(stats, main, role){
     +'</div>'
     +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-size:14px;font-weight:800;">My Listings</div></div>'
-      +'<div style="background:rgba(26,143,255,.07);border:1px solid rgba(26,143,255,.2);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:12px;color:var(--blue3);line-height:1.5;">💡 You can offer multiple services by adding more than one listing. Each listing can be a different category, price or location.</div>'
+      +(role === 'SHOP_OWNER'
+        ? '<div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:12px;color:var(--gold);line-height:1.5;">💡 This is your shop — you only need ONE listing here. Add your individual products (each with its own price and photo) in the "My Shop Products" section further down, not as separate listings.</div>'
+        : '<div style="background:rgba(26,143,255,.07);border:1px solid rgba(26,143,255,.2);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:12px;color:var(--blue3);line-height:1.5;">💡 You can offer multiple services by adding more than one listing. Each listing can be a different category, price or location.</div>')
       +'<div id="provListings"></div>'
     +'</div>'
     +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
@@ -4483,6 +4488,8 @@ function selectListingType(type){
     el.style.borderColor = isSelected ? 'var(--blue2)' : 'var(--bd)';
     el.style.background = isSelected ? 'rgba(26,143,255,.08)' : 'transparent';
   });
+  var explainer = document.getElementById('shopTypeExplainer');
+  if(explainer) explainer.style.display = (type === 'SHOP') ? 'block' : 'none';
   loadCategoriesForType(type);
 }
 
