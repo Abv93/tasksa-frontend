@@ -3150,6 +3150,7 @@ async function loadProviderDash(stats, main, role){
             +'</div>'
             +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+escapeHtml(p.name)+'</div>'
             +'<div style="font-size:11px;color:var(--t3);">R'+p.price+' · Stock: '+p.stock+'</div></div>'
+            +'<button data-prod-id="'+p.id+'" data-prod-name="'+escapeHtml(p.name)+'" data-action="edit-product" style="background:rgba(26,143,255,.1);border:none;border-radius:6px;color:var(--blue3);padding:5px 8px;font-size:11px;cursor:pointer;flex-shrink:0;">✏️</button>'
             +'<button data-prod-id="'+p.id+'" data-prod-name="'+escapeHtml(p.name)+'" data-action="delete-product" style="background:rgba(239,68,68,.1);border:none;border-radius:6px;color:#f87171;padding:5px 8px;font-size:11px;cursor:pointer;flex-shrink:0;">🗑️</button>'
           +'</div>';
         }).join('')
@@ -3835,10 +3836,41 @@ async function deleteShopProduct(id, name){
   } catch(e){ toast(e.message||'Failed to remove product','error'); }
 }
 
-async function openAddProductModal(){
-  if(!S.user) return;
+var _editingProductId = '';
+async function openEditProductModal(product){
+  _editingProductId = product.id;
   var sel = document.getElementById('productListingId');
   if(sel){
+    sel.innerHTML = '<option value="'+product.listingId+'">Current shop</option>';
+    sel.disabled = true; // editing an existing product keeps it on its current shop
+  }
+  document.getElementById('productName').value = product.name || '';
+  document.getElementById('productDesc').value = product.description || '';
+  document.getElementById('productPrice').value = product.price || '';
+  document.getElementById('productStock').value = product.stock != null ? product.stock : '';
+  _productPhotoUrl = (product.images && product.images[0]) ? product.images[0] : '';
+  var preview = document.getElementById('productPhotoPreview');
+  var img = document.getElementById('productPhotoImg');
+  var label = document.getElementById('productPhotoLabel');
+  if(_productPhotoUrl){
+    if(img) img.src = _productPhotoUrl;
+    if(preview) preview.style.display = 'block';
+    if(label) label.textContent = '✓ Photo added — tap to replace';
+  } else {
+    if(preview) preview.style.display = 'none';
+    if(label) label.textContent = 'Add a photo (optional)';
+  }
+  document.getElementById('addProductTitle').textContent = 'Edit Product';
+  document.getElementById('addProductBtn').textContent = 'Save Changes';
+  openModal('addProductModal');
+}
+
+async function openAddProductModal(){
+  if(!S.user) return;
+  _editingProductId = ''; // fresh add, not editing
+  var sel = document.getElementById('productListingId');
+  if(sel){
+    sel.disabled = false;
     sel.innerHTML = '<option value="">Loading...</option>';
     try {
       var r = await api('/listings/mine');
@@ -3868,6 +3900,8 @@ async function openAddProductModal(){
   if(preview) preview.style.display = 'none';
   var label = document.getElementById('productPhotoLabel');
   if(label) label.textContent = 'Add a photo (optional)';
+  document.getElementById('addProductTitle').textContent = 'Add Shop Product';
+  document.getElementById('addProductBtn').textContent = 'Add Product';
   openModal('addProductModal');
 }
 
@@ -3920,18 +3954,26 @@ async function saveProduct(){
   if(!name){ toast('Product name is required','error'); return; }
   if(!price || price <= 0){ toast('Please enter a valid price','error'); return; }
   if(isNaN(stock) || stock < 0){ toast('Please enter a valid stock quantity','error'); return; }
+  var isEditing = !!_editingProductId;
   var btn = document.getElementById('addProductBtn');
-  btn.disabled = true; btn.textContent = 'Adding...';
+  btn.disabled = true; btn.textContent = isEditing ? 'Saving...' : 'Adding...';
   try {
-    await api('/products','POST',{
+    var payload = {
       listingId, name, description: desc||undefined,
       price, stock, images: _productPhotoUrl ? [_productPhotoUrl] : []
-    });
+    };
+    if(isEditing){
+      await api('/products/'+_editingProductId, 'PUT', payload);
+      toast('Product updated!','success');
+    } else {
+      await api('/products','POST',payload);
+      toast('Product added successfully!','success');
+    }
     closeModal('addProductModal');
-    toast('Product added successfully!','success');
+    _editingProductId = '';
     loadDash(); // Refresh dashboard
-  } catch(e){ toast(e.message||'Failed to add product','error'); }
-  btn.disabled = false; btn.textContent = 'Add Product';
+  } catch(e){ toast(e.message||'Failed to save product','error'); }
+  btn.disabled = false; btn.textContent = isEditing ? 'Save Changes' : 'Add Product';
 }
 
 var _showingArchived = false;
@@ -4733,6 +4775,7 @@ document.addEventListener('click', function(e){
   if(btn.dataset.prodId){
     var product = (S._myProductsCache||[]).find(function(p){ return p.id === btn.dataset.prodId; });
     if(product && action === 'delete-product') deleteShopProduct(product.id, product.name);
+    else if(product && action === 'edit-product') openEditProductModal(product);
     return;
   }
 
