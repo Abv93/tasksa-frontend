@@ -1439,6 +1439,11 @@ function toggleFaq(i){
       <div class="field"><label>Price (R) *</label><input type="number" id="productPrice" placeholder="299"></div>
       <div class="field"><label>Stock Quantity *</label><input type="number" id="productStock" placeholder="10"></div>
     </div>
+    <div class="field">
+      <label>Product Photo</label>
+      <div id="productPhotoPreview" style="display:none;margin-bottom:8px;"><img id="productPhotoImg" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;"></div>
+      <button type="button" onclick="uploadProductPhoto()" style="width:100%;background:var(--bg3);border:1px dashed var(--bd2);border-radius:10px;padding:12px;color:var(--t2);font-size:13px;font-weight:700;cursor:pointer;">📷 <span id="productPhotoLabel">Add a photo (optional)</span></button>
+    </div>
     <div class="mfooter">
       <button class="btn btn-g" onclick="closeModal('addProductModal')">Cancel</button>
       <button class="btn btn-p" id="addProductBtn" onclick="saveProduct()">Add Product</button>
@@ -1571,7 +1576,7 @@ function toggleFaq(i){
         </div>
         <div style="font-size:11px;color:var(--t3);margin-top:6px;">Choose Shop if you'll be selling physical products (you'll add products to it afterwards)</div>
         <div id="shopTypeExplainer" style="display:none;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:12px 14px;margin-top:10px;font-size:12px;color:var(--gold);line-height:1.5;">
-          <strong>📦 Important:</strong> This creates ONE shop for your business. After creating it, you'll add each individual product (its own name, price, photo) separately in your dashboard — don't create a new listing for every item you sell.
+          <strong>📦 Important:</strong> This creates ONE shop for your business. After creating it, go to <strong>My Shop Products</strong> in your dashboard and use <strong>Add Product</strong> to add each item (its own name, price, photo) separately — don't create a new listing for every item you sell.
         </div>
       </div>
       <div>
@@ -3858,7 +3863,51 @@ async function openAddProductModal(){
   document.getElementById('productDesc').value = '';
   document.getElementById('productPrice').value = '';
   document.getElementById('productStock').value = '';
+  _productPhotoUrl = '';
+  var preview = document.getElementById('productPhotoPreview');
+  if(preview) preview.style.display = 'none';
+  var label = document.getElementById('productPhotoLabel');
+  if(label) label.textContent = 'Add a photo (optional)';
   openModal('addProductModal');
+}
+
+var _productPhotoUrl = '';
+function uploadProductPhoto(){
+  if(typeof cloudinary === 'undefined'){
+    toast('Loading uploader...','info');
+    var s = document.createElement('script');
+    s.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
+    s.onload = function(){ launchProductPhotoWidget(); };
+    document.head.appendChild(s);
+  } else {
+    launchProductPhotoWidget();
+  }
+}
+function launchProductPhotoWidget(){
+  var widget = cloudinary.createUploadWidget({
+    cloudName: CLOUDINARY_CLOUD,
+    uploadPreset: CLOUDINARY_PRESET,
+    folder: 'tasksa/products',
+    multiple: false,
+    maxFiles: 1,
+    maxFileSize: 8000000,
+    clientAllowedFormats: ['jpg','jpeg','png','webp'],
+    sources: ['local','camera'],
+    styles:{ palette:{ window:'#020b1a', windowBorder:'#1a8fff', tabIcon:'#1a8fff', menuIcons:'#93b8d8', textDark:'#020b1a', textLight:'#ffffff', link:'#1a8fff', action:'#0a6edb', inactiveTabIcon:'#4a7aa0', error:'#ef4444', inProgress:'#1a8fff', complete:'#22c55e', sourceBg:'#041020' } }
+  }, function(error, result){
+    if(error){ toast('Upload failed: '+error.message,'error'); return; }
+    if(result.event === 'success'){
+      _productPhotoUrl = result.info.secure_url;
+      var preview = document.getElementById('productPhotoPreview');
+      var img = document.getElementById('productPhotoImg');
+      if(img) img.src = _productPhotoUrl;
+      if(preview) preview.style.display = 'block';
+      var label = document.getElementById('productPhotoLabel');
+      if(label) label.textContent = '✓ Photo added — tap to replace';
+      toast('Photo uploaded','success');
+    }
+  });
+  widget.open();
 }
 
 async function saveProduct(){
@@ -3876,7 +3925,7 @@ async function saveProduct(){
   try {
     await api('/products','POST',{
       listingId, name, description: desc||undefined,
-      price, stock
+      price, stock, images: _productPhotoUrl ? [_productPhotoUrl] : []
     });
     closeModal('addProductModal');
     toast('Product added successfully!','success');
