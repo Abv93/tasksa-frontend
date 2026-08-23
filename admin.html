@@ -774,6 +774,7 @@ async function loadUsers(page=1,noListingsFilter){
       <td><div class="act-btns">
         <button class="act-btn ab-blue" onclick="openEditUser('${u.id}','${u.name}','${u.email}','${u.phone||''}','${u.role}','${u.province||''}','${u.city||''}',${u.isActive})">Edit</button>
         <button class="act-btn ab-gold" onclick="openResetUserPassword('${u.id}','${u.name}')">Reset Pass</button>
+        ${(u.paystackSubaccountCode && !u.paystackVerifiedNotifiedAt) ? `<button class="act-btn ab-green" onclick="notifyBankingVerified('${u.id}','${u.name}',this)" title="Send once you've verified this subaccount on Paystack">✅ Notify Verified</button>` : ''}
         <button class="act-btn ${u.isActive?'ab-red':'ab-green'}" onclick="toggleUser('${u.id}',${u.isActive})">${u.isActive?'Deactivate':'Activate'}</button>
         ${u.role!=='ADMIN'?`<button class="act-btn ab-red" onclick="hardDeleteUser('${u.id}','${u.name}')" style="opacity:.8;" title="Permanently delete user">🗑️</button>`:''}  
       </div></td>
@@ -821,6 +822,16 @@ async function toggleUser(id,isActive){
   try { await api(`/admin/users/${id}`,'PUT',{isActive:!isActive}); loadUsers(); toast(isActive?'User deactivated':'User activated',isActive?'error':'success'); }
   catch(e){ toast(e.message,'error'); }
 }
+async function notifyBankingVerified(id, name, btn){
+  if(!confirm(`Send "Banking Verified" notification to ${name}?\n\nOnly do this once you've actually verified their subaccount on Paystack's dashboard.`)) return;
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    const r = await api(`/admin/users/${id}/notify-banking-verified`, 'POST');
+    toast(r.message, 'success');
+    loadUsers(); // refresh so the button disappears now that they're notified
+  } catch(e){ toast(e.message, 'error'); btn.disabled = false; btn.textContent = '✅ Notify Verified'; }
+}
+
 function openResetUserPassword(id,name){
   const newPass = prompt('Enter a new password for '+name+' (min 8 characters):');
   if(!newPass) return;
