@@ -565,13 +565,29 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:48px 5% 0;}
 
 <script>
 function openRegisterAsProvider(){
-  // If user is logged in take them to dashboard, else open register modal
   if(window.S && S.user){
-    goPage('dashboard');
-    toast('Go to Dashboard → Provider Settings to list your services','info');
+    if(S.user.role === 'CLIENT'){
+      openModal('becomeProviderModal');
+    } else {
+      goPage('dashboard');
+    }
   } else {
     openModal('registerModal');
   }
+}
+
+async function confirmBecomeProvider(){
+  var btn = document.getElementById('becomeProviderBtn');
+  btn.disabled = true; btn.textContent = 'Switching...';
+  try {
+    var r = await api('/users/become-provider', 'PUT');
+    S.user.role = r.data.role; // update local session immediately, no re-login needed
+    closeModal('becomeProviderModal');
+    toast('You\'re now a Provider! Add your first listing to get started.','success');
+    updateNavForUser();
+    goPage('dashboard');
+  } catch(e){ toast(e.message||'Failed to switch account','error'); }
+  btn.disabled = false; btn.textContent = 'Yes, Switch to Provider';
 }
 </script>
 
@@ -1483,6 +1499,22 @@ function toggleFaq(i){
     <div class="mfooter">
       <button class="btn btn-g" onclick="closeModal('replyReviewModal')">Cancel</button>
       <button class="btn btn-p" id="submitReplyBtn" onclick="submitReviewReply()">Post Reply</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="becomeProviderModal">
+  <div class="modal" style="max-width:420px;">
+    <button class="modal-close" onclick="closeModal('becomeProviderModal')">✕</button>
+    <h3>Become a Provider</h3>
+    <div class="modal-sub">You're currently registered as a client. Switching to a provider account lets you list your own services and start receiving bookings — free to join.</div>
+    <div style="background:var(--bg3);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--t2);line-height:1.6;">
+      ✅ Your existing client account, bookings and history stay exactly as they are<br>
+      ✅ You'll be able to switch back to browsing as a client any time<br>
+      ✅ No cost to list — you only ever pay when a client books you
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-g" onclick="closeModal('becomeProviderModal')">Cancel</button>
+      <button class="btn btn-p" id="becomeProviderBtn" onclick="confirmBecomeProvider()">Yes, Switch to Provider</button>
     </div>
   </div>
 </div>
@@ -4182,6 +4214,7 @@ function renderVerificationUI(d){
         +'<div style="font-size:10px;color:var(--t3);margin-top:2px;">I have a CIPC number</div>'
       +'</div>'
     +'</div>'
+    +'<div style="background:rgba(26,143,255,.07);border:1px solid rgba(26,143,255,.2);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:12px;color:var(--blue3);line-height:1.5;">💡 Not officially registered with CIPC? No problem — choose <strong>Individual</strong> instead. Most providers on TaskSA verify this way, and it works just as well to get your ✓ badge.</div>'
     +'<div id="verifyFormArea"></div>';
 }
 
