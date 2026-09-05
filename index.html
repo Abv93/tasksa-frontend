@@ -3511,7 +3511,7 @@ async function submitBooking(){
 
     // Cash payment — just confirm
     closeModal('bookingModal');
-    toast('Booking sent! You will receive a confirmation email shortly.','success');
+    toast('Booking sent! The provider will be notified and will confirm with you shortly.','success');
     // Prevent re-booking — reload dashboard after short delay
     setTimeout(function(){ if(document.getElementById('page-dashboard').classList.contains('active')) loadDash(); }, 1500);
     document.getElementById('bookDate').value='';
