@@ -2230,6 +2230,20 @@ async function submitForgotPassword(){
   btn.disabled = false; btn.textContent = 'Send Reset Link';
 }
 
+// If the person was in the middle of filling out a booking as a guest,
+// hit "Confirm Booking", and got sent here to log in — this reopens the
+// booking modal with everything they already typed still intact (closeModal
+// only hides it, never clears the fields), instead of dumping them on the
+// dashboard and making them start the whole booking over from scratch.
+function goToDashboardOrResumeBooking(){
+  if(S.bookingListingId){
+    openModal('bookingModal');
+    toast('Welcome back! Just confirm your booking below.','success');
+  } else {
+    goPage('dashboard');
+  }
+}
+
 async function doLogin(){
   var email=document.getElementById('loginEmail').value.trim();
   var pass=document.getElementById('loginPass').value;
@@ -2243,7 +2257,7 @@ async function doLogin(){
     updateNavForUser();
     toast('Welcome back, '+S.user.name+'!','success');
     loadNotifications(); startNotifPolling(); subscribeToPush();
-    goPage('dashboard');
+    goToDashboardOrResumeBooking();
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Sign In';
 }
@@ -2268,7 +2282,7 @@ async function doRegister(){
     updateNavForUser();
     toast('Welcome to TaskSA, '+S.user.name+'!','success');
     loadNotifications(); startNotifPolling(); subscribeToPush();
-    goPage('dashboard');
+    goToDashboardOrResumeBooking();
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false; btn.textContent='Create Account';
 }
