@@ -1618,7 +1618,7 @@ function toggleFaq(i){
       </div>
       <div>
         <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">PROVINCE *</label>
-        <select id="editListingProvince" onchange="populateCities('editListingProvince','editListingCity');populateServiceAreasPicker('edit','editListingProvince','editListingCity','editListingAreasPicker','editListingAreasDropdown')" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+        <select id="editListingProvince" onchange="populateCities('editListingProvince','editListingCity');populateAreaDropdown('editListingProvince','editListingLocation');populateServiceAreasPicker('edit','editListingProvince','editListingCity','editListingAreasPicker','editListingAreasDropdown')" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
           <option value="">Select province...</option>
           <option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option>
           <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
@@ -1632,7 +1632,7 @@ function toggleFaq(i){
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">AREA / SUBURB</label>
-          <input id="editListingLocation" type="text" placeholder="e.g. Sea Point, Sandton" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+          <select id="editListingLocation" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;"><option value="">Same as city above</option></select>
         </div>
       </div>
       <div>
@@ -1699,7 +1699,7 @@ function toggleFaq(i){
       </div>
       <div>
         <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">PROVINCE *</label>
-        <select id="newListingProvince" onchange="populateCities('newListingProvince','newListingCity');populateServiceAreasPicker('new','newListingProvince','newListingCity','newListingAreasPicker','newListingAreasDropdown')" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+        <select id="newListingProvince" onchange="populateCities('newListingProvince','newListingCity');populateAreaDropdown('newListingProvince','newListingLocation');populateServiceAreasPicker('new','newListingProvince','newListingCity','newListingAreasPicker','newListingAreasDropdown')" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
           <option value="">Select province...</option>
           <option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option>
           <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
@@ -1713,7 +1713,7 @@ function toggleFaq(i){
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--t3);display:block;margin-bottom:6px;">AREA / SUBURB</label>
-          <input id="newListingLocation" type="text" placeholder="e.g. Sea Point, Sandton" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;">
+          <select id="newListingLocation" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--t);font-size:14px;outline:none;box-sizing:border-box;"><option value="">Same as city above</option></select>
         </div>
       </div>
       <div>
@@ -3940,6 +3940,21 @@ function populateCities(provinceId, cityId){
   }).join('');
 }
 
+// The primary "Area/Suburb" field uses the same city list as the CITY
+// dropdown — most providers' area is simply their city, so this defaults
+// to blank ("Same as city above") and only needs picking if their area is
+// a specific suburb within that city.
+function populateAreaDropdown(provinceId, areaId){
+  var prov = document.getElementById(provinceId);
+  var areaEl = document.getElementById(areaId);
+  if(!prov || !areaEl) return;
+  var cities = SA_CITIES[prov.value] || [];
+  var current = areaEl.value;
+  areaEl.innerHTML = '<option value="">Same as city above</option>' + cities.map(function(c){
+    return '<option value="'+c+'"'+(c===current?' selected':'')+'>'+c+'</option>';
+  }).join('');
+}
+
 // ── SERVICE AREAS: DROPDOWN + REMOVABLE TAGS ────────────────────────
 // Lets a provider tag additional cities/areas their listing also covers,
 // instead of creating duplicate near-identical listings per area.
@@ -4088,7 +4103,7 @@ async function openAddServiceItemModal(){
     sel.innerHTML = '<option value="">Loading...</option>';
     try {
       var r = await api('/listings/mine');
-      var mine = (r.data||[]).filter(function(l){ return l.type === 'SERVICE'; });
+      var mine = (r.data||[]).filter(function(l){ return l.category && l.category.type === 'SERVICE'; });
       sel.innerHTML = mine.length
         ? mine.map(function(l){ return '<option value="'+l.id+'">'+l.name+'</option>'; }).join('')
         : '<option value="">You need a service listing first</option>';
@@ -4897,13 +4912,13 @@ function openEditListing(id, name, desc, price, city, location, province, servic
   document.getElementById('editListingName').value = name;
   document.getElementById('editListingDesc').value = desc;
   document.getElementById('editListingPrice').value = price;
-  document.getElementById('editListingCity').value = city;
-  document.getElementById('editListingLocation').value = location||'';
   var provSel = document.getElementById('editListingProvince');
   if(provSel) provSel.value = province||'';
   populateCities('editListingProvince','editListingCity');
+  populateAreaDropdown('editListingProvince','editListingLocation');
   var citySel = document.getElementById('editListingCity');
   if(citySel) citySel.value = city||'';
+  document.getElementById('editListingLocation').value = location||'';
   _selectedServiceAreas['edit'] = Array.isArray(serviceAreas) ? serviceAreas.slice() : [];
   populateServiceAreasPicker('edit','editListingProvince','editListingCity','editListingAreasPicker','editListingAreasDropdown');
   openModal('editListingModal');
