@@ -1440,6 +1440,42 @@ function toggleFaq(i){
   </div>
 </div>
 
+<!-- ADD SERVICE ITEM MODAL — purely additive, mirrors Add Product -->
+<div class="modal-overlay" id="addServiceItemModal">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeModal('addServiceItemModal')">✕</button>
+    <h3 id="addServiceItemTitle">Add Service to Menu</h3>
+    <div class="modal-sub">Add one service to this listing's menu — e.g. "Cut", "Blow-dry", "Nails"</div>
+    <div class="field">
+      <label>Listing *</label>
+      <select id="serviceItemListingId" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:10px 12px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+        <option value="">Loading your listings...</option>
+      </select>
+      <div id="serviceItemListingIdFixed" style="display:none;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;color:var(--t2);font-size:13px;"></div>
+    </div>
+    <div class="field"><label>Service Name *</label><input id="serviceItemName" placeholder="e.g. Blow-dry"></div>
+    <div class="field"><label>Description</label><textarea id="serviceItemDesc" placeholder="Describe this specific service..." style="min-height:70px;resize:none;"></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>Price (R) *</label><input type="number" id="serviceItemPrice" placeholder="150"></div>
+      <div class="field"><label>Price Type</label>
+        <select id="serviceItemPriceType" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:10px 12px;color:var(--t);font-size:13px;">
+          <option value="PER_JOB">Per Job</option><option value="HOURLY">Per Hour</option>
+          <option value="DAILY">Per Day</option><option value="FIXED">Fixed Price</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Photo</label>
+      <div id="serviceItemPhotoPreview" style="display:none;margin-bottom:8px;"></div>
+      <button type="button" onclick="uploadServiceItemPhoto()" style="width:100%;background:var(--bg3);border:1px dashed var(--bd2);border-radius:10px;padding:12px;color:var(--t2);font-size:13px;font-weight:700;cursor:pointer;">📷 <span id="serviceItemPhotoLabel">Add a photo (optional)</span></button>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-g" onclick="closeModal('addServiceItemModal')">Cancel</button>
+      <button class="btn btn-p" id="addServiceItemBtn" onclick="saveServiceItem()">Add Service</button>
+    </div>
+  </div>
+</div>
+
 <!-- ADD PRODUCT MODAL -->
 <div class="modal-overlay" id="addProductModal">
   <div class="modal" style="max-width:480px;">
@@ -2430,6 +2466,9 @@ async function openProviderProfile(lid){
   try {
     var r = await publicApi('/listings/'+lid);
     var l = r.data;
+    var svcItemsR = await publicApi('/service-items?listingId='+lid).catch(function(){ return {data:[]}; });
+    var svcMenuItems = svcItemsR.data || [];
+    S._currentProfileServiceItems = svcMenuItems; // cache for booking flow
     var catName = (l.category&&l.category.name)||'Service';
     var city = l.city||''; var prov = l.province||'';
     var loc = [city,prov].filter(Boolean).join(', ');
@@ -2530,6 +2569,17 @@ async function openProviderProfile(lid){
       +'</div>'
       // About
       +(l.description?'<div style="padding:20px 20px 12px;"><div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--t);">About</div><div style="font-size:13px;color:var(--t2);line-height:1.7;">'+l.description+'</div></div>':'')
+      // Service menu — purely additive, only shows if this listing has one
+      +(svcMenuItems.length ? '<div style="padding:20px 20px 4px;"><div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--t);">Services &amp; Pricing</div>'
+        +svcMenuItems.map(function(it){
+          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd);">'
+            +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+escapeHtml(it.name)+'</div>'
+            +(it.description?'<div style="font-size:11px;color:var(--t3);margin-top:2px;">'+escapeHtml(it.description)+'</div>':'')+'</div>'
+            +'<div style="font-size:13px;font-weight:800;color:var(--blue3);white-space:nowrap;">R'+it.price+'</div>'
+            +'<button data-action="book-service-item" data-svc-item-id="'+it.id+'" style="background:var(--surf);border:1px solid var(--bd2);border-radius:50px;padding:7px 14px;font-size:11px;font-weight:700;color:var(--t);cursor:pointer;white-space:nowrap;">Book</button>'
+          +'</div>';
+        }).join('')
+      +'</div>' : '')
       // Photos
       + galleryHtml
       // Reviews
@@ -3147,6 +3197,14 @@ async function loadProviderDash(stats, main, role){
     +'</div>'
     +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
+        +'<div style="font-size:14px;font-weight:800;">📋 My Service Menu</div>'
+        +'<button onclick="openAddServiceItemModal()" style="background:rgba(34,197,94,.12);border:none;border-radius:8px;color:var(--green2);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">+ Add Service</button>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--t3);margin-bottom:12px;">Optional — if you offer several distinct services (e.g. Cut, Blow-dry, Nails), list them here as one menu on your listing instead of creating a separate listing for each.</div>'
+      +'<div id="provServiceItems"><div style="font-size:13px;color:var(--t3);padding:12px 0;">Loading...</div></div>'
+    +'</div>'
+    +'<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
         +'<div style="font-size:14px;font-weight:800;">🛒 My Shop Products</div>'
         +'<button onclick="openAddProductModal()" style="background:rgba(34,197,94,.12);border:none;border-radius:8px;color:var(--green2);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">+ Add Product</button>'
       +'</div>'
@@ -3287,6 +3345,30 @@ async function loadProviderDash(stats, main, role){
       }
     }
   } catch(e){ console.error('provider shop:', e.message); }
+  // Load service menu items if provider has any (purely additive feature)
+  try {
+    var svi = document.getElementById('provServiceItems');
+    if(svi){
+      var sir = await api('/service-items/mine').catch(()=>({data:[]}));
+      var svcItems = sir.data || [];
+      S._myServiceItemsCache = svcItems;
+      if(svcItems.length){
+        svi.innerHTML = svcItems.map(function(it){
+          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);">'
+            +'<div style="width:36px;height:36px;border-radius:8px;background:var(--bg3);overflow:hidden;flex-shrink:0;">'
+              +(it.images&&it.images[0]?'<img src="'+it.images[0]+'" style="width:100%;height:100%;object-fit:cover;">':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;">📋</div>')
+            +'</div>'
+            +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+escapeHtml(it.name)+'</div>'
+            +'<div style="font-size:11px;color:var(--t3);">R'+it.price+((it.listing&&it.listing.name)?' · '+escapeHtml(it.listing.name):'')+'</div></div>'
+            +'<button data-svc-id="'+it.id+'" data-action="edit-service-item" style="background:rgba(26,143,255,.1);border:none;border-radius:6px;color:var(--blue3);padding:5px 8px;font-size:11px;cursor:pointer;flex-shrink:0;">✏️</button>'
+            +'<button data-svc-id="'+it.id+'" data-action="delete-service-item" style="background:rgba(239,68,68,.1);border:none;border-radius:6px;color:#f87171;padding:5px 8px;font-size:11px;cursor:pointer;flex-shrink:0;">🗑️</button>'
+          +'</div>';
+        }).join('');
+      } else {
+        svi.innerHTML = '<div style="font-size:13px;color:var(--t3);padding:12px 0;">No services added to a menu yet — this is optional.</div>';
+      }
+    }
+  } catch(e){ console.error('provider service items:', e.message); }
   loadProviderEarnings();
   loadProviderShopOrders();
   loadVerificationStatus();
@@ -3399,10 +3481,11 @@ async function loadShopDash(stats, main){
 }
 
 
-async function openBookModal(listingId, listingName, providerId, priceFrom){
+async function openBookModal(listingId, listingName, providerId, priceFrom, serviceItemId){
   S.bookingListingId = listingId;
   S.bookingProviderId = providerId || null;
   S.bookingPrice = priceFrom || null;
+  S.bookingServiceItemId = serviceItemId || null; // purely additive — undefined for every existing call site
   var name = listingName || 'Service';
   S.bookingTitle = name;
   var t=document.getElementById('bookTitle');
@@ -3490,6 +3573,7 @@ async function submitBooking(){
     var fullNotes='Address: '+addr+(notes?' | Notes: '+notes:'');
     var booking = await api('/bookings','POST',{
       listingId:     S.bookingListingId,
+      serviceItemId: S.bookingServiceItemId || undefined,
       scheduledAt:   scheduledAt,
       paymentMethod: _selectedPayment,
       notes:         fullNotes,
@@ -3515,7 +3599,7 @@ async function submitBooking(){
         closeModal('bookingModal');
         toast('Booking saved! However: '+(payErr.message||'card payment could not be started')+'. Your booking is in "My Bookings" — you can arrange cash payment with the provider, or try card again once resolved.','error');
         setTimeout(function(){ if(document.getElementById('page-dashboard').classList.contains('active')) loadDash(); }, 1500);
-        S.bookingListingId=null;
+        S.bookingListingId=null;S.bookingServiceItemId=null;
         _selectedPayment='CASH';
         btn.disabled=false;
         btn.textContent='Confirm Booking';
@@ -3531,7 +3615,7 @@ async function submitBooking(){
     document.getElementById('bookDate').value='';
     document.getElementById('bookAddr').value='';
     document.getElementById('bookNotes').value='';
-    S.bookingListingId=null;
+    S.bookingListingId=null;S.bookingServiceItemId=null;
     _selectedPayment='CASH';
     if(document.getElementById('page-dashboard').classList.contains('active')) loadDash();
   } catch(e){ toast(e.message,'error'); }
@@ -3986,6 +4070,144 @@ async function openEditProductModal(product){
   document.getElementById('addProductTitle').textContent = 'Edit Product';
   document.getElementById('addProductBtn').textContent = 'Save Changes';
   openModal('addProductModal');
+}
+
+// ── SERVICE ITEMS — purely additive, mirrors Products exactly ──────
+var _editingServiceItemId = '';
+var _serviceItemPhotoUrl = '';
+
+async function openAddServiceItemModal(){
+  if(!S.user) return;
+  _editingServiceItemId = '';
+  var sel = document.getElementById('serviceItemListingId');
+  var fixed = document.getElementById('serviceItemListingIdFixed');
+  if(fixed) fixed.style.display = 'none';
+  if(sel){
+    sel.style.display = 'block';
+    sel.disabled = false;
+    sel.innerHTML = '<option value="">Loading...</option>';
+    try {
+      var r = await api('/listings/mine');
+      var mine = (r.data||[]).filter(function(l){ return l.type === 'SERVICE'; });
+      sel.innerHTML = mine.length
+        ? mine.map(function(l){ return '<option value="'+l.id+'">'+l.name+'</option>'; }).join('')
+        : '<option value="">You need a service listing first</option>';
+    } catch(e){ sel.innerHTML = '<option value="">Could not load listings</option>'; }
+  }
+  document.getElementById('serviceItemName').value = '';
+  document.getElementById('serviceItemDesc').value = '';
+  document.getElementById('serviceItemPrice').value = '';
+  document.getElementById('serviceItemPriceType').value = 'PER_JOB';
+  _serviceItemPhotoUrl = '';
+  var preview = document.getElementById('serviceItemPhotoPreview');
+  if(preview){ preview.style.display = 'none'; preview.innerHTML = ''; }
+  var label = document.getElementById('serviceItemPhotoLabel');
+  if(label) label.textContent = 'Add a photo (optional)';
+  document.getElementById('addServiceItemTitle').textContent = 'Add Service to Menu';
+  document.getElementById('addServiceItemBtn').textContent = 'Add Service';
+  openModal('addServiceItemModal');
+}
+
+function openEditServiceItemModal(item){
+  _editingServiceItemId = item.id;
+  var sel = document.getElementById('serviceItemListingId');
+  var fixed = document.getElementById('serviceItemListingIdFixed');
+  if(sel) sel.style.display = 'none';
+  if(fixed){
+    fixed.style.display = 'block';
+    fixed.textContent = (item.listing && item.listing.name) ? item.listing.name : 'Your listing';
+  }
+  document.getElementById('serviceItemName').value = item.name || '';
+  document.getElementById('serviceItemDesc').value = item.description || '';
+  document.getElementById('serviceItemPrice').value = item.price || '';
+  document.getElementById('serviceItemPriceType').value = item.priceType || 'PER_JOB';
+  _serviceItemPhotoUrl = (item.images && item.images[0]) ? item.images[0] : '';
+  var preview = document.getElementById('serviceItemPhotoPreview');
+  var label = document.getElementById('serviceItemPhotoLabel');
+  if(_serviceItemPhotoUrl){
+    preview.style.display = 'block';
+    preview.innerHTML = '<img src="'+_serviceItemPhotoUrl+'" style="width:70px;height:70px;object-fit:cover;border-radius:8px;">';
+    if(label) label.textContent = '✓ Photo added — tap to replace';
+  } else if(preview){
+    preview.style.display = 'none';
+    if(label) label.textContent = 'Add a photo (optional)';
+  }
+  document.getElementById('addServiceItemTitle').textContent = 'Edit Service';
+  document.getElementById('addServiceItemBtn').textContent = 'Save Changes';
+  openModal('addServiceItemModal');
+}
+
+function uploadServiceItemPhoto(){
+  if(typeof cloudinary === 'undefined'){
+    var s = document.createElement('script');
+    s.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
+    s.onload = function(){ launchServiceItemPhotoWidget(); };
+    document.head.appendChild(s);
+  } else {
+    launchServiceItemPhotoWidget();
+  }
+}
+function launchServiceItemPhotoWidget(){
+  var widget = cloudinary.createUploadWidget({
+    cloudName: CLOUDINARY_CLOUD,
+    uploadPreset: CLOUDINARY_PRESET,
+    folder: 'tasksa/service-items',
+    multiple: false,
+    maxFiles: 1,
+    maxFileSize: 8000000,
+    clientAllowedFormats: ['jpg','jpeg','png','webp'],
+    sources: ['local','camera'],
+    styles:{ palette:{ window:'#020b1a', windowBorder:'#1a8fff', tabIcon:'#1a8fff', menuIcons:'#93b8d8', textDark:'#020b1a', textLight:'#ffffff', link:'#1a8fff', action:'#0a6edb', inactiveTabIcon:'#4a7aa0', error:'#ef4444', inProgress:'#1a8fff', complete:'#22c55e', sourceBg:'#041020' } }
+  }, function(error, result){
+    if(error){ toast('Upload failed: '+error.message,'error'); return; }
+    if(result.event === 'success'){
+      _serviceItemPhotoUrl = result.info.secure_url;
+      var preview = document.getElementById('serviceItemPhotoPreview');
+      preview.style.display = 'block';
+      preview.innerHTML = '<img src="'+_serviceItemPhotoUrl+'" style="width:70px;height:70px;object-fit:cover;border-radius:8px;">';
+      var label = document.getElementById('serviceItemPhotoLabel');
+      if(label) label.textContent = '✓ Photo added — tap to replace';
+      toast('Photo uploaded','success');
+    }
+  });
+  widget.open();
+}
+
+async function saveServiceItem(){
+  var listingId = document.getElementById('serviceItemListingId').value;
+  var name = document.getElementById('serviceItemName').value.trim();
+  var desc = document.getElementById('serviceItemDesc').value.trim();
+  var price = parseFloat(document.getElementById('serviceItemPrice').value);
+  var priceType = document.getElementById('serviceItemPriceType').value;
+  var isEditing = !!_editingServiceItemId;
+  if(!isEditing && !listingId){ toast('Please select a listing','error'); return; }
+  if(!name){ toast('Service name is required','error'); return; }
+  if(!price || price <= 0){ toast('Please enter a valid price','error'); return; }
+  var btn = document.getElementById('addServiceItemBtn');
+  btn.disabled = true; btn.textContent = isEditing ? 'Saving...' : 'Adding...';
+  try {
+    var payload = { listingId, name, description: desc||undefined, price, priceType, images: _serviceItemPhotoUrl ? [_serviceItemPhotoUrl] : [] };
+    if(isEditing){
+      await api('/service-items/'+_editingServiceItemId, 'PUT', payload);
+      toast('Service updated!','success');
+    } else {
+      await api('/service-items','POST',payload);
+      toast('Service added to menu!','success');
+    }
+    closeModal('addServiceItemModal');
+    _editingServiceItemId = '';
+    loadDash();
+  } catch(e){ toast(e.message||'Failed to save service','error'); }
+  btn.disabled = false; btn.textContent = isEditing ? 'Save Changes' : 'Add Service';
+}
+
+async function deleteServiceItem(id, name){
+  if(!confirm('Remove "'+name+'" from your service menu?')) return;
+  try {
+    await api('/service-items/'+id, 'DELETE');
+    toast('Service removed','success');
+    loadDash();
+  } catch(e){ toast(e.message||'Failed to remove service','error'); }
 }
 
 async function openAddProductModal(){
@@ -4923,6 +5145,14 @@ document.addEventListener('click', function(e){
     return;
   }
 
+  // Service item actions (purely additive, same pattern as products)
+  if(btn.dataset.svcId){
+    var svcItem = (S._myServiceItemsCache||[]).find(function(x){ return x.id === btn.dataset.svcId; });
+    if(svcItem && action === 'delete-service-item') deleteServiceItem(svcItem.id, svcItem.name);
+    else if(svcItem && action === 'edit-service-item') openEditServiceItemModal(svcItem);
+    return;
+  }
+
   // Provider profile modal actions (review / book / message) — use cached current listing
   if(action === 'write-review' || action === 'profile-book' || action === 'profile-message'){
     var pl = S._currentProfileListing;
@@ -4936,6 +5166,17 @@ document.addEventListener('click', function(e){
       closeModal('providerProfileModal');
       messageUser((pl.owner&&pl.owner.id)||'', (pl.owner&&pl.owner.name)||pl.name);
     }
+    return;
+  }
+
+  // Book a specific service menu item (purely additive) — uses that item's
+  // own name and price, not the listing's generic ones
+  if(action === 'book-service-item'){
+    var plsvc = S._currentProfileListing;
+    var svcItem = (S._currentProfileServiceItems||[]).find(function(x){ return x.id === btn.dataset.svcItemId; });
+    if(!plsvc || !svcItem) return;
+    closeModal('providerProfileModal');
+    openBookModal(plsvc.id, svcItem.name, (plsvc.owner&&plsvc.owner.id)||'', svcItem.price, svcItem.id);
     return;
   }
 
