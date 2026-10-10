@@ -318,6 +318,63 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:48px 5% 0;}
 .back-btn:hover{border-color:var(--blue2);color:var(--t);}
 .load-more:hover{border-color:var(--blue2);color:var(--t);}
 
+/* ── PROVIDER DASHBOARD SHELL: sidebar on desktop, swipeable tab bar on phone ── */
+.pd-shell{display:flex;gap:18px;align-items:flex-start;}
+.pd-nav{width:210px;flex-shrink:0;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px 10px;position:sticky;top:80px;}
+.pd-who{padding:6px 6px 14px;border-bottom:1px solid var(--bd);margin-bottom:10px;}
+.pd-who-row{display:flex;align-items:center;gap:10px;}
+.pd-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background-size:cover;background-position:center;}
+.pd-name{font-size:14px;font-weight:700;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px;}
+.pd-role{font-size:11px;color:var(--blue3);margin-top:2px;}
+.pd-status{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:5px 12px;border-radius:50px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid;user-select:none;}
+.pd-status.on{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:#4ade80;}
+.pd-status.off{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#f87171;}
+.pd-dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+.pd-tabs{display:flex;flex-direction:column;gap:2px;}
+.pd-tab{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;color:var(--t2);font-size:13px;font-weight:600;border:none;background:none;text-align:left;width:100%;font-family:inherit;}
+.pd-tab:hover{background:var(--surf);color:var(--t);}
+.pd-tab.active{background:rgba(26,143,255,.14);color:var(--blue3);}
+.pd-tab-ic{font-size:15px;width:20px;text-align:center;}
+.pd-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 6px;border-radius:50px;color:#fff;background:#ef4444;}
+.pd-body{flex:1;min-width:0;}
+.pd-panel{display:none;}
+.pd-panel.active{display:block;}
+@media(max-width:900px){
+  .pd-shell{flex-direction:column;gap:14px;}
+  .pd-nav{width:100%;position:static;padding:12px;}
+  .pd-who{padding:0 0 12px;}
+  .pd-body{width:100%;}
+  .pd-tabs{flex-direction:row;overflow-x:auto;gap:6px;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+  .pd-tabs::-webkit-scrollbar{display:none;}
+  .pd-tab{width:auto;flex-shrink:0;white-space:nowrap;padding:9px 14px;border:1px solid var(--bd);border-radius:50px;}
+  .pd-tab.active{border-color:var(--blue2);}
+}
+.pd-switchrow{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer;}
+.pd-toggle{width:44px;height:24px;border-radius:50px;background:rgba(239,68,68,.4);position:relative;flex-shrink:0;transition:background .2s;}
+.pd-toggle i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;}
+.pd-toggle.on{background:#22c55e;}
+.pd-toggle.on i{left:23px;}
+/* ── AVAILABILITY CALENDAR (provider dashboard + client booking form) ── */
+.pdcal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.pdcal-head button{background:var(--bg3);border:1px solid var(--bd);color:var(--t);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px;font-weight:700;font-family:inherit;}
+.pdcal-head button:disabled{opacity:.3;cursor:default;}
+.pdcal-title{font-size:14px;font-weight:800;}
+.pdcal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%;}
+#pdCalBox{max-width:480px;}
+#bookCal{width:100%;overflow:hidden;}
+.pdcal-dow{text-align:center;font-size:10px;font-weight:700;color:var(--t3);padding:4px 0;}
+.pdcal-day{height:40px;min-width:0;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:var(--bg3);border:1px solid transparent;color:var(--t);user-select:none;}
+.pdcal-day:hover{border-color:var(--bd2);}
+.pdcal-blank{background:none;cursor:default;border:none;}
+.pdcal-day.past{opacity:.3;cursor:default;}
+.pdcal-day.today{border-color:var(--blue2);}
+.pdcal-day.blocked{background:rgba(239,68,68,.15);color:#f87171;text-decoration:line-through;}
+.pdcal-day.cdis{opacity:.4;cursor:not-allowed;background:var(--surf2);color:var(--t3);text-decoration:line-through;}
+.pdcal-day.picked{background:var(--blue2);color:#fff;border-color:var(--blue2);}
+.pdcal-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--t3);margin-top:10px;}
+.pdcal-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle;}
+.prov-book-btn.unavail{background:var(--surf2);color:var(--t3);}
+.prov-unavail-badge{position:absolute;top:10px;left:10px;background:rgba(239,68,68,.92);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:50px;}
 </style>
 </head>
 <body>
@@ -1855,7 +1912,7 @@ function toggleFaq(i){
     <button class="modal-close" onclick="closeModal('bookingModal')">✕</button>
     <h3 id="bookTitle">Book Service</h3>
     <div class="modal-sub" id="bookSub">Complete your booking</div>
-    <div class="field"><label>Date *</label><input type="date" id="bookDate"></div>
+    <div class="field"><label>Date *</label><input type="hidden" id="bookDate"><div id="bookCal"></div></div>
     <div class="field"><label>Time</label><input type="time" id="bookTime" value="09:00"></div>
     <div class="field"><label>Address *</label><input id="bookAddr" placeholder="Your address"></div>
     <div class="field"><label>Notes</label><textarea id="bookNotes" placeholder="Any special instructions..."></textarea></div>
@@ -2382,14 +2439,15 @@ function renderProvCard(l,i){
   var pl=priceLabels[l.priceType]||'job';
   var priceStr=l.priceFrom?'From '+R(l.priceFrom)+'/'+pl:'Get Quote';
   var stars='★★★★'+(l.rating>=4.8?'★':'☆');
+  var unavail=!!(l.owner&&S.unavailProv&&S.unavailProv[l.owner.id]);
   return '<div class="prov-card" data-lid="'+l.id+'" data-lname="'+encodeURIComponent(l.name)+'">'
-    +'<div class="prov-photo" style="background-image:url('+cardPhoto+');background-size:cover;background-position:center;">'+(l.isVerified?'<span class="prov-vbadge">✓ Verified</span>':'')+'</div>'
+    +'<div class="prov-photo" style="background-image:url('+cardPhoto+');background-size:cover;background-position:center;">'+(l.isVerified?'<span class="prov-vbadge">✓ Verified</span>':'')+(unavail?'<span class="prov-unavail-badge">Unavailable</span>':'')+'</div>'
     +'<div class="prov-body">'
       +'<div class="prov-name">'+l.name+'</div>'
       +'<div class="prov-role">'+catName+(locationLabel?' · '+locationLabel:'')+'</div>'
       +'<div class="prov-stars">'+stars+' <span style="font-size:10px;color:var(--t3)">'+(l._count&&l._count.reviews||0)+' reviews</span></div>'
       +'<div class="prov-price">'+priceStr+'</div>'
-      +'<button class="prov-book-btn" data-lid="'+l.id+'" data-lname="'+encodeURIComponent(l.name)+'" data-provid="'+(l.owner&&l.owner.id||'')+'" data-price="'+(l.priceFrom||0)+'">Book '+catName+'</button>'
+      +'<button class="prov-book-btn'+(unavail?' unavail':'')+'" data-lid="'+l.id+'" data-lname="'+encodeURIComponent(l.name)+'" data-provid="'+(l.owner&&l.owner.id||'')+'" data-price="'+(l.priceFrom||0)+'">'+(unavail?'Currently unavailable':'Book '+catName)+'</button>'
     +'</div></div>';
 }
 function parseAmenities(description){
@@ -2844,6 +2902,7 @@ async function loadHome(){
   async function tryLoad(){
     var ok = false;
     try {
+      await loadUnavailProviders();
       var r1 = await publicApi('/listings?type=SERVICE&limit=4');
       var g1 = document.getElementById('homeProvGrid');
       if(g1) g1.innerHTML = r1.data.map(function(l,i){ return renderProvCard(l,i); }).join('') || emptyState('🔧','No providers yet','');
@@ -2868,6 +2927,7 @@ async function loadServices(){
   if(!g) return;
   skel(g,8);
   try {
+    await loadUnavailProviders();
     var r=await publicApi('/listings?type=SERVICE&limit=24');
     S.allSvcs=r.data;
     var cats=await publicApi('/categories?type=SERVICE');
@@ -3164,6 +3224,7 @@ async function loadProviderDash(stats, main, role){
   try {
     var r = await api('/users/dashboard-stats');
     var d = r.data;
+    S._pdPending = d.pendingBookings || 0;
     if(stats) stats.innerHTML =
       '<div class="dash-stat"><div class="dash-stat-label">My Listings</div><div class="dash-stat-val">'+d.totalListings+'</div></div>'
       +'<div class="dash-stat"><div class="dash-stat-label">Total Bookings</div><div class="dash-stat-val">'+d.totalBookings+'</div></div>'
@@ -3237,6 +3298,8 @@ async function loadProviderDash(stats, main, role){
         +'<button id="changePassBtn2" onclick="changeUserPassword()" class="btn-primary" style="padding:11px;">Change Password</button>'
       +'</div>'
     +'</div>';
+
+  pdBuildShell(main, role);
 
   try {
     var listings = await api('/listings/mine');
@@ -3493,8 +3556,14 @@ async function openBookModal(listingId, listingName, providerId, priceFrom, serv
   if(t) t.textContent='Book '+name;
   if(s) s.textContent='Fill in the details for your booking';
   var d=document.getElementById('bookDate');
-  if(d) d.min=new Date().toISOString().split('T')[0];
+  if(d){ d.min=new Date().toISOString().split('T')[0]; d.value=''; }
+  var nowBk=new Date();
+  S.bkCal={y:nowBk.getFullYear(),m:nowBk.getMonth()};
+  S.bkAvail=null;
+  var calBox=document.getElementById('bookCal');
+  if(calBox) calBox.innerHTML='<div style="font-size:12px;color:var(--t3);padding:8px 0;">Checking availability…</div>';
   openModal('bookingModal');
+  bkLoadAvailability(providerId||null);
 }
 var _selectedPayment = 'CASH';
 var _cachedCommissionRate = null;
@@ -5348,6 +5417,309 @@ function toggleLang(){
   applyLang();
 }
 
+
+// ══════════════════════════════════════════════════════════════════
+// PROVIDER AVAILABILITY — switch + calendar (provider side) and the
+// grayed-out booking calendar (client side). Purely additive: if the
+// availability endpoints are not reachable, everything below degrades to
+// "no blocked days" and the app behaves exactly as it did before.
+// ══════════════════════════════════════════════════════════════════
+var PD_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function pad2(n){ return String(n).padStart(2,'0'); }
+function ymdLocal(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function prettyDay(ds){
+  var p=ds.split('-'); var d=new Date(parseInt(p[0],10),parseInt(p[1],10)-1,parseInt(p[2],10));
+  return d.toLocaleDateString('en-ZA',{weekday:'short',day:'numeric',month:'long'});
+}
+
+// Month grid shared by the provider calendar and the client booking form.
+// cellFn(dateStr, isPast, isToday) returns the extra CSS classes for that day.
+function calMonthHtml(year, month, scope, cellFn){
+  var now=new Date();
+  var nowIdx=now.getFullYear()*12+now.getMonth();
+  var idx=year*12+month;
+  var todayStr=ymdLocal(now);
+  var first=new Date(year,month,1);
+  var offset=(first.getDay()+6)%7; // week starts Monday
+  var days=new Date(year,month+1,0).getDate();
+  var h='<div class="pdcal-head">'
+    +'<button type="button" data-calnav="-1" data-scope="'+scope+'"'+(idx<=nowIdx?' disabled':'')+'>‹</button>'
+    +'<div class="pdcal-title">'+PD_MONTHS[month]+' '+year+'</div>'
+    +'<button type="button" data-calnav="1" data-scope="'+scope+'"'+(idx>=nowIdx+12?' disabled':'')+'>›</button>'
+    +'</div><div class="pdcal-grid">';
+  ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(function(n){ h+='<div class="pdcal-dow">'+n+'</div>'; });
+  for(var i=0;i<offset;i++) h+='<div class="pdcal-blank"></div>';
+  for(var d=1; d<=days; d++){
+    var ds=year+'-'+pad2(month+1)+'-'+pad2(d);
+    var past=ds<todayStr;
+    var cls=cellFn(ds, past, ds===todayStr)||'';
+    h+='<div class="pdcal-day'+(past?' past':'')+(ds===todayStr?' today':'')+(cls?' '+cls:'')+'" data-d="'+ds+'">'+d+'</div>';
+  }
+  return h+'</div>';
+}
+function calNavigate(scope, delta){
+  var st=scope==='pd'?S.pdCal:S.bkCal;
+  if(!st) return;
+  var now=new Date(); var nowIdx=now.getFullYear()*12+now.getMonth();
+  var idx=st.y*12+st.m+delta;
+  if(idx<nowIdx || idx>nowIdx+12) return;
+  st.y=Math.floor(idx/12); st.m=idx%12;
+  if(scope==='pd') pdRenderCalendar(); else bkRenderCalendar();
+}
+
+// ── PROVIDER SIDE ────────────────────────────────────────────────
+function pdRenderStatus(){
+  var st=S.pdAvail;
+  var pill=document.getElementById('pdStatusPill');
+  if(pill){
+    if(!st){ pill.style.display='none'; }
+    else {
+      pill.style.display='inline-flex';
+      pill.className='pd-status '+(st.isAvailable?'on':'off');
+      pill.innerHTML='<span class="pd-dot"></span><span>'+(st.isAvailable?'Available for bookings':'Not taking bookings')+'</span>';
+    }
+  }
+  var row=document.getElementById('pdSwitchRow');
+  if(row){
+    if(!st){ row.innerHTML=''; return; }
+    row.innerHTML='<div class="pd-switchrow" data-pdswitch="1">'
+      +'<div><div style="font-size:13px;font-weight:700;">'+(st.isAvailable?'You are taking new bookings':'You are NOT taking new bookings')+'</div>'
+      +'<div style="font-size:11px;color:var(--t3);margin-top:3px;">'+(st.isAvailable?'Clients can book you on any day you have not blocked below.':'Clients see you as unavailable and cannot book you until you switch this back on.')+'</div></div>'
+      +'<div class="pd-toggle'+(st.isAvailable?' on':'')+'"><i></i></div></div>';
+  }
+}
+function pdRenderCalendar(){
+  var box=document.getElementById('pdCalBox');
+  if(!box) return;
+  var st=S.pdAvail;
+  if(!st){
+    box.innerHTML='<div style="font-size:12px;color:var(--t3);padding:12px 0;">Availability could not be loaded right now. Please refresh in a moment.</div>';
+    return;
+  }
+  var blocked={}; st.dates.forEach(function(d){ blocked[d]=1; });
+  var now=new Date();
+  var cur=S.pdCal||(S.pdCal={y:now.getFullYear(),m:now.getMonth()});
+  box.innerHTML=calMonthHtml(cur.y,cur.m,'pd',function(ds){ return blocked[ds]?'blocked':''; })
+    +'<div class="pdcal-legend"><span><i style="background:var(--bg3);border:1px solid var(--bd2);"></i>Open</span>'
+    +'<span><i style="background:rgba(239,68,68,.4);"></i>Blocked</span>'
+    +'<span><i style="border:1px solid var(--blue2);"></i>Today</span></div>'
+    +'<div style="font-size:11px;color:var(--t3);margin-top:8px;">'+(st.dates.length?st.dates.length+' day'+(st.dates.length!==1?'s':'')+' blocked from today onwards.':'No days blocked — clients can book any day.')+'</div>';
+}
+async function pdLoadAvailability(){
+  try {
+    var r=await api('/listings/availability/me');
+    S.pdAvail={isAvailable:r.data.isAvailable!==false, dates:r.data.dates||[]};
+  } catch(e){ S.pdAvail=null; }
+  pdRenderStatus();
+  pdRenderCalendar();
+}
+async function pdToggleSwitch(){
+  var st=S.pdAvail; if(!st) return;
+  var want=!st.isAvailable;
+  st.isAvailable=want; pdRenderStatus();
+  try {
+    await api('/listings/availability/me','PATCH',{isAvailable:want});
+    toast(want?'You now show as available for bookings':'You now show as unavailable — clients cannot book you','success');
+  } catch(e){
+    st.isAvailable=!want; pdRenderStatus();
+    toast(e.message||'Could not update — please try again','error');
+  }
+}
+async function pdToggleDay(ds){
+  var st=S.pdAvail; if(!st) return;
+  var wasBlocked=st.dates.indexOf(ds)>=0;
+  var before=st.dates.slice();
+  st.dates=wasBlocked?st.dates.filter(function(x){return x!==ds;}):st.dates.concat([ds]).sort();
+  pdRenderCalendar();
+  try {
+    var r=await api('/listings/availability/me/dates','POST',{dates:[ds],blocked:!wasBlocked});
+    st.dates=r.data.dates||st.dates;
+  } catch(e){
+    st.dates=before;
+    toast(e.message||'Could not update that day','error');
+  }
+  pdRenderCalendar();
+}
+async function pdApplyRange(block){
+  var st=S.pdAvail; if(!st) return;
+  var f=(document.getElementById('pdRangeFrom')||{}).value;
+  var t=(document.getElementById('pdRangeTo')||{}).value;
+  if(!f||!t){ toast('Choose a From and a To date','error'); return; }
+  if(t<f){ toast('The To date must be the same as or after the From date','error'); return; }
+  var dates=[]; var c=new Date(f+'T00:00:00'); var end=new Date(t+'T00:00:00');
+  while(c<=end && dates.length<=366){ dates.push(ymdLocal(c)); c.setDate(c.getDate()+1); }
+  if(dates.length>366){ toast('That range is too long — maximum is one year','error'); return; }
+  if(block){
+    var today=ymdLocal(new Date());
+    dates=dates.filter(function(d){ return d>=today; });
+    if(!dates.length){ toast('Those dates are in the past','error'); return; }
+  }
+  try {
+    var r=await api('/listings/availability/me/dates','POST',{dates:dates,blocked:block});
+    st.dates=r.data.dates||st.dates;
+    pdRenderCalendar();
+    toast(block?'Those days are now blocked':'Those days are open again','success');
+  } catch(e){ toast(e.message||'Could not update those days','error'); }
+}
+function pdShowTab(key){
+  var shell=document.querySelector('.pd-shell'); if(!shell) return;
+  S.pdTab=key;
+  Array.prototype.forEach.call(shell.querySelectorAll('.pd-tab'),function(b){ b.classList.toggle('active', b.dataset.pdtab===key); });
+  Array.prototype.forEach.call(shell.querySelectorAll('.pd-panel'),function(p){ p.classList.toggle('active', p.dataset.ptab===key); });
+  if(key==='calendar') pdRenderCalendar();
+}
+
+// Turns the existing stack of dashboard cards into the tabbed layout. Each
+// card is moved (not rebuilt), so every element id and button keeps working
+// exactly as before — we only decide which tab each card sits in.
+function pdBuildShell(main, role){
+  var showAvail = role !== 'SHOP_OWNER';
+  var cards=Array.prototype.slice.call(main.children);
+  var idMap=[['profileStrengthCard','overview'],['provListings','listings'],['provServiceItems','listings'],['provShopProducts','listings'],['provShopOrders','listings'],['provBookings','bookings'],['provMessages','messages'],['provEarnings','earnings'],['paystackSection','earnings'],['verificationSection','account'],['profileCurrPass','account']];
+  var tabs=[
+    {k:'overview',ic:'📊',l:'Overview'},
+    {k:'bookings',ic:'📋',l:'Bookings'},
+    {k:'calendar',ic:'📅',l:'Calendar'},
+    {k:'listings',ic:'📝',l:'Listings'},
+    {k:'earnings',ic:'💰',l:'Earnings'},
+    {k:'messages',ic:'💬',l:'Messages'},
+    {k:'account',ic:'👤',l:'Account'}
+  ];
+  if(!showAvail) tabs=tabs.filter(function(t){ return t.k!=='calendar'; });
+  var active=tabs.some(function(t){ return t.k===S.pdTab; })?S.pdTab:'overview';
+
+  var panels={};
+  tabs.forEach(function(t){
+    var p=document.createElement('div');
+    p.className='pd-panel'+(t.k===active?' active':'');
+    p.dataset.ptab=t.k;
+    panels[t.k]=p;
+  });
+  cards.forEach(function(card){
+    var tab='overview';
+    idMap.some(function(pair){ if(card.querySelector('#'+pair[0])){ tab=pair[1]; return true; } return false; });
+    panels[tab].appendChild(card);
+  });
+  if(showAvail){
+    panels.calendar.innerHTML=
+      '<div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;margin-bottom:20px;">'
+        +'<div style="font-size:14px;font-weight:800;margin-bottom:4px;">📅 My Availability</div>'
+        +'<div style="font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.5;">Tap a day to mark it unavailable — fully booked, away or closed. Clients cannot book a blocked day. Tap it again to open it up.</div>'
+        +'<div id="pdSwitchRow"></div>'
+        +'<div id="pdCalBox"></div>'
+        +'<div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--bd);">'
+          +'<div style="font-size:12px;font-weight:700;margin-bottom:8px;">Block or open a whole range of days</div>'
+          +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
+            +'<input type="date" id="pdRangeFrom" min="'+ymdLocal(new Date())+'" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:8px 10px;color:var(--t);font-size:12px;font-family:inherit;">'
+            +'<span style="font-size:12px;color:var(--t3);">to</span>'
+            +'<input type="date" id="pdRangeTo" min="'+ymdLocal(new Date())+'" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:8px 10px;color:var(--t);font-size:12px;font-family:inherit;">'
+          +'</div>'
+          +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
+            +'<button type="button" data-pdrange="block" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:50px;color:#f87171;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Block these days</button>'
+            +'<button type="button" data-pdrange="open" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:50px;color:#4ade80;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Open these days</button>'
+          +'</div>'
+        +'</div>'
+      +'</div>';
+  }
+
+  var u=S.user||{};
+  var initials=(u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+  var roleLabel=role==='HOST'?'Host':role==='SHOP_OWNER'?'Shop Owner':'Service Provider';
+  var avatarStyle=u.avatar?' style="background-image:url('+u.avatar+');"':'';
+  var pending=S._pdPending||0;
+  var nav='<div class="pd-nav">'
+    +'<div class="pd-who"><div class="pd-who-row">'
+      +'<div class="pd-av"'+avatarStyle+'>'+(u.avatar?'':escapeHtml(initials))+'</div>'
+      +'<div style="min-width:0;"><div class="pd-name">'+escapeHtml(u.name||'')+'</div><div class="pd-role">'+roleLabel+'</div></div>'
+    +'</div>'
+    +(showAvail?'<div class="pd-status on" id="pdStatusPill" data-pdswitch="1" style="display:none;"></div>':'')
+    +'</div>'
+    +'<div class="pd-tabs">'
+    +tabs.map(function(t){
+      return '<button type="button" class="pd-tab'+(t.k===active?' active':'')+'" data-pdtab="'+t.k+'"><span class="pd-tab-ic">'+t.ic+'</span>'+t.l
+        +(t.k==='bookings'&&pending>0?'<span class="pd-badge">'+pending+'</span>':'')+'</button>';
+    }).join('')
+    +'</div></div>';
+
+  var body=document.createElement('div');
+  body.className='pd-body';
+  tabs.forEach(function(t){ body.appendChild(panels[t.k]); });
+  var shell=document.createElement('div');
+  shell.className='pd-shell';
+  shell.innerHTML=nav;
+  shell.appendChild(body);
+  main.innerHTML='';
+  main.appendChild(shell);
+  if(showAvail) pdLoadAvailability();
+}
+
+// ── CLIENT SIDE ──────────────────────────────────────────────────
+// Providers who have their "available" switch off — listing cards use this
+// to show "Currently unavailable". Never throws; on any failure cards just
+// render as they always did.
+async function loadUnavailProviders(){
+  try {
+    var r=await publicApi('/listings/availability/switched-off');
+    var m={}; ((r.data&&r.data.ownerIds)||[]).forEach(function(id){ m[id]=1; });
+    S.unavailProv=m;
+  } catch(e){ S.unavailProv=S.unavailProv||{}; }
+}
+async function bkLoadAvailability(pid){
+  var avail={isAvailable:true,dates:[]};
+  if(pid){
+    try {
+      var r=await publicApi('/listings/availability/provider/'+encodeURIComponent(pid));
+      avail={isAvailable:r.data.isAvailable!==false, dates:r.data.dates||[]};
+    } catch(e){ /* fail open — server still enforces on submit */ }
+  }
+  if(S.bookingProviderId!==(pid||null)) return; // user already moved on to another booking
+  S.bkAvail=avail;
+  if(!avail.isAvailable){
+    closeModal('bookingModal');
+    toast('This provider is not taking new bookings right now. Please check back soon or choose another provider.','error');
+    return;
+  }
+  bkRenderCalendar();
+}
+function bkRenderCalendar(){
+  var box=document.getElementById('bookCal');
+  if(!box) return;
+  var av=S.bkAvail||{dates:[]};
+  var blocked={}; av.dates.forEach(function(d){ blocked[d]=1; });
+  var picked=(document.getElementById('bookDate')||{}).value||'';
+  var now=new Date();
+  var cur=S.bkCal||(S.bkCal={y:now.getFullYear(),m:now.getMonth()});
+  box.innerHTML=calMonthHtml(cur.y,cur.m,'bk',function(ds,past){
+      if(!past && blocked[ds]) return 'cdis';
+      return ds===picked?'picked':'';
+    })
+    +'<div style="font-size:11px;color:var(--t3);margin-top:8px;">'
+    +(picked?'<b style="color:var(--blue3);">Selected: '+prettyDay(picked)+'</b>':'Tap a day to choose it.')
+    +(av.dates.length?' Crossed-out days are not available.':'')+'</div>';
+}
+function bkPickDay(ds){
+  var inp=document.getElementById('bookDate');
+  if(inp) inp.value=ds;
+  bkRenderCalendar();
+}
+
+document.addEventListener('click',function(e){
+  var t=e.target;
+  if(!t||!t.closest) return;
+  var tab=t.closest('[data-pdtab]');
+  if(tab){ pdShowTab(tab.dataset.pdtab); return; }
+  if(t.closest('[data-pdswitch]')){ pdToggleSwitch(); return; }
+  var nav=t.closest('[data-calnav]');
+  if(nav){ if(!nav.disabled) calNavigate(nav.dataset.scope, parseInt(nav.dataset.calnav,10)); return; }
+  var rg=t.closest('[data-pdrange]');
+  if(rg){ pdApplyRange(rg.dataset.pdrange==='block'); return; }
+  var day=t.closest('.pdcal-day[data-d]');
+  if(day){
+    if(day.classList.contains('past')||day.classList.contains('cdis')||day.classList.contains('pdcal-blank')) return;
+    if(day.closest('#pdCalBox')) pdToggleDay(day.dataset.d);
+    else if(day.closest('#bookCal')) bkPickDay(day.dataset.d);
+  }
+});
 
 async function init(){
   // Prevent browser autofill in search bar
