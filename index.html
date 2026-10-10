@@ -1927,7 +1927,7 @@ function toggleFaq(i){
         <div id="payOptCard" onclick="selectPayment('CARD')" style="border:2px solid var(--bd);border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
           <div style="font-size:20px;margin-bottom:4px;">💳</div>
           <div style="font-size:12px;font-weight:700;color:var(--t);">Card</div>
-          <div style="font-size:10px;color:var(--t3);">Secure online payment</div>
+          <div style="font-size:10px;color:var(--t3);">Pay once provider accepts</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;">
@@ -2774,15 +2774,7 @@ async function submitStayBooking(lid){
       totalAmount:   undefined
     });
     document.getElementById('stayDetailModal').classList.remove('open');
-    if(payMethod === 'CARD' && booking.data && booking.data.id){
-      var ps = await api('/paystack/initiate','POST',{bookingId: booking.data.id});
-      if(ps.data && ps.data.authorizationUrl){
-        toast('Redirecting to payment...','success');
-        window.location.href = ps.data.authorizationUrl;
-        return;
-      }
-    }
-    toast('Stay booked! The host will confirm shortly.','success');
+    toast(payMethod==='CARD' ? 'Request sent! You will not be charged yet — once the host accepts, tap "Pay now" in My Bookings.' : 'Stay booked! The host will confirm shortly.','success');
   } catch(e){ toast(e.message||'Could not complete booking','error'); }
 }
 
@@ -3343,6 +3335,8 @@ async function loadProviderDash(stats, main, role){
             var actionBtns = b.status==='PENDING'
               ? '<button data-booking-id="'+b.id+'" data-action="accept-booking" style="background:rgba(34,197,94,.15);border:none;border-radius:6px;color:var(--green2);padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">✓ Accept</button>'
                 +'<button data-booking-id="'+b.id+'" data-action="decline-booking" style="background:rgba(239,68,68,.15);border:none;border-radius:6px;color:#f87171;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✕ Decline</button>'
+              : b.status==='CONFIRMED' && b.paymentMethod==='CARD' && b.paymentStatus!=='PAID'
+              ? '<span style="font-size:11px;color:var(--amber);">⏳ Waiting for client to pay</span>'
               : b.status==='CONFIRMED'
               ? '<button data-booking-id="'+b.id+'" data-action="complete-booking" style="background:rgba(26,143,255,.15);border:none;border-radius:6px;color:var(--blue3);padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✓ Complete</button>'
               : '—';
@@ -3351,7 +3345,7 @@ async function loadProviderDash(stats, main, role){
               +'<td style="padding:10px 8px;color:var(--t3);white-space:nowrap;">'+fDate(b.scheduledAt)+'</td>'
               +'<td style="padding:10px 8px;max-width:220px;">'+renderBookingNotes(b.notes).replace('margin-top:6px;','margin-top:0;')+'</td>'
               +'<td style="padding:10px 8px;color:var(--blue3);">'+R(b.totalAmount)+'</td>'
-              +'<td style="padding:10px 8px;"><span style="font-size:10px;font-weight:700;color:'+sc+';">'+b.status+'</span></td>'
+              +'<td style="padding:10px 8px;"><span style="font-size:10px;font-weight:700;color:'+sc+';">'+b.status+'</span>'+(b.paymentMethod==='CARD'?'<br><span style="font-size:10px;color:'+(b.paymentStatus==='PAID'?'var(--green2)':'var(--t3)')+';">'+(b.paymentStatus==='PAID'?'💳 Paid':'💳 Card — unpaid')+'</span>':'<br><span style="font-size:10px;color:var(--t3);">💵 Cash</span>')+'</td>'
               +'<td style="padding:10px 8px;">'+actionBtns+'</td>'
               +'</tr>';
           }).join('')+'</tbody></table></div>';
@@ -3588,7 +3582,7 @@ function selectPayment(method){
     ? 'border:2px solid var(--gold);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:rgba(245,166,35,.08);'
     : 'border:2px solid var(--bd);border-radius:10px;padding:12px;text-align:center;cursor:pointer;';
   var btn = document.getElementById('bookBtn');
-  if(btn) btn.textContent = method==='CARD' ? 'Pay by Card →' : 'Confirm Booking';
+  if(btn) btn.textContent = method==='CARD' ? 'Send Booking Request →' : 'Confirm Booking';
 
   // Show/hide the price breakdown box for the booking modal specifically
   var breakdown = document.getElementById('cardPriceBreakdown');
@@ -3649,36 +3643,11 @@ async function submitBooking(){
       totalAmount:   S.bookingPrice ? parseFloat(S.bookingPrice) : undefined
     });
 
-    if(_selectedPayment === 'CARD' && booking.data && booking.data.id){
-      // Redirect to Paystack for card payment
-      btn.textContent = 'Redirecting to payment...';
-      try {
-        var ps = await api('/paystack/initiate','POST',{bookingId: booking.data.id});
-        if(ps.data && ps.data.authorizationUrl){
-          closeModal('bookingModal');
-          var feeNote = ps.data.platformFee ? ' (R'+ps.data.providerPrice.toFixed(2)+' + R'+ps.data.platformFee.toFixed(2)+' platform fee = R'+ps.data.totalCharge.toFixed(2)+')' : '';
-          toast('Redirecting to secure payment...'+feeNote,'success');
-          window.location.href = ps.data.authorizationUrl;
-          return;
-        }
-      } catch(payErr){
-        // CRITICAL: the booking already exists at this point even though card
-        // payment couldn't start. Don't let the user think nothing happened —
-        // that's exactly what causes accidental duplicate bookings.
-        closeModal('bookingModal');
-        toast('Booking saved! However: '+(payErr.message||'card payment could not be started')+'. Your booking is in "My Bookings" — you can arrange cash payment with the provider, or try card again once resolved.','error');
-        setTimeout(function(){ if(document.getElementById('page-dashboard').classList.contains('active')) loadDash(); }, 1500);
-        S.bookingListingId=null;S.bookingServiceItemId=null;
-        _selectedPayment='CASH';
-        btn.disabled=false;
-        btn.textContent='Confirm Booking';
-        return;
-      }
-    }
-
-    // Cash payment — just confirm
+    // Card: nothing is charged now. The client pays from My Bookings once the provider accepts.
     closeModal('bookingModal');
-    toast('Booking sent! The provider will be notified and will confirm with you shortly.','success');
+    toast(_selectedPayment==='CARD'
+      ? 'Request sent! You will not be charged yet — once the provider accepts, tap "Pay now" in My Bookings.'
+      : 'Booking sent! The provider will be notified and will confirm with you shortly.','success');
     // Prevent re-booking — reload dashboard after short delay
     setTimeout(function(){ if(document.getElementById('page-dashboard').classList.contains('active')) loadDash(); }, 1500);
     document.getElementById('bookDate').value='';
@@ -3689,7 +3658,7 @@ async function submitBooking(){
     if(document.getElementById('page-dashboard').classList.contains('active')) loadDash();
   } catch(e){ toast(e.message,'error'); }
   btn.disabled=false;
-  btn.textContent=_selectedPayment==='CARD'?'Pay by Card →':'Confirm Booking';
+  btn.textContent=_selectedPayment==='CARD'?'Send Booking Request →':'Confirm Booking';
 }
 async function messageUser(partnerId, partnerName){
   if(!S.user){ openModal('loginModal'); return; }
@@ -3980,7 +3949,7 @@ async function loadBannerCarousel(){
     }, 800);
   } else if(status === 'cancelled'){
     setTimeout(function(){
-      toast('Payment cancelled. Your booking is saved — you can pay later or choose Cash.','error');
+      toast('Payment cancelled. Your booking is still saved — tap Pay now in My Bookings to try again.','error');
       goPage('dashboard');
     }, 800);
   }
@@ -4449,6 +4418,16 @@ function renderClientBookingsList(){
   cb.innerHTML = list.map(function(b){
     var statusColor = b.status==='CONFIRMED'?'var(--green2)':b.status==='COMPLETED'?'var(--blue3)':b.status==='CANCELLED'?'#f87171':'var(--amber)';
     var statusLabel = b.status==='CONFIRMED'?'✓ Confirmed':b.status==='COMPLETED'?'✓ Completed':b.status==='CANCELLED'?'✕ Cancelled':'⏳ Pending';
+    var payLine = '';
+    if(b.paymentMethod==='CARD' && b.paymentStatus==='PAID'){
+      payLine = '<div style="font-size:11px;font-weight:700;color:var(--green2);margin-top:6px;">💳 Paid by card</div>';
+    } else if(b.paymentMethod==='CARD' && b.status==='PENDING'){
+      payLine = '<div style="font-size:11px;color:var(--amber);margin-top:6px;">⏳ Waiting for the provider to accept — you pay only after they do</div>';
+    } else if(b.paymentMethod==='CARD' && b.status==='CONFIRMED'){
+      payLine = '<div style="margin-top:8px;"><button onclick="payForBooking(\''+b.id+'\',this)" style="background:var(--gold);color:#000;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;">💳 Pay now</button> <span style="font-size:11px;color:var(--t3);">Provider accepted — pay to secure your booking</span></div>';
+    }
+    var cancelBtn = (!_showingArchived && b.paymentStatus!=='PAID' && (b.status==='PENDING'||b.status==='CONFIRMED'))
+      ? '<button onclick="cancelMyBooking(\''+b.id+'\')" style="background:none;border:none;color:#f87171;font-size:11px;cursor:pointer;padding:2px 8px 2px 0;">Cancel booking</button>' : '';
     var actionBtn;
     if(_showingArchived){
       actionBtn = '<button onclick="unhideBooking(\''+b.id+'\')" style="background:none;border:none;color:var(--blue3);font-size:11px;cursor:pointer;padding:2px 0;">↩️ Restore</button>';
@@ -4464,12 +4443,39 @@ function renderClientBookingsList(){
       +'</div>'
       +'<div style="font-size:12px;color:var(--t3);margin-top:4px;">📅 '+fDate(b.scheduledAt)+'</div>'
       +renderBookingNotes(b.notes)
+      +payLine
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">'
         +'<div style="font-size:12px;color:var(--blue3);">'+R(b.totalAmount)+'</div>'
-        +actionBtn
+        +'<div>'+cancelBtn+actionBtn+'</div>'
       +'</div>'
       +'</div>';
   }).join('');
+}
+
+async function payForBooking(id, btn){
+  if(btn){ btn.disabled=true; btn.textContent='Opening payment...'; }
+  try {
+    var ps = await api('/paystack/initiate','POST',{bookingId:id});
+    if(ps.data && ps.data.authorizationUrl){
+      var feeNote = ps.data.platformFee ? ' (R'+ps.data.providerPrice.toFixed(2)+' + R'+ps.data.platformFee.toFixed(2)+' platform fee = R'+ps.data.totalCharge.toFixed(2)+')' : '';
+      toast('Redirecting to secure payment...'+feeNote,'success');
+      window.location.href = ps.data.authorizationUrl;
+      return;
+    }
+    throw new Error('Could not start payment');
+  } catch(e){
+    toast(e.message||'Could not start payment','error');
+    if(btn){ btn.disabled=false; btn.textContent='💳 Pay now'; }
+  }
+}
+
+async function cancelMyBooking(id){
+  if(!confirm('Cancel this booking?')) return;
+  try {
+    await api('/bookings/'+id+'/status','PATCH',{status:'CANCELLED'});
+    toast('Booking cancelled','success');
+    loadDash();
+  } catch(e){ toast(e.message||'Could not cancel booking','error'); }
 }
 
 function unhideBooking(id){
