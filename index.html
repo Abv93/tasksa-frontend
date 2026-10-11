@@ -2443,7 +2443,7 @@ function renderProvCard(l,i){
   return '<div class="prov-card" data-lid="'+l.id+'" data-lname="'+encodeURIComponent(l.name)+'">'
     +'<div class="prov-photo" style="background-image:url('+cardPhoto+');background-size:cover;background-position:center;">'+(l.isVerified?'<span class="prov-vbadge">✓ Verified</span>':'')+(unavail?'<span class="prov-unavail-badge">Unavailable</span>':'')+'</div>'
     +'<div class="prov-body">'
-      +'<div class="prov-name">'+l.name+'</div>'
+      +'<div class="prov-name">'+escapeHtml(l.name)+'</div>'
       +'<div class="prov-role">'+catName+(locationLabel?' · '+locationLabel:'')+'</div>'
       +'<div class="prov-stars">'+stars+' <span style="font-size:10px;color:var(--t3)">'+(l._count&&l._count.reviews||0)+' reviews</span></div>'
       +'<div class="prov-price">'+priceStr+'</div>'
@@ -2606,7 +2606,7 @@ async function openProviderProfile(lid){
         +(l.isVerified?'<span style="position:absolute;top:14px;right:14px;background:var(--green2);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;">&#x2713; Verified</span>':'')
         +heroContent
         +'<div>'
-          +'<div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">'+l.name+'</div>'
+          +'<div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">'+escapeHtml(l.name)+'</div>'
           +'<div style="font-size:13px;color:rgba(255,255,255,.8);">'+catName+(loc?' · '+loc:'')+'</div>'
         +'</div>'
       +'</div>'
@@ -2626,7 +2626,7 @@ async function openProviderProfile(lid){
         +'</div>'
       +'</div>'
       // About
-      +(l.description?'<div style="padding:20px 20px 12px;"><div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--t);">About</div><div style="font-size:13px;color:var(--t2);line-height:1.7;">'+l.description+'</div></div>':'')
+      +(l.description?'<div style="padding:20px 20px 12px;"><div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--t);">About</div><div style="font-size:13px;color:var(--t2);line-height:1.7;">'+escapeHtml(l.description)+'</div></div>':'')
       // Service menu — purely additive, only shows if this listing has one
       +(svcMenuItems.length ? '<div style="padding:20px 20px 4px;"><div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--t);">Services &amp; Pricing</div>'
         +svcMenuItems.map(function(it){
@@ -2690,7 +2690,7 @@ function openStayDetail(lid){
       +'<span style="position:absolute;top:12px;left:12px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;">'+catName+'</span>'
       +(l.isVerified?'<span style="position:absolute;top:12px;right:12px;background:var(--green2);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;">✓ Verified</span>':'')
     +'</div>'
-    +'<div style="font-size:20px;font-weight:800;margin-bottom:4px;">'+l.name+'</div>'
+    +'<div style="font-size:20px;font-weight:800;margin-bottom:4px;">'+escapeHtml(l.name)+'</div>'
     +'<div style="font-size:13px;color:var(--t3);margin-bottom:6px;">📍 '+loc+'</div>'
     +'<div style="font-size:13px;margin-bottom:4px;">★★★★★ <span style="color:var(--t3);font-size:11px;">'+(l._count&&l._count.reviews||0)+' reviews</span></div>'
     +'<div style="font-size:18px;font-weight:800;color:var(--blue3);margin-bottom:16px;">'+priceStr+'</div>'
@@ -2794,7 +2794,7 @@ function renderAccomCard(l,i){
     +(l.isFeatured?"<span class=\"accom-feat-badge\">Featured</span>":"")
     +"</div>"
     +"<div class=\"accom-body\">"
-    +"<div class=\"accom-name\">"+l.name+sleepsBadge+"</div>"
+    +"<div class=\"accom-name\">"+escapeHtml(l.name)+sleepsBadge+"</div>"
     +"<div class=\"accom-loc\">&#128205; "+loc+"</div>"
     +"<div class=\"accom-stars\">&#9733;&#9733;&#9733;&#9733;&#9733; <span style=\"color:var(--t3);font-size:10px;\">"+(l._count&&l._count.reviews||0)+" reviews</span></div>"
     +"<div class=\"accom-footer\">"
@@ -2816,8 +2816,8 @@ function renderShopCard(s,i){
       +(isEmpty?'<span style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:50px;">🕐 Coming Soon</span>':'')
     +'</div>'
     +'<div class="shop-body">'
-      +'<div class="shop-name">'+s.name+'</div>'
-      +'<div class="shop-loc">📍 '+s.location+'</div>'
+      +'<div class="shop-name">'+escapeHtml(s.name)+'</div>'
+      +'<div class="shop-loc">📍 '+escapeHtml(s.location)+'</div>'
       +'<div class="shop-desc">'+(s.description||'').slice(0,90)+'</div>'
       +'<div class="shop-stats">★★★★☆ · '+(s._count&&s._count.reviews||0)+' reviews · '+(isEmpty?'<span style="color:var(--amber2);">No products yet</span>':prodCount+' products')+'</div>'
       +(s.isVerified?'<span class="vbadge" style="margin-bottom:8px;display:inline-block;">✓ Verified</span>':'')
@@ -2836,7 +2836,7 @@ function renderProductCard(p,i){
   return '<div class="product-card">'
     +imgContent
     +'<div class="prod-body">'
-      +'<div class="prod-name" data-view-product="'+p.id+'" style="cursor:pointer;">'+p.name+'</div>'
+      +'<div class="prod-name" data-view-product="'+p.id+'" style="cursor:pointer;">'+escapeHtml(p.name)+'</div>'
       +'<div class="prod-store">'+store+'</div>'
       +'<div class="prod-stars">★★★★★</div>'
       +'<div class="prod-price">'+R(p.price)+'</div>'
@@ -2927,7 +2927,7 @@ async function loadServices(){
     var sel=document.getElementById('svcCat');
     if(sel){
       sel.innerHTML='<option value="">All Services</option>';
-      S.svcCats.forEach(function(c){ sel.innerHTML+='<option value="'+c.id+'">'+(c.icon||'')+' '+c.name+'</option>'; });
+      S.svcCats.forEach(function(c){ sel.innerHTML+='<option value="'+c.id+'">'+(c.icon||'')+' '+escapeHtml(c.name)+'</option>'; });
     }
     renderSvcGrid(S.allSvcs);
   } catch(e){ g.innerHTML=emptyState('⚠️','Could not load services',e.message); }
@@ -2972,7 +2972,7 @@ async function loadShop(){
     var sel=document.getElementById('shopCatFilter');
     if(sel){
       sel.innerHTML='<option value="">All Shops</option>';
-      S.shopCats.forEach(function(c){ sel.innerHTML+='<option value="'+c.id+'">'+(c.icon||'')+' '+c.name+'</option>'; });
+      S.shopCats.forEach(function(c){ sel.innerHTML+='<option value="'+c.id+'">'+(c.icon||'')+' '+escapeHtml(c.name)+'</option>'; });
     }
     var sortedShops = r.data.slice().sort(function(a,b){
       var aCount=(a._count&&a._count.products)||0, bCount=(b._count&&b._count.products)||0;
@@ -3024,7 +3024,7 @@ async function viewShop(id){
     var banner=document.getElementById('shopDetailBanner');
     if(banner) banner.style.backgroundImage='url('+imgUrl+')';
     var info=document.getElementById('shopDetailInfo');
-    if(info) info.innerHTML='<h2>'+s.name+'</h2><p>📍 '+s.location+'</p><p style="margin-top:6px;color:var(--t2);font-size:13px;">'+(s.description||'')+'</p>';
+    if(info) info.innerHTML='<h2>'+escapeHtml(s.name)+'</h2><p>📍 '+escapeHtml(s.location)+'</p><p style="margin-top:6px;color:var(--t2);font-size:13px;">'+escapeHtml(s.description||'')+'</p>';
     if(pg) pg.innerHTML=prods.data.map(function(p,i){return renderProductCard(p,i);}).join('')||emptyState('📦','No products yet','');
   } catch(e){ if(pg) pg.innerHTML=emptyState('⚠️','Could not load shop',e.message); }
 }
@@ -3046,7 +3046,7 @@ async function loadAccom(){
     var sel=document.getElementById('accomCat');
     if(sel){
       sel.innerHTML='<option value="">All Stays</option>';
-      S.accomCats.forEach(function(c){ sel.innerHTML+='<option value="'+c.id+'">'+(c.icon||'')+' '+c.name+'</option>'; });
+      S.accomCats.forEach(function(c){ sel.innerHTML+='<option value="'+c.id+'">'+(c.icon||'')+' '+escapeHtml(c.name)+'</option>'; });
     }
     g.innerHTML=S.allAccom.map(function(l,i){return renderAccomCard(l,i);}).join('')||emptyState('🏡','No stays yet','');
   } catch(e){ g.innerHTML=emptyState('⚠️','Could not load stays',e.message); }
@@ -3341,7 +3341,7 @@ async function loadProviderDash(stats, main, role){
               ? '<button data-booking-id="'+b.id+'" data-action="complete-booking" style="background:rgba(26,143,255,.15);border:none;border-radius:6px;color:var(--blue3);padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✓ Complete</button>'
               : '—';
             return '<tr style="border-bottom:1px solid var(--bd);">'
-              +'<td style="padding:10px 8px;font-weight:700;">'+(b.client?b.client.name:'Client')+'<br><span style="font-size:10px;color:var(--t3);font-weight:400;">'+(b.client&&b.client.phone||'')+'</span></td>'
+              +'<td style="padding:10px 8px;font-weight:700;">'+escapeHtml(b.client?b.client.name:'Client')+'<br><span style="font-size:10px;color:var(--t3);font-weight:400;">'+escapeHtml(b.client&&b.client.phone||'')+'</span></td>'
               +'<td style="padding:10px 8px;color:var(--t3);white-space:nowrap;">'+fDate(b.scheduledAt)+'</td>'
               +'<td style="padding:10px 8px;max-width:220px;">'+renderBookingNotes(b.notes).replace('margin-top:6px;','margin-top:0;')+'</td>'
               +'<td style="padding:10px 8px;color:var(--blue3);">'+R(b.totalAmount)+'</td>'
@@ -3506,7 +3506,7 @@ async function loadShopDash(stats, main){
           return '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--bd);">'
             +'<div style="width:44px;height:44px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;">🛒</div>'
             +'<div style="flex:1;">'
-              +'<div style="font-weight:700;font-size:13px;">'+l.name+'</div>'
+              +'<div style="font-weight:700;font-size:13px;">'+escapeHtml(l.name)+'</div>'
               +'<div style="font-size:11px;color:var(--t3);">'+(l.city||'')+' · '+(l._count?l._count.products+' products':'')+'</div>'
             +'</div>'
             +'<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:50px;background:rgba(34,197,94,.1);color:var(--green2);">'+(l.isActive?'Active':'Inactive')+'</span>'
@@ -3717,7 +3717,8 @@ async function changeUserPassword(){
   if(newp.length<8){toast('Minimum 8 characters','error');return;}
   var btn=document.getElementById('changePassBtn2'); btn.disabled=true; btn.textContent='Saving...';
   try {
-    await api('/users/change-password','PUT',{currentPassword:curr,newPassword:newp});
+    var cp = await api('/users/change-password','PUT',{currentPassword:curr,newPassword:newp});
+    if(cp && cp.token){ S.token = cp.token; try{ localStorage.setItem('tasksa_token', cp.token); }catch(e){} }
     toast('Password changed!','success');
     document.getElementById('profileCurrPass').value='';
     document.getElementById('profileNewPass').value='';
@@ -4143,7 +4144,7 @@ async function openAddServiceItemModal(){
       var r = await api('/listings/mine');
       var mine = (r.data||[]).filter(function(l){ return l.category && l.category.type === 'SERVICE'; });
       sel.innerHTML = mine.length
-        ? mine.map(function(l){ return '<option value="'+l.id+'">'+l.name+'</option>'; }).join('')
+        ? mine.map(function(l){ return '<option value="'+l.id+'">'+escapeHtml(l.name)+'</option>'; }).join('')
         : '<option value="">You need a service listing first</option>';
     } catch(e){ sel.innerHTML = '<option value="">Could not load listings</option>'; }
   }
@@ -4280,7 +4281,7 @@ async function openAddProductModal(){
       });
       if(shopListings.length){
         sel.innerHTML = shopListings.map(function(l){
-          return '<option value="'+l.id+'">'+l.name+'</option>';
+          return '<option value="'+l.id+'">'+escapeHtml(l.name)+'</option>';
         }).join('');
       } else {
         sel.innerHTML = '<option value="">No shop listings yet — create one first</option>';
@@ -4438,7 +4439,7 @@ function renderClientBookingsList(){
     }
     return '<div style="padding:14px 0;border-bottom:1px solid var(--bd);">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
-        +'<div style="font-weight:700;font-size:13px;">'+(b.listing?b.listing.name:'Booking')+'</div>'
+        +'<div style="font-weight:700;font-size:13px;">'+escapeHtml(b.listing?b.listing.name:'Booking')+'</div>'
         +'<span style="font-size:11px;font-weight:700;color:'+statusColor+';">'+statusLabel+'</span>'
       +'</div>'
       +'<div style="font-size:12px;color:var(--t3);margin-top:4px;">📅 '+fDate(b.scheduledAt)+'</div>'
@@ -4677,7 +4678,7 @@ async function renderPaystackForm(){
     el.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;max-width:420px;">'
       +'<select id="paystackBank" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;">'
         +'<option value="">Select your bank...</option>'
-        +banks.map(function(b){ return '<option value="'+b.code+'">'+b.name+'</option>'; }).join('')
+        +banks.map(function(b){ return '<option value="'+b.code+'">'+escapeHtml(b.name)+'</option>'; }).join('')
       +'</select>'
       +'<input id="paystackAccNum" placeholder="Account number" inputmode="numeric" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;">'
       +'<button id="paystackSetupBtn" onclick="setupPaystackAccount()" class="btn-primary" style="padding:11px;">Set Up Card Payouts</button>'
@@ -4757,12 +4758,12 @@ async function loadProviderEarnings(){
       : '<div style="font-size:12px;color:var(--t3);padding:8px 0;">No payouts yet</div>';
     el.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
       +'<div style="background:var(--bg3);border-radius:10px;padding:12px;text-align:center;">'
-        +'<div style="font-size:20px;font-weight:800;color:var(--green2);">'+R(d.owed)+'</div>'
-        +'<div style="font-size:11px;color:var(--t3);">Owed to you (card payments)</div>'
+        +'<div style="font-size:20px;font-weight:800;color:var(--green2);">'+R(d.totalEarned)+'</div>'
+        +'<div style="font-size:11px;color:var(--t3);">Received via card (paid straight to your bank)</div>'
       +'</div>'
       +'<div style="background:var(--bg3);border-radius:10px;padding:12px;text-align:center;">'
-        +'<div style="font-size:20px;font-weight:800;color:var(--blue3);">'+R(d.totalPaidOut)+'</div>'
-        +'<div style="font-size:11px;color:var(--t3);">Already paid out</div>'
+        +'<div style="font-size:20px;font-weight:800;color:var(--blue3);">R0</div>'
+        +'<div style="font-size:11px;color:var(--t3);">Owed by TaskSA — card money is never held</div>'
       +'</div>'
     +'</div>'
     +'<div style="font-size:12px;font-weight:700;color:var(--t3);margin-bottom:6px;">RECENT PAYOUTS</div>'
@@ -5050,7 +5051,7 @@ async function loadCategoriesForType(type){
     if(cats.length){
       sel.innerHTML = '<option value="">Select a category...</option>';
       cats.forEach(function(c){
-        sel.innerHTML += '<option value="'+c.id+'">'+(c.icon||'')+' '+c.name+'</option>';
+        sel.innerHTML += '<option value="'+c.id+'">'+(c.icon||'')+' '+escapeHtml(c.name)+'</option>';
       });
     } else {
       sel.innerHTML = '<option value="">No categories found for this type</option>';
@@ -5148,7 +5149,7 @@ function renderCart(){
   var sum=0;
   items.innerHTML=S.cart.map(function(item,i){
     sum+=item.price;
-    return '<div class="cart-item"><div class="cart-item-icon">'+item.em+'</div><div class="cart-item-info"><div class="cart-item-name">'+item.name+'</div><div class="cart-item-store">'+item.store+'</div></div><div class="cart-item-price">'+R(item.price)+'</div><button class="cart-item-remove" data-cartidx="'+i+'">✕</button></div>';
+    return '<div class="cart-item"><div class="cart-item-icon">'+item.em+'</div><div class="cart-item-info"><div class="cart-item-name">'+escapeHtml(item.name)+'</div><div class="cart-item-store">'+item.store+'</div></div><div class="cart-item-price">'+R(item.price)+'</div><button class="cart-item-remove" data-cartidx="'+i+'">✕</button></div>';
   }).join('');
   if(total) total.textContent=R(sum);
   if(footer) footer.style.display='block';
@@ -5812,7 +5813,7 @@ async function loadConversations(){
           +(c.unread > 0 ? '<span style="position:absolute;top:-3px;right:-3px;width:14px;height:14px;background:var(--blue2);border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">'+c.unread+'</span>' : '')
         +'</div>'
         +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:13px;font-weight:700;">'+p.name+'</div>'
+          +'<div style="font-size:13px;font-weight:700;">'+escapeHtml(p.name)+'</div>'
           +'<div style="font-size:11px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(c.lastMessage.content||'')+'</div>'
         +'</div>'
         +'</div>';

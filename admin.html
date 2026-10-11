@@ -604,6 +604,9 @@ async function api(path, method='GET', body=null){
   if(!r.ok) throw new Error(d.error||'Request failed');
   return d;
 }
+function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+// for text placed inside a '...' JS string inside an onclick="..." attribute
+function jsq(v){ return esc(String(v==null?'':v).replace(/\\/g,'\\\\').replace(/'/g,"\\'")); }
 function R(n){ return 'R'+Math.round(n||0).toLocaleString('en-ZA'); }
 function fDate(d){ return new Date(d).toLocaleDateString('en-ZA'); }
 function ini(name){ return (name||'??').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
@@ -694,14 +697,14 @@ async function loadDashboard(){
       <div class="stat-card sc-purple"><div class="sc-label">Pending Bookings</div><div class="sc-val">${d.pendingBookings}</div><div class="sc-sub">${d.totalBookings} total bookings</div><div class="sc-icon">📅</div></div>`;
     if(d.pendingBookings>0){ const b=document.getElementById('sbPending'); b.style.display='inline'; b.textContent=d.pendingBookings; }
     const bkHtml=d.recentBookings.map(b=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--bd)">
-      <div style="width:32px;height:32px;border-radius:50%;background:rgba(26,143,255,.15);color:var(--blue3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${ini(b.client?.name)}</div>
-      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700">${b.client?.name||'—'}</div><div style="font-size:10px;color:var(--t3)">${b.listing?.name||'—'}</div></div>
+      <div style="width:32px;height:32px;border-radius:50%;background:rgba(26,143,255,.15);color:var(--blue3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${esc(ini(b.client?.name))}</div>
+      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700">${esc(b.client?.name||'—')}</div><div style="font-size:10px;color:var(--t3)">${esc(b.listing?.name||'—')}</div></div>
       <span class="badge ${b.status==='CONFIRMED'?'b-green':b.status==='COMPLETED'?'b-blue':b.status==='CANCELLED'?'b-red':'b-amber'}">${b.status}</span>
     </div>`).join('');
     document.getElementById('recentBookings').innerHTML=bkHtml||'<p style="font-size:12px;color:var(--t3);padding:12px 0">No bookings yet</p>';
     const uHtml=d.recentUsers.map(u=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--bd)">
-      <div style="width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,.12);color:#4ade80;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${ini(u.name)}</div>
-      <div style="flex:1"><div style="font-size:12px;font-weight:700">${u.name}</div><div style="font-size:10px;color:var(--t3)">${u.email}</div></div>
+      <div style="width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,.12);color:#4ade80;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${esc(ini(u.name))}</div>
+      <div style="flex:1"><div style="font-size:12px;font-weight:700">${esc(u.name)}</div><div style="font-size:10px;color:var(--t3)">${esc(u.email)}</div></div>
       <span class="badge b-blue">${u.role.replace('_',' ')}</span>
     </div>`).join('');
     document.getElementById('recentUsers').innerHTML=uHtml||'<p style="font-size:12px;color:var(--t3);padding:12px 0">No users yet</p>';
@@ -735,15 +738,15 @@ function renderPagination(containerId, currentPage, total, perPage, loadFn){
   const totalPages = Math.ceil(total / perPage);
   if(totalPages <= 1){ el.innerHTML=''; return; }
   let html = '';
-  if(currentPage > 1) html += `<button class="pag-btn" onclick="(${loadFn.name})(${currentPage-1})">‹</button>`;
+  if(currentPage > 1) html += `<button class="pag-btn" onclick="(${esc(loadFn.name)})(${currentPage-1})">‹</button>`;
   const start = Math.max(1, currentPage-2);
   const end = Math.min(totalPages, currentPage+2);
-  if(start > 1) html += `<button class="pag-btn" onclick="(${loadFn.name})(1)">1</button>` + (start>2?'<span style="padding:0 4px;color:var(--t3);">…</span>':'');
+  if(start > 1) html += `<button class="pag-btn" onclick="(${esc(loadFn.name)})(1)">1</button>` + (start>2?'<span style="padding:0 4px;color:var(--t3);">…</span>':'');
   for(let p=start; p<=end; p++){
-    html += `<button class="pag-btn ${p===currentPage?'active':''}" onclick="(${loadFn.name})(${p})">${p}</button>`;
+    html += `<button class="pag-btn ${p===currentPage?'active':''}" onclick="(${esc(loadFn.name)})(${p})">${p}</button>`;
   }
-  if(end < totalPages) html += (end<totalPages-1?'<span style="padding:0 4px;color:var(--t3);">…</span>':'') + `<button class="pag-btn" onclick="(${loadFn.name})(${totalPages})">${totalPages}</button>`;
-  if(currentPage < totalPages) html += `<button class="pag-btn" onclick="(${loadFn.name})(${currentPage+1})">›</button>`;
+  if(end < totalPages) html += (end<totalPages-1?'<span style="padding:0 4px;color:var(--t3);">…</span>':'') + `<button class="pag-btn" onclick="(${esc(loadFn.name)})(${totalPages})">${totalPages}</button>`;
+  if(currentPage < totalPages) html += `<button class="pag-btn" onclick="(${esc(loadFn.name)})(${currentPage+1})">›</button>`;
   el.innerHTML = html;
 }
 
@@ -766,20 +769,20 @@ async function loadUsers(page=1,noListingsFilter){
         ? (listingCount===0 ? '<span class="badge b-red" title="No listings created yet">0 listings</span>' : `<span class="badge b-gray">${listingCount} listing${listingCount!==1?'s':''}</span>`)
         : '<span style="color:var(--t3);font-size:11px;">—</span>';
       return `<tr>
-      <td><div class="td-name">${u.name}</div><div class="td-sub">${u.phone||'—'}</div></td>
-      <td style="font-size:12px">${u.email}</td>
+      <td><div class="td-name">${esc(u.name)}</div><div class="td-sub">${esc(u.phone||'—')}</div></td>
+      <td style="font-size:12px">${esc(u.email)}</td>
       <td><span class="badge ${u.role==='ADMIN'?'b-red':u.role==='PROVIDER'?'b-blue':u.role==='SHOP_OWNER'?'b-purple':u.role==='HOST'?'b-amber':'b-gray'}">${u.role.replace('_',' ')}</span></td>
       <td>${listingBadge}</td>
-      <td style="font-size:12px">${u.city||'—'}, ${u.province||'—'}</td>
+      <td style="font-size:12px">${esc(u.city||'—')}, ${esc(u.province||'—')}</td>
       <td><span class="badge ${u.isActive?'b-green':'b-red'}">${u.isActive?'Active':'Inactive'}</span></td>
       <td style="font-size:11px;color:var(--t3)">${fDate(u.createdAt)}</td>
       <td><div class="act-btns">
-        <button class="act-btn ab-blue" onclick="openEditUser('${u.id}','${u.name}','${u.email}','${u.phone||''}','${u.role}','${u.province||''}','${u.city||''}',${u.isActive})">Edit</button>
-        <button class="act-btn ab-gold" onclick="openResetUserPassword('${u.id}','${u.name}')">Reset Pass</button>
-        ${(u._count && u._count.listings > 0) ? `<button class="act-btn ab-blue" onclick="viewUserListings('${u.id}','${u.name}')" title="Jump to this user's listings">📋 View Listings</button>` : ''}
-        ${(u.paystackSubaccountCode && !u.paystackVerifiedNotifiedAt) ? `<button class="act-btn ab-green" onclick="notifyBankingVerified('${u.id}','${u.name}',this)" title="Send once you've verified this subaccount on Paystack">✅ Notify Verified</button>` : ''}
+        <button class="act-btn ab-blue" onclick="openEditUser('${u.id}','${jsq(u.name)}','${jsq(u.email)}','${jsq(u.phone||'')}','${u.role}','${jsq(u.province||'')}','${jsq(u.city||'')}',${u.isActive})">Edit</button>
+        <button class="act-btn ab-gold" onclick="openResetUserPassword('${u.id}','${jsq(u.name)}')">Reset Pass</button>
+        ${(u._count && u._count.listings > 0) ? `<button class="act-btn ab-blue" onclick="viewUserListings('${u.id}','${jsq(u.name)}')" title="Jump to this user's listings">📋 View Listings</button>` : ''}
+        ${(u.paystackSubaccountCode && !u.paystackVerifiedNotifiedAt) ? `<button class="act-btn ab-green" onclick="notifyBankingVerified('${u.id}','${jsq(u.name)}',this)" title="Send once you've verified this subaccount on Paystack">✅ Notify Verified</button>` : ''}
         <button class="act-btn ${u.isActive?'ab-red':'ab-green'}" onclick="toggleUser('${u.id}',${u.isActive})">${u.isActive?'Deactivate':'Activate'}</button>
-        ${u.role!=='ADMIN'?`<button class="act-btn ab-red" onclick="hardDeleteUser('${u.id}','${u.name}')" style="opacity:.8;" title="Permanently delete user">🗑️</button>`:''}
+        ${u.role!=='ADMIN'?`<button class="act-btn ab-red" onclick="hardDeleteUser('${u.id}','${jsq(u.name)}')" style="opacity:.8;" title="Permanently delete user">🗑️</button>`:''}
       </div></td>
     </tr>`;}).join('') || '<tr class="empty-row"><td colspan="8">No users found</td></tr>';
     renderPagination('usersPag', page, r.total, 15, loadUsers);
@@ -928,14 +931,14 @@ async function loadListings(page=1){
     if(window._listingsOwnerFilter) q+=`&ownerId=${window._listingsOwnerFilter}`;
     const r=await api(q);
     const filterNote = window._listingsOwnerFilter
-      ? ` — showing only listings by <strong>${window._listingsOwnerName||'this user'}</strong> <button onclick="clearListingsOwnerFilter()" style="background:none;border:none;color:var(--blue3);cursor:pointer;text-decoration:underline;font-size:12px;margin-left:4px;">Clear filter</button>`
+      ? ` — showing only listings by <strong>${esc(window._listingsOwnerName||'this user')}</strong> <button onclick="clearListingsOwnerFilter()" style="background:none;border:none;color:var(--blue3);cursor:pointer;text-decoration:underline;font-size:12px;margin-left:4px;">Clear filter</button>`
       : '';
     document.getElementById('listingsCount').innerHTML=`${r.total} listings${filterNote}`;
     document.getElementById('listingsTable').innerHTML=r.data.map(l=>`<tr>
-      <td><div class="td-name">${l.name}</div><div class="td-sub">${l._count.bookings} bookings · ${l._count.reviews} reviews · ${l.viewCount||0} views</div></td>
-      <td style="font-size:12px">${l.owner?.name||'—'}</td>
-      <td><span class="badge b-blue">${l.category?.name||'—'}</span></td>
-      <td style="font-size:12px">${l.city}, ${l.province}</td>
+      <td><div class="td-name">${esc(l.name)}</div><div class="td-sub">${l._count.bookings} bookings · ${l._count.reviews} reviews · ${l.viewCount||0} views</div></td>
+      <td style="font-size:12px">${esc(l.owner?.name||'—')}</td>
+      <td><span class="badge b-blue">${esc(l.category?.name||'—')}</span></td>
+      <td style="font-size:12px">${esc(l.city)}, ${esc(l.province)}</td>
       <td style="font-size:12px;color:var(--blue3)">${l.priceFrom?'R'+l.priceFrom:'—'}</td>
       <td><div style="display:flex;flex-direction:column;gap:3px">
         ${l.isActive?'<span class="badge b-green">Active</span>':'<span class="badge b-red">Inactive</span>'}
@@ -947,7 +950,7 @@ async function loadListings(page=1){
         <button class="act-btn ab-green" onclick="verifyListing('${l.id}',${l.isVerified})">${l.isVerified?'Unverify':'Verify'}</button>
         <button class="act-btn ab-gold" onclick="featureListing('${l.id}',${l.isFeatured})">${l.isFeatured?'Unfeature':'Feature'}</button>
         <button class="act-btn ${l.isActive?'ab-red':'ab-green'}" onclick="toggleListing('${l.id}',${l.isActive})">${l.isActive?'Disable':'Enable'}</button>
-        <button class="act-btn ab-red" onclick="deleteListingHard('${l.id}','${(l.name||'').replace(/'/g,"\\'")}',${l._count.bookings},${l._count.reviews})" title="Permanently delete">🗑️</button>
+        <button class="act-btn ab-red" onclick="deleteListingHard('${l.id}','${jsq(l.name)}',${l._count.bookings},${l._count.reviews})" title="Permanently delete">🗑️</button>
       </div></td>
     </tr>`).join('')||'<tr class="empty-row"><td colspan="7">No listings found</td></tr>';
     renderPagination('listingsPag', page, r.total, 15, loadListings);
@@ -1009,9 +1012,9 @@ async function loadBookings(page=1){
     const r=await api(`/admin/bookings?page=${page}&limit=20${status?'&status='+status:''}`);
     document.getElementById('bookingsCount').textContent=`${r.total} bookings`;
     document.getElementById('bookingsTable').innerHTML=r.data.map(b=>`<tr>
-      <td><div class="td-name">${b.client?.name||'—'}</div><div class="td-sub">${b.client?.email||''}</div></td>
-      <td style="font-size:12px">${b.listing?.name||'—'}</td>
-      <td><div class="td-name" style="font-size:12px">${b.listing?.owner?.name||'—'}</div><div class="td-sub">${b.listing?.owner?.phone||''}</div></td>
+      <td><div class="td-name">${esc(b.client?.name||'—')}</div><div class="td-sub">${esc(b.client?.email||'')}</div></td>
+      <td style="font-size:12px">${esc(b.listing?.name||'—')}</td>
+      <td><div class="td-name" style="font-size:12px">${esc(b.listing?.owner?.name||'—')}</div><div class="td-sub">${esc(b.listing?.owner?.phone||'')}</div></td>
       <td style="font-size:11px;color:var(--t3)">${fDate(b.scheduledAt)}</td>
       <td style="font-size:12px;font-weight:700">${R(b.totalAmount)}</td>
       <td style="font-size:12px;color:var(--green2)">${R(b.commission)}</td>
@@ -1034,7 +1037,7 @@ async function loadOrders(){
     document.getElementById('ordersCount').textContent=`${r.total} orders`;
     document.getElementById('ordersTable').innerHTML=r.data.map(o=>`<tr>
       <td style="font-size:12px;font-weight:700;color:var(--blue3)">${o.collectionCode||'—'}</td>
-      <td><div class="td-name">${o.client?.name||'—'}</div></td>
+      <td><div class="td-name">${esc(o.client?.name||'—')}</div></td>
       <td style="font-size:12px">${o.items?.length||0} items</td>
       <td style="font-size:12px;font-weight:700">${R(o.totalAmount)}</td>
       <td style="font-size:12px;color:var(--green2)">${R(o.commission)}</td>
@@ -1054,10 +1057,10 @@ async function loadReviews(){
     const r=await api('/admin/reviews?limit=20');
     document.getElementById('reviewsCount').textContent=`${r.total} reviews`;
     document.getElementById('reviewsTable').innerHTML=r.data.map(rv=>`<tr>
-      <td style="font-size:12px;font-weight:700">${rv.client?.name||'—'}</td>
-      <td style="font-size:12px">${rv.listing?.name||'—'}</td>
+      <td style="font-size:12px;font-weight:700">${esc(rv.client?.name||'—')}</td>
+      <td style="font-size:12px">${esc(rv.listing?.name||'—')}</td>
       <td><span style="color:var(--gold)">${'★'.repeat(rv.rating)}${'☆'.repeat(5-rv.rating)}</span></td>
-      <td style="font-size:12px;max-width:200px">${rv.comment||'—'}</td>
+      <td style="font-size:12px;max-width:200px">${esc(rv.comment||'—')}</td>
       <td style="font-size:11px;color:var(--t3)">${fDate(rv.createdAt)}</td>
       <td><button class="act-btn ab-red" onclick="deleteReview('${rv.id}')">Delete</button></td>
     </tr>`).join('')||'<tr class="empty-row"><td colspan="6">No reviews yet</td></tr>';
@@ -1068,14 +1071,14 @@ async function loadCategories(){
   try {
     const r=await api('/admin/categories');
     document.getElementById('catsTable').innerHTML=r.data.map(c=>`<tr>
-      <td style="font-size:20px">${c.icon||'📁'}</td>
-      <td class="td-name">${c.name}</td>
-      <td style="font-size:12px;color:var(--t3)">${c.slug}</td>
+      <td style="font-size:20px">${esc(c.icon||'📁')}</td>
+      <td class="td-name">${esc(c.name)}</td>
+      <td style="font-size:12px;color:var(--t3)">${esc(c.slug)}</td>
       <td><span class="badge ${c.type==='SERVICE'?'b-blue':c.type==='ACCOMMODATION'?'b-purple':'b-green'}">${c.type}</span></td>
       <td style="font-size:12px">${c._count?.listings||0} listings</td>
       <td><span class="badge ${c.isActive?'b-green':'b-red'}">${c.isActive?'Active':'Inactive'}</span></td>
       <td><div class="act-btns">
-        <button class="act-btn ab-blue" onclick="openEditCat('${c.id}','${c.name}','${c.icon||''}','${c.type}',${c.isActive})">Edit</button>
+        <button class="act-btn ab-blue" onclick="openEditCat('${c.id}','${jsq(c.name)}','${jsq(c.icon||'')}','${c.type}',${c.isActive})">Edit</button>
         <button class="act-btn ${c.isActive?'ab-red':'ab-green'}" onclick="toggleCat('${c.id}',${c.isActive})">${c.isActive?'Disable':'Enable'}</button>
       </div></td>
     </tr>`).join('')||'<tr class="empty-row"><td colspan="7">No categories</td></tr>';
@@ -1105,9 +1108,9 @@ async function loadBanners(){
     const r=await api('/admin/banners');
     document.getElementById('bannersTable').innerHTML=r.data.map(b=>`<tr>
       <td><div style="width:60px;height:36px;border-radius:6px;background:${b.background};flex-shrink:0"></div></td>
-      <td class="td-name">${b.title}</td>
-      <td style="font-size:12px;color:var(--t2)">${b.subtitle||'—'}</td>
-      <td style="font-size:12px;color:var(--blue3)">${b.ctaLink||'—'}</td>
+      <td class="td-name">${esc(b.title)}</td>
+      <td style="font-size:12px;color:var(--t2)">${esc(b.subtitle||'—')}</td>
+      <td style="font-size:12px;color:var(--blue3)">${esc(b.ctaLink||'—')}</td>
       <td style="font-size:11px;color:var(--t3)">${fDate(b.startDate)} – ${fDate(b.endDate)}</td>
       <td><span class="badge ${b.isActive?'b-green':'b-red'}">${b.isActive?'Active':'Inactive'}</span></td>
       <td><div class="act-btns">
@@ -1173,7 +1176,7 @@ async function loadPayouts(){
     const r = await api('/payouts/admin/overview');
     document.getElementById('payoutsCount').textContent = `${r.data.length} providers earning via card · TaskSA commission total: R${(r.totalCommission||0).toFixed(2)}`;
     document.getElementById('payoutsTable').innerHTML = r.data.map(p => `<tr>
-      <td><div class="td-name">${p.name}</div><div class="td-sub">${p.email}${p.phone?' · '+p.phone:''}</div></td>
+      <td><div class="td-name">${esc(p.name)}</div><div class="td-sub">${esc(p.email)}${p.phone?' · '+esc(p.phone):''}</div></td>
       <td>${p.paystackSetUp ? '<span class="badge b-green">✓ Paystack active</span>' : '<span class="badge b-red">Not set up</span>'}</td>
       <td style="font-size:13px;font-weight:800;color:var(--green2);">R${p.totalEarned.toFixed(2)}</td>
       <td style="font-size:13px;font-weight:800;color:var(--gold);">R${p.taskSaCommission.toFixed(2)}</td>
@@ -1196,9 +1199,9 @@ async function loadVerifyQueue(){
       <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
           <div>
-            <div style="font-weight:700;font-size:14px;">${u.name}</div>
-            <div style="font-size:12px;color:var(--t3);">${u.email} · ${u.phone||'—'} · ${u.role}</div>
-            <div style="font-size:11px;color:var(--t3);">${u.city||'—'}, ${u.province||'—'}</div>
+            <div style="font-weight:700;font-size:14px;">${esc(u.name)}</div>
+            <div style="font-size:12px;color:var(--t3);">${esc(u.email)} · ${esc(u.phone||'—')} · ${u.role}</div>
+            <div style="font-size:11px;color:var(--t3);">${esc(u.city||'—')}, ${esc(u.province||'—')}</div>
           </div>
           <span class="badge ${u.providerType==='BUSINESS'?'b-purple':'b-blue'}">${u.providerType==='BUSINESS'?'🏢 Business':'🧍 Individual'}</span>
         </div>
@@ -1206,31 +1209,31 @@ async function loadVerifyQueue(){
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
             <div>
               <div style="font-size:10px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;font-weight:700;">ID Document</div>
-              ${u.idDocumentUrl ? `<a href="${u.idDocumentUrl}" target="_blank"><img src="${u.idDocumentUrl}" style="width:100%;border-radius:8px;border:1px solid var(--bd);max-height:160px;object-fit:cover;"></a>` : '<div style="font-size:12px;color:var(--t3);">Not uploaded</div>'}
+              ${u.idDocumentUrl ? `<a href="${esc(u.idDocumentUrl)}" target="_blank"><img src="${esc(u.idDocumentUrl)}" style="width:100%;border-radius:8px;border:1px solid var(--bd);max-height:160px;object-fit:cover;"></a>` : '<div style="font-size:12px;color:var(--t3);">Not uploaded</div>'}
             </div>
             <div>
               <div style="font-size:10px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;font-weight:700;">Selfie with ID</div>
-              ${u.selfieWithIdUrl ? `<a href="${u.selfieWithIdUrl}" target="_blank"><img src="${u.selfieWithIdUrl}" style="width:100%;border-radius:8px;border:1px solid var(--bd);max-height:160px;object-fit:cover;"></a>` : '<div style="font-size:12px;color:var(--t3);">Not uploaded</div>'}
+              ${u.selfieWithIdUrl ? `<a href="${esc(u.selfieWithIdUrl)}" target="_blank"><img src="${esc(u.selfieWithIdUrl)}" style="width:100%;border-radius:8px;border:1px solid var(--bd);max-height:160px;object-fit:cover;"></a>` : '<div style="font-size:12px;color:var(--t3);">Not uploaded</div>'}
             </div>
           </div>
         ` : `
           <div style="margin-bottom:12px;">
             <div style="font-size:10px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;font-weight:700;">CIPC Number</div>
-            <div style="font-size:14px;font-weight:700;color:var(--blue3);">${u.cipcNumber || '—'}</div>
-            ${u.cipcDocumentUrl ? `<a href="${u.cipcDocumentUrl}" target="_blank" style="font-size:12px;color:var(--blue3);">📄 View uploaded certificate</a>` : '<div style="font-size:11px;color:var(--t3);">No certificate uploaded — verify number manually on cipc.co.za</div>'}
+            <div style="font-size:14px;font-weight:700;color:var(--blue3);">${esc(u.cipcNumber || '—')}</div>
+            ${u.cipcDocumentUrl ? `<a href="${esc(u.cipcDocumentUrl)}" target="_blank" style="font-size:12px;color:var(--blue3);">📄 View uploaded certificate</a>` : '<div style="font-size:11px;color:var(--t3);">No certificate uploaded — verify number manually on cipc.co.za</div>'}
           </div>
         `}
-        ${u.verificationNotes ? `<div style="font-size:12px;color:#f87171;background:rgba(239,68,68,.08);padding:8px;border-radius:8px;margin-bottom:12px;">Previous rejection reason: ${u.verificationNotes}</div>` : ''}
+        ${u.verificationNotes ? `<div style="font-size:12px;color:#f87171;background:rgba(239,68,68,.08);padding:8px;border-radius:8px;margin-bottom:12px;">Previous rejection reason: ${esc(u.verificationNotes)}</div>` : ''}
         <div style="display:flex;gap:8px;">
           ${status === 'PENDING' ? `
-            <button class="btn btn-s" style="flex:1;" onclick="approveVerification('${u.id}','${u.name}')">✓ Approve</button>
-            <button class="btn btn-d" style="flex:1;" onclick="rejectVerification('${u.id}','${u.name}')">✕ Reject</button>
+            <button class="btn btn-s" style="flex:1;" onclick="approveVerification('${u.id}','${jsq(u.name)}')">✓ Approve</button>
+            <button class="btn btn-d" style="flex:1;" onclick="rejectVerification('${u.id}','${jsq(u.name)}')">✕ Reject</button>
           ` : ''}
           ${status === 'NOT_SUBMITTED' ? `
-            <button class="btn btn-g" style="flex:1;" onclick="sendVerificationReminder('${u.id}','${u.name}')">🔔 Send Reminder</button>
+            <button class="btn btn-g" style="flex:1;" onclick="sendVerificationReminder('${u.id}','${jsq(u.name)}')">🔔 Send Reminder</button>
           ` : ''}
           ${(status === 'PENDING' || status === 'VERIFIED' || status === 'REJECTED') ? `
-            <button class="btn btn-g" style="flex:0;padding:9px 14px;" onclick="resetVerification('${u.id}','${u.name}')" title="Wipe all documents and start fresh">🗑️ Reset</button>
+            <button class="btn btn-g" style="flex:0;padding:9px 14px;" onclick="resetVerification('${u.id}','${jsq(u.name)}')" title="Wipe all documents and start fresh">🗑️ Reset</button>
           ` : ''}
         </div>
       </div>
