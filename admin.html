@@ -1270,12 +1270,15 @@ async function secureOldDocuments(){
   try {
     const dry = await api('/verification/admin/secure-existing?dryRun=1','POST');
     const d = dry.data;
-    const total = d.publicDocumentsFound + (d.strayPublicFiles||0);
-    if(!total){ toast('Nothing to do — no public documents found ('+d.alreadyPrivate+' already private)'+(d.sweepError?'. Folder sweep could not run — check Railway logs.':''), d.sweepError?'error':'success'); return; }
-    if(!confirm('Found '+total+' file(s) that are still publicly reachable by link ('+d.publicDocumentsFound+' linked to providers, '+(d.strayPublicFiles||0)+' leftover uploads).\n\nMake them private now? Admin viewing keeps working.')) return;
+    const removable = Math.max(0,(d.strayPublicFiles||0)-(d.strayTooNew||0));
+    const total = d.publicDocumentsFound + removable;
+    if(!total){
+      toast('Nothing to do — no public documents found ('+d.alreadyPrivate+' already private)'+(d.strayTooNew?(', '+d.strayTooNew+' very recent upload(s) skipped'):'')+(d.sweepError?'. Folder sweep could not run — check Railway logs.':''), d.sweepError?'error':'success');
+      return;
+    }
+    if(!confirm('Found:\n• '+d.publicDocumentsFound+' public document(s) linked to providers — will be made private\n• '+removable+' leftover upload(s) not linked to anyone — will be DELETED\n\nContinue? Admin viewing keeps working.')) return;
     const r = await api('/verification/admin/secure-existing','POST');
-    const n = r.data.secured + (r.data.strayConverted||0);
-    toast('Secured '+n+' file(s)'+(r.data.failed?(', '+r.data.failed+' failed'):''), r.data.failed?'error':'success');
+    toast('Made private: '+r.data.secured+' · Leftovers deleted: '+(r.data.strayRemoved||0)+(r.data.failed?(' · '+r.data.failed+' failed'):''), r.data.failed?'error':'success');
     loadVerifyQueue();
   } catch(e){ toast(e.message,'error'); }
 }
