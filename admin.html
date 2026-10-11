@@ -514,6 +514,7 @@ td{padding:10px 14px;font-size:12px;vertical-align:middle;}
               <option value="REJECTED">Rejected</option>
               <option value="NOT_SUBMITTED">Not Submitted</option>
             </select>
+            <button class="btn btn-g" style="padding:7px 12px;" onclick="secureOldDocuments()" title="Make documents uploaded before the privacy update private">🔒 Secure old documents</button>
           </div>
         </div>
         <div id="verifyQueueList" style="padding:16px;"></div>
@@ -1209,18 +1210,18 @@ async function loadVerifyQueue(){
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
             <div>
               <div style="font-size:10px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;font-weight:700;">ID Document</div>
-              ${u.idDocumentUrl ? `<a href="${esc(u.idDocumentUrl)}" target="_blank"><img src="${esc(u.idDocumentUrl)}" style="width:100%;border-radius:8px;border:1px solid var(--bd);max-height:160px;object-fit:cover;"></a>` : '<div style="font-size:12px;color:var(--t3);">Not uploaded</div>'}
+              ${u.hasIdDocument ? `<div class="vdoc" data-u="${esc(u.id)}" data-k="id" style="font-size:12px;color:var(--t3);">Loading…</div>` : '<div style="font-size:12px;color:var(--t3);">Not uploaded</div>'}
             </div>
             <div>
               <div style="font-size:10px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;font-weight:700;">Selfie with ID</div>
-              ${u.selfieWithIdUrl ? `<a href="${esc(u.selfieWithIdUrl)}" target="_blank"><img src="${esc(u.selfieWithIdUrl)}" style="width:100%;border-radius:8px;border:1px solid var(--bd);max-height:160px;object-fit:cover;"></a>` : '<div style="font-size:12px;color:var(--t3);">Not uploaded</div>'}
+              ${u.hasSelfie ? `<div class="vdoc" data-u="${esc(u.id)}" data-k="selfie" style="font-size:12px;color:var(--t3);">Loading…</div>` : '<div style="font-size:12px;color:var(--t3);">Not uploaded</div>'}
             </div>
           </div>
         ` : `
           <div style="margin-bottom:12px;">
             <div style="font-size:10px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;font-weight:700;">CIPC Number</div>
             <div style="font-size:14px;font-weight:700;color:var(--blue3);">${esc(u.cipcNumber || '—')}</div>
-            ${u.cipcDocumentUrl ? `<a href="${esc(u.cipcDocumentUrl)}" target="_blank" style="font-size:12px;color:var(--blue3);">📄 View uploaded certificate</a>` : '<div style="font-size:11px;color:var(--t3);">No certificate uploaded — verify number manually on cipc.co.za</div>'}
+            ${u.hasCipcDocument ? `<div class="vdoc" data-u="${esc(u.id)}" data-k="cipc" style="font-size:12px;color:var(--t3);">Loading…</div>` : '<div style="font-size:11px;color:var(--t3);">No certificate uploaded — verify number manually on cipc.co.za</div>'}
           </div>
         `}
         ${u.verificationNotes ? `<div style="font-size:12px;color:#f87171;background:rgba(239,68,68,.08);padding:8px;border-radius:8px;margin-bottom:12px;">Previous rejection reason: ${esc(u.verificationNotes)}</div>` : ''}
@@ -1238,7 +1239,43 @@ async function loadVerifyQueue(){
         </div>
       </div>
     `).join('') || '<div style="text-align:center;padding:32px;color:var(--t3);">No requests in this category</div>';
+    hydrateVerifyDocs();
   } catch(e){ toast('Failed to load verification queue','error'); }
+}
+
+// Documents are private: each one is fetched through the backend with the admin
+// login, shown from a temporary in-browser copy, and never exposed as a public link.
+var _docBlobUrls = [];
+async function hydrateVerifyDocs(){
+  _docBlobUrls.forEach(u => URL.revokeObjectURL(u)); _docBlobUrls = [];
+  const slots = Array.from(document.querySelectorAll('#verifyQueueList .vdoc'));
+  for(const el of slots){
+    try {
+      const r = await fetch(`${API}/verification/admin/doc/${encodeURIComponent(el.dataset.u)}/${encodeURIComponent(el.dataset.k)}`, { headers:{ 'Authorization':'Bearer '+TOKEN } });
+      if(!r.ok) throw new Error('failed');
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob); _docBlobUrls.push(url);
+      if(blob.type.indexOf('image/') === 0){
+        el.innerHTML = '<a href="'+url+'" target="_blank" rel="noopener"><img src="'+url+'" style="width:100%;border-radius:8px;border:1px solid var(--bd);max-height:160px;object-fit:cover;"></a>';
+      } else {
+        el.innerHTML = '<a href="'+url+'" target="_blank" rel="noopener" style="font-size:12px;color:var(--blue3);">📄 Open document</a>';
+      }
+    } catch(e){
+      el.innerHTML = '<span style="color:#f87171;">Could not load document</span>';
+    }
+  }
+}
+
+async function secureOldDocuments(){
+  try {
+    const dry = await api('/verification/admin/secure-existing?dryRun=1','POST');
+    const d = dry.data;
+    if(!d.publicDocumentsFound){ toast('Nothing to do — no public documents found ('+d.alreadyPrivate+' already private)','success'); return; }
+    if(!confirm('Found '+d.publicDocumentsFound+' document(s) that are still publicly reachable by link.\n\nMake them private now? Admin viewing keeps working.')) return;
+    const r = await api('/verification/admin/secure-existing','POST');
+    toast('Secured '+r.data.secured+' document(s)'+(r.data.failed?(', '+r.data.failed+' failed'):''), r.data.failed?'error':'success');
+    loadVerifyQueue();
+  } catch(e){ toast(e.message,'error'); }
 }
 
 async function approveVerification(userId, name){

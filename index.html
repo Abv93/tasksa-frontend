@@ -4586,10 +4586,10 @@ function uploadVerifyDoc(type){
   }
 }
 
-function launchVerifyUploadWidget(type){
+function launchVerifyUploadWidget(type, usePublicFallback){
   var widget = cloudinary.createUploadWidget({
     cloudName: CLOUDINARY_CLOUD,
-    uploadPreset: CLOUDINARY_PRESET,
+    uploadPreset: usePublicFallback ? CLOUDINARY_PRESET : CLOUDINARY_PRIVATE_PRESET,
     folder: 'tasksa/verification-private', // kept out of public listing folders
     multiple: false,
     maxFiles: 1,
@@ -4598,7 +4598,12 @@ function launchVerifyUploadWidget(type){
     sources: ['local','camera'],
     styles:{ palette:{ window:'#020b1a', windowBorder:'#1a8fff', tabIcon:'#1a8fff', menuIcons:'#93b8d8', textDark:'#020b1a', textLight:'#ffffff', link:'#1a8fff', action:'#0a6edb', inactiveTabIcon:'#4a7aa0', error:'#ef4444', inProgress:'#1a8fff', complete:'#22c55e', sourceBg:'#041020' } }
   }, function(error, result){
-    if(error){ toast('Upload failed: '+error.message,'error'); return; }
+    if(error){
+      // Private preset not created yet: fall back to the normal one. The server
+      // converts the file to private when the form is submitted.
+      if(!usePublicFallback && /preset/i.test(error.message||'')){ launchVerifyUploadWidget(type, true); return; }
+      toast('Upload failed: '+error.message,'error'); return;
+    }
     if(result.event === 'success'){
       _verifyUploads[type] = result.info.secure_url;
       var labelMap = { id:'idDocLabel', selfie:'selfieDocLabel', cipc:'cipcDocLabel' };
@@ -4889,6 +4894,7 @@ function launchProfilePhotoWidget(){
 // ── PHOTO MANAGEMENT ─────────────────────────────────────────────
 var CLOUDINARY_CLOUD  = 'dn1ldm8lu';
 var CLOUDINARY_PRESET = 'tasksa';
+var CLOUDINARY_PRIVATE_PRESET = 'tasksa_private'; // delivery type: Authenticated (see setup notes)
 var _photoListingId   = null;
 var _photoImages      = [];
 
